@@ -68,9 +68,11 @@ setup_kwargs = {
     'url': 'https://servicecanary.com',
     'packages': PACKAGES,
     'scripts': SCRIPTS,
+    'include_package_data': True,
     # Include the init scripts in the install
     'package_data': {
         'canaryd': ['init_scripts/*'],
+        'canaryd.packages.requests': ['*.pem'],
     },
 }
 
