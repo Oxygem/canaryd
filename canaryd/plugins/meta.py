@@ -86,9 +86,6 @@ class Meta(Plugin):
             previous_up = ensure_datetime(previous_item['value'])
             up = ensure_datetime(item['value'])
 
-            print('PREVIOUS UP', previous_up)
-            print('UP', up)
-
             if (
                 previous_up.day == up.day
                 and previous_up.hour == up.hour
