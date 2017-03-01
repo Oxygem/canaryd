@@ -6,7 +6,7 @@ import os
 import platform
 
 from ConfigParser import RawConfigParser, Error as ConfigParserError
-from os import environ, path
+from os import environ, makedirs, path
 
 from canaryd.packages import click, six
 
@@ -113,17 +113,24 @@ def get_settings(config_file):
     return settings
 
 
-def write_settings_to_config(settings, config_file):
+def write_settings_to_config(settings):
     '''
     Write a config file from settings.
     '''
 
-    config = RawConfigParser()
+    # Ensure the config directory exists
+    config_directory = get_config_directory()
+    makedirs(config_directory)
 
+    # Generate the config
+    config = RawConfigParser()
     config.add_section('canaryd')
 
     for key, value in six.iteritems(settings.__dict__):
         config.set('canaryd', key, value)
+
+    # Write the config file
+    config_file = get_config_file()
 
     with open(config_file, 'wb') as f:
         config.write(f)

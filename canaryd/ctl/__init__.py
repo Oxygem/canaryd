@@ -59,7 +59,7 @@ def register_command(key):
     settings = CanarydSettings(api_key=key, server_id=server_id)
 
     # Write the settings to the config file
-    write_settings_to_config(settings, config_file)
+    write_settings_to_config(settings)
 
     click.echo('--> {0} written'.format(config_file))
 
