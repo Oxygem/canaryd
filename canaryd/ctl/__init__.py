@@ -17,7 +17,7 @@ def init_command(key, auto_start=False):
 
     # Register if the config file cannot be found
     if not path.exists(config_file):
-        did_register = register_command(key, config_file)
+        did_register = register_command(key)
 
         if not did_register:
             raise TypeError('Failed to register')
