@@ -66,6 +66,9 @@ class Plugin(object):
                 ),
             )
 
+    # Serialisation
+    #
+
     def serialise_value(self, key, value):
         spec = self.spec[1]
         self.check_spec_key(key, value)
@@ -93,17 +96,23 @@ class Plugin(object):
             for key, item in six.iteritems(changes)
         )
 
-    def unserialise_item(self, item):
+    # Unserialisation
+    #
+
+    def unserialise_value(self, key, value):
         spec = self.spec[1]
+        self.check_spec_key(key, value)
 
-        for key, value in six.iteritems(item):
-            self.check_spec_key(key, value)
+        if isinstance(spec[key], set):
+            return set(value)
 
-            # Turn lists that should be sets into sets
-            if isinstance(spec[key], set):
-                item[key] = set(item[key])
+        return value
 
-        return item
+    def unserialise_item(self, item):
+        return dict(
+            (key, self.unserialise_value(key, value))
+            for key, value in six.iteritems(item)
+        )
 
     def unserialise_state(self, items):
         return dict(
