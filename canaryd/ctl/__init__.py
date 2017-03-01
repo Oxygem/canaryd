@@ -28,7 +28,10 @@ def init_command(key, auto_start=False):
 
     if (
         auto_start or
-        click.confirm('Start canaryd service ({0})?'.format(start_command))
+        click.confirm(
+            'Start canaryd service ({0})?'.format(start_command),
+            default=True,
+        )
     ):
         system(start_command)
 
