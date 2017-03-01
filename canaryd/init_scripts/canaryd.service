@@ -1,0 +1,8 @@
+[Unit]
+Description=canaryd
+
+[Service]
+Type=simple
+User=root
+ExecStart=CANARYD_LOCATION
+Restart=on-abort
