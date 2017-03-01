@@ -49,7 +49,7 @@ def register_command(key):
 
         # Signup and get the key
         key = signup(email_or_blank)
-        click.echo('--> You are now signed up for systemcanary.com')
+        click.echo('--> You are now signed up for servicecanary.com')
         click.echo('--> Check your email for a login link to view updates')
 
     # Register the server

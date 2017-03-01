@@ -61,11 +61,11 @@ with open('canaryd/version.py') as f:
 setup_kwargs = {
     'name': 'canaryd',
     'version': version_data['__version__'],
-    'description': 'Client for System Canary',
+    'description': 'Client for Service Canary',
     'author': 'Oxygem',
     'author_email': 'hello@oxygem.com',
     'license': 'MIT',
-    'url': 'http://systemcanary.com',
+    'url': 'https://servicecanary.com',
     'packages': PACKAGES,
     'scripts': SCRIPTS,
     # Include the init scripts in the install
