@@ -113,25 +113,6 @@ class Iptables(Plugin):
         if 'rules' in data_changes:
             previous_rules, rules = data_changes['rules']
 
-            # Find new rules
-            new_rules = []
-
-            for i, rule in enumerate(rules):
-                # If we've run out of rules in the previous state, add
-                if len(previous_rules) <= i:
-                    new_rules.append(rule)
-
-                # Otherwise compare
-                elif previous_rules[i] != rule:
-                    new_rules.append(rule)
-
-            if new_rules:
-                key = 'rule' if len(new_rules) == 1 else 'rules'
-
-                yield 'added', '{0} added'.format(key.title()), {
-                    key: new_rules,
-                }
-
             # Find deleted roles
             deleted_rules = []
 
@@ -147,8 +128,27 @@ class Iptables(Plugin):
             if deleted_rules:
                 key = 'rule' if len(deleted_rules) == 1 else 'rules'
 
-                yield 'deleted', '{0} removed'.format(key.title()), {
+                yield 'deleted', '{0} removed from {1}'.format(key.title(), key), {
                     key: deleted_rules,
+                }
+
+            # Find new rules
+            new_rules = []
+
+            for i, rule in enumerate(rules):
+                # If we've run out of rules in the previous state, add
+                if len(previous_rules) <= i:
+                    new_rules.append(rule)
+
+                # Otherwise compare
+                elif previous_rules[i] != rule:
+                    new_rules.append(rule)
+
+            if new_rules:
+                key = 'rule' if len(new_rules) == 1 else 'rules'
+
+                yield 'added', '{0} added to {1}'.format(key.title(), key), {
+                    key: new_rules,
                 }
 
 
