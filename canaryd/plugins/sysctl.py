@@ -30,7 +30,12 @@ class Sysctl(Plugin):
     @staticmethod
     def parse_lines(lines):
         for line in lines:
-            if any(line.startswith(prefix) for prefix in IGNORE_PREFIXES):
+            line = line.strip()
+
+            if (
+                line.startswith('#') or
+                any(line.startswith(prefix) for prefix in IGNORE_PREFIXES)
+            ):
                 continue
 
             if ':' in line:
@@ -47,6 +52,7 @@ class Sysctl(Plugin):
                 continue
 
             name, value = bits
-            values = value.split()
+            name = name.strip()
+            values = [v.strip() for v in value.split()]
 
             yield name, values
