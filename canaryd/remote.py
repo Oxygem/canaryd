@@ -110,7 +110,7 @@ def make_api_request(
 
     try:
         response = method(
-            '{0}/api/v{1}/{2}'.format(
+            '{0}/v{1}/{2}'.format(
                 settings.api_base,
                 settings.api_version,
                 endpoint,
