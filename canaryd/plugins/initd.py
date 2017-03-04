@@ -18,7 +18,7 @@ class Initd(Plugin, ServiceMixin):
             _=`cat /etc/init.d/$SERVICE | grep status`
             if [ "$?" = "0" ]; then
                 PID=` \
-                    ps -U0 -o 'tty,pid,comm' \
+                    ps --ppid 1 -o 'tty,pid,comm' \
                     | grep ^?.*$SERVICE \
                     | head -n 1 \
                     | sed -n -e 's/?\s\+\([0-9]\+\)\s\+.*/\\1/p' \
