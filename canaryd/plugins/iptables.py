@@ -102,7 +102,7 @@ class Iptables(Plugin):
         return chains
 
     @staticmethod
-    def generate_events(key, data_changes):
+    def generate_events(chain_name, data_changes):
         # Check policy
         if 'policy' in data_changes:
             yield 'updated', None, {
@@ -126,10 +126,13 @@ class Iptables(Plugin):
                     deleted_rules.append(rule)
 
             if deleted_rules:
-                key = 'rule' if len(deleted_rules) == 1 else 'rules'
+                rule_type = 'rule' if len(deleted_rules) == 1 else 'rules'
 
-                yield 'deleted', '{0} removed from {1}'.format(key.title(), key), {
-                    key: deleted_rules,
+                yield 'deleted', '{0} removed from {1}'.format(
+                    rule_type.title(),
+                    chain_name,
+                ), {
+                    rule_type: deleted_rules,
                 }
 
             # Find new rules
@@ -145,10 +148,13 @@ class Iptables(Plugin):
                     new_rules.append(rule)
 
             if new_rules:
-                key = 'rule' if len(new_rules) == 1 else 'rules'
+                rule_type = 'rule' if len(new_rules) == 1 else 'rules'
 
-                yield 'added', '{0} added to {1}'.format(key.title(), key), {
-                    key: new_rules,
+                yield 'added', '{0} added to {1}'.format(
+                    rule_type.title(),
+                    chain_name,
+                ), {
+                    rule_type: new_rules,
                 }
 
 
