@@ -237,4 +237,7 @@ def signup(email):
         },
     )
 
-    return response_data['api_key']
+    if 'api_key' in response_data:
+        return True, response_data['api_key']
+
+    return False, response_data['info']
