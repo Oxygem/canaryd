@@ -1,23 +1,61 @@
+# cansryd
+# File: canaryd/canaryct/__init__.py
+# Desc: canaryctl functions
+
+from __future__ import print_function
+
 import json
 
 from os import path, system
 
 from canaryd.packages import click
 
-from canaryd.log import logger
-from canaryd.plugin import get_plugin_state, get_plugins, prepare_plugin
-from canaryd.remote import CanaryJSONEncoder, register, signup
-from canaryd.settings import CanarydSettings, get_config_file, write_settings_to_config
+from canaryd.log import logger, setup_logging
+from canaryd.plugin import (
+    get_plugin_state,
+    get_plugins,
+    get_plugin_by_name,
+    prepare_plugin,
+)
+from canaryd.remote import CanaryJSONEncoder, register_server, signup
+from canaryd.settings import (
+    CanarydSettings,
+    get_config_file,
+    write_settings_to_config,
+)
+from canaryd.version import __version__
 
 from .install_service import install_service
 
 
-def init_command(key, auto_start=False):
+# Parse arguments
+@click.group()
+@click.option('-v', '--verbose', count=True)
+def main(verbose=0):
+    '''
+    canaryd control.
+    '''
+
+    # For canaryctl we want warnings to show, so always bump verbosity
+    verbose += 1
+    setup_logging(verbose)
+
+
+@main.command()
+@click.option('--start', is_flag=True, default=False)
+@click.argument('key', required=False)
+def init(start, key):
+    '''
+    Create the canaryd service and start it.
+
+    This command will attempt to register if the config file is not found.
+    '''
+
     config_file = get_config_file()
 
     # Register if the config file cannot be found
     if not path.exists(config_file):
-        did_register = register_command(key)
+        did_register = register(key)
 
         if not did_register:
             raise TypeError('Failed to register')
@@ -27,7 +65,7 @@ def init_command(key, auto_start=False):
     start_command = install_service()
 
     if (
-        auto_start or
+        start or
         click.confirm(
             'Start canaryd service ({0})?'.format(start_command),
             default=True,
@@ -36,7 +74,15 @@ def init_command(key, auto_start=False):
         system(start_command)
 
 
-def register_command(key):
+@main.command()
+@click.argument('key', required=False)
+def register(key):
+    '''
+    Register this server on Service Canary.
+
+    If no api key is provided, you can sign up instantly.
+    '''
+
     config_file = get_config_file()
 
     if not key:
@@ -53,7 +99,7 @@ def register_command(key):
         click.echo('--> Check your email for a login link to view updates')
 
     # Register the server
-    server_id = register(key=key)
+    server_id = register_server(key=key)
 
     # Create our settings
     settings = CanarydSettings(api_key=key, server_id=server_id)
@@ -66,22 +112,21 @@ def register_command(key):
     return True
 
 
-def state_command(plugin_name):
-    plugins = get_plugins()
+@main.command()
+@click.argument('plugin')
+def state(plugin):
+    '''
+    Get state for a single plugin.
+    '''
 
-    target_plugin = None
-
-    for plugin in plugins:
-        if plugin.name == plugin_name:
-            target_plugin = plugin
-            break
+    target_plugin = get_plugin_by_name(plugin)
 
     if not target_plugin:
-        raise TypeError('Invalid plugin: {0}'.format(plugin_name))
+        raise TypeError('Invalid plugin: {0}'.format(plugin))
 
     prepare_plugin(target_plugin)
 
-    click.echo('State for {0}:'.format(plugin_name))
+    click.echo('State for {0}:'.format(plugin))
 
     status, data = get_plugin_state(target_plugin)
 
@@ -98,7 +143,29 @@ def state_command(plugin_name):
         ).format(plugin.name, data.__class__.__name__, data))
 
 
-def plugins_command():
+@main.command()
+def plugins():
+    '''
+    List all plugins.
+    '''
+
     click.echo('--> Available plugins: {0}'.format(', '.join(
         plugin.name for plugin in get_plugins()
     )))
+
+
+@main.command()
+def version():
+    '''
+    Print the canaryd version and config location.
+    '''
+
+    click.echo('canaryd: v{0}'.format(__version__))
+    click.echo('config: {0}'.format(get_config_file()))
+
+
+@main.command()
+def ping():
+    '''
+    Ping servicecanary.com.
+    '''
