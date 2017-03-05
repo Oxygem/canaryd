@@ -15,7 +15,7 @@ git push --tags
 
 echo "# Upload to pypi..."
 # Clear dist
-rm -rf dist/*
+rm -rf dist/* build/*
 # Build source and wheel packages
 python setup.py sdist bdist_wheel
 # Upload w/Twine
