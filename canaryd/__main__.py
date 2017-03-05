@@ -26,7 +26,7 @@ def main(verbose=0):
     setup_logging(verbose)
     logger.info('Starting canaryd v{0}'.format(__version__))
 
-    config_file = get_config_file(confirm_non_root=False)
+    config_file = get_config_file()
 
     # Load the settings, using our config file if provided
     settings = get_settings(config_file)

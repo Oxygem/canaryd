@@ -73,8 +73,8 @@ def get_config_directory():
     return path.join('/', 'etc', 'canaryd')
 
 
-def get_config_file(**kwargs):
-    return path.join(get_config_directory(**kwargs), 'canaryd.conf')
+def get_config_file():
+    return path.join(get_config_directory(), 'canaryd.conf')
 
 
 def get_settings(config_file):
