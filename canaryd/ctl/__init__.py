@@ -25,6 +25,7 @@ from canaryd.settings import (
 )
 from canaryd.version import __version__
 
+from .check_root import check_root
 from .install_service import install_service
 
 
@@ -50,6 +51,8 @@ def init(start, key):
 
     This command will attempt to register if the config file is not found.
     '''
+
+    check_root()
 
     config_file = get_config_file()
 
@@ -82,6 +85,8 @@ def register(key):
 
     If no api key is provided, you can sign up instantly.
     '''
+
+    check_root()
 
     config_file = get_config_file()
 
