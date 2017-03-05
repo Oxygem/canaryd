@@ -12,6 +12,7 @@ from canaryd.packages import click
 
 from canaryd import remote
 
+from canaryd.exceptions import CanarydError
 from canaryd.log import logger, setup_logging
 from canaryd.plugin import (
     get_plugin_state,
@@ -22,6 +23,7 @@ from canaryd.plugin import (
 from canaryd.remote import CanaryJSONEncoder
 from canaryd.settings import (
     CanarydSettings,
+    get_config_directory,
     get_config_file,
     get_settings,
     write_settings_to_config,
@@ -48,23 +50,24 @@ def main(verbose=0):
 @main.command()
 @click.option('--start', is_flag=True, default=False)
 @click.argument('key', required=False)
-def init(start, key):
+@click.pass_context
+def init(ctx, start, key):
     '''
     Create the canaryd service and start it.
 
     This command will attempt to register if the config file is not found.
     '''
 
-    check_root()
+    check_root('Not root user, cannot create services.', exit=True)
 
     config_file = get_config_file()
 
     # Register if the config file cannot be found
     if not path.exists(config_file):
-        did_register = register(key)
+        did_register = ctx.invoke(register, key=key)
 
         if not did_register:
-            raise TypeError('Failed to register')
+            raise CanarydError('Failed to register')
 
     # Install the service
     click.echo('--> Installing canaryd service')
@@ -89,7 +92,13 @@ def register(key):
     If no api key is provided, you can sign up instantly.
     '''
 
-    check_root()
+    check_root('''
+Not root user, using config directory:
+{0}
+It is recommended to run canaryd as root as
+plugins that require privileges (eg iptables)
+will not function properly.
+'''.strip().format(get_config_directory()))
 
     config_file = get_config_file()
 
@@ -102,9 +111,16 @@ def register(key):
             return False
 
         # Signup and get the key
-        key = remote.signup(email_or_blank)
-        click.echo('--> You are now signed up for servicecanary.com')
-        click.echo('--> Check your email for a login link to view updates')
+        did_signup, key_or_message = remote.signup(email_or_blank)
+
+        if did_signup:
+            key = key_or_message
+            click.echo('--> You are now signed up for servicecanary.com.')
+            click.echo('--> Check your email for a login link to view updates.')
+
+        else:
+            click.echo(click.style(key_or_message, 'blue'))
+            return False
 
     # Register the server
     server_id = remote.register(key=key)
