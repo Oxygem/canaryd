@@ -10,6 +10,8 @@ from os import path, system
 
 from canaryd.packages import click
 
+from canaryd import remote
+
 from canaryd.log import logger, setup_logging
 from canaryd.plugin import (
     get_plugin_state,
@@ -17,10 +19,11 @@ from canaryd.plugin import (
     get_plugin_by_name,
     prepare_plugin,
 )
-from canaryd.remote import CanaryJSONEncoder, register_server, signup
+from canaryd.remote import CanaryJSONEncoder
 from canaryd.settings import (
     CanarydSettings,
     get_config_file,
+    get_settings,
     write_settings_to_config,
 )
 from canaryd.version import __version__
@@ -99,12 +102,12 @@ def register(key):
             return False
 
         # Signup and get the key
-        key = signup(email_or_blank)
+        key = remote.signup(email_or_blank)
         click.echo('--> You are now signed up for servicecanary.com')
         click.echo('--> Check your email for a login link to view updates')
 
     # Register the server
-    server_id = register_server(key=key)
+    server_id = remote.register(key=key)
 
     # Create our settings
     settings = CanarydSettings(api_key=key, server_id=server_id)
@@ -174,3 +177,19 @@ def ping():
     '''
     Ping servicecanary.com.
     '''
+
+    config_file = get_config_file()
+
+    if not path.exists(config_file):
+        click.echo((
+            'No config file ({0}) exists, '
+            'please run `canaryctl init`'
+        ).format(config_file))
+        return
+
+    settings = get_settings(config_file)
+
+    # Ping the API
+    remote.ping(settings)
+
+    click.echo('OK!')

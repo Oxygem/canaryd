@@ -206,7 +206,7 @@ def upload_state_changes(states, settings):
     )
 
 
-def register_server(key):
+def register(key):
     '''
     Register this server on api.servicecanary.com and return a server id.
     '''
