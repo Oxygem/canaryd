@@ -120,7 +120,9 @@ def write_settings_to_config(settings):
 
     # Ensure the config directory exists
     config_directory = get_config_directory()
-    makedirs(config_directory)
+
+    if not path.exists(config_directory):
+        makedirs(config_directory)
 
     # Generate the config
     config = RawConfigParser()
