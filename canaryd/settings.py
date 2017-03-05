@@ -2,15 +2,14 @@
 # File: canaryd/settings.py
 # Desc: settings for canaryd/canaryctl
 
-import os
 import platform
 
 from ConfigParser import RawConfigParser, Error as ConfigParserError
-from os import environ, makedirs, path
+from os import environ, geteuid, makedirs, path
 
 from canaryd.packages import click, six
 
-from canaryd.exceptions import ConfigError, UserCancelError
+from canaryd.exceptions import ConfigError
 from canaryd.log import logger
 
 API_BASE = environ.get(
@@ -59,19 +58,10 @@ class CanarydSettings(object):
         logger.debug('Settings updated: {0}'.format(data))
 
 
-def get_config_directory(confirm_non_root=True):
+def get_config_directory():
     # If we're non-root, just use the users config dir (~/.config, etc)
-    if os.geteuid() > 0:
+    if geteuid() > 0:
         config_directory = click.get_app_dir('canaryd')
-
-        # Warn the user about the implications of running as non-root
-        logger.warning('Not root user, using config directory: {0}'.format(config_directory))
-        logger.warning('It is recommended to run canaryd as root')
-        logger.warning('Plugins that require privileges (eg iptables) will not function')
-
-        # Confirm this is OK!
-        if confirm_non_root and not click.confirm('Do you wish to continue?'):
-            raise UserCancelError()
 
         return config_directory
 
