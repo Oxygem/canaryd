@@ -4,7 +4,6 @@
 
 from __future__ import print_function
 
-from canaryd.exceptions import CanarydError
 from canaryd.log import logger
 from canaryd.remote import ApiError
 
@@ -15,11 +14,8 @@ try:
     main()
 
 except ApiError as e:
-    logger.critical('API {0} error: {1}'.format(e.status_code, e.message))
-
-except CanarydError:
-    raise
-
-except Exception:
-    logger.critical('Unexpected exception:')
-    raise
+    logger.critical('API {0} error: {1}({2})'.format(
+        e.status_code,
+        e.name,
+        e.message,
+    ))
