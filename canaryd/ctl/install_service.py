@@ -36,7 +36,7 @@ def install_service():
     if which('launchctl'):
         script = get_data('canaryd', path.join('init_scripts', 'canaryd.plist'))
         script_path = path.join('/', 'Library', 'LaunchDaemons', 'canaryd.plist')
-        start_command = 'launchctl start canaryd'
+        start_command = 'launchctl load {0}'.format(script_path)
 
     # Systemd
     elif which('systemctl'):
