@@ -86,6 +86,10 @@ def setup_logging(verbosity):
     logger.addHandler(stdout_handler)
     logger.addHandler(stderr_handler)
 
+    logger.debug('Log level set to: {0}'.format(
+        logging.getLevelName(log_level),
+    ))
+
 
 def setup_file_logging(filename):
     handler = logging.FileHandler(filename)
