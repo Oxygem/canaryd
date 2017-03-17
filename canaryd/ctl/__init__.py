@@ -143,6 +143,9 @@ def state(plugin):
     Get state for a single plugin.
     '''
 
+    # Trigger load of all plugins first
+    get_plugins()
+
     target_plugin = get_plugin_by_name(plugin)
 
     if not target_plugin:
