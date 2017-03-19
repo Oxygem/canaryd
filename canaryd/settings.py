@@ -4,7 +4,11 @@
 
 import platform
 
-from ConfigParser import RawConfigParser, Error as ConfigParserError
+from ConfigParser import (
+    DuplicateSectionError,
+    Error as ConfigParserError,
+    RawConfigParser,
+)
 from os import environ, geteuid, makedirs, path
 
 from canaryd.packages import click, six
@@ -94,10 +98,7 @@ def get_settings(config_file):
         logger.critical('Error in config file ({0}): {1}'.format(config_file, e.message))
         raise ConfigError('Config file error')
 
-    for key, value in canaryd_config_items:
-        if hasattr(settings, key):
-            setattr(settings, key, value)
-
+    settings.update(dict(canaryd_config_items))
     logger.info('Loaded settings file: {0}'.format(config_file))
 
     return settings
@@ -116,7 +117,19 @@ def write_settings_to_config(settings):
 
     # Generate the config
     config = RawConfigParser()
-    config.add_section('canaryd')
+    config_file = get_config_file()
+
+    # Attempt to work alongside any existing config
+    try:
+        config.read(config_file)
+
+    except ConfigParserError as e:
+        logger.critical('Error in config file ({0}): {1}'.format(config_file, e.message))
+
+    try:
+        config.add_section('canaryd')
+    except DuplicateSectionError:
+        pass
 
     for key, value in six.iteritems(settings.__dict__):
         config.set('canaryd', key, value)
