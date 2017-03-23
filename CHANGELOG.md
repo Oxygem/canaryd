@@ -1,5 +1,6 @@
-# v0.1.1 [WIP]
+# v0.1.1
 
++ Don't overwrite extra config (api_base, etc) on register
 + Fix `launchctl` init
 + Fix state CLI command
 
