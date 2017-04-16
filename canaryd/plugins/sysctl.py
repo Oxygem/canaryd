@@ -1,3 +1,5 @@
+from canaryd.packages import six
+
 from canaryd.plugin import Plugin
 
 # We ignore these because they constantly update and represent "live" state
@@ -7,7 +9,7 @@ IGNORE_PREFIXES = ('vm.', 'machdep.', 'debug.')
 
 class Sysctl(Plugin):
     spec = ('key', {
-        'values': set((str,)),
+        'values': set((six.text_type,)),
     })
 
     command = (
