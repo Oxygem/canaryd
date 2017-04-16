@@ -15,9 +15,10 @@ from canaryd import remote
 from canaryd.exceptions import CanarydError
 from canaryd.log import logger, setup_logging
 from canaryd.plugin import (
+    get_and_prepare_working_plugins,
+    get_plugin_by_name,
     get_plugin_state,
     get_plugins,
-    get_plugin_by_name,
     prepare_plugin,
 )
 from canaryd.remote import CanaryJSONEncoder
@@ -179,6 +180,12 @@ def plugins():
 
     click.echo('--> Available plugins: {0}'.format(', '.join(
         plugin.name for plugin in get_plugins()
+    )))
+
+    working_plugins = get_and_prepare_working_plugins(get_settings())
+
+    click.echo('--> Enabled plugins: {0}'.format(', '.join(
+        plugin.name for plugin in working_plugins
     )))
 
 
