@@ -10,9 +10,9 @@ def slugify(value):
 
 class Hardware(Plugin):
     spec = ('key', {
-        'type': str,
-        'serial_number': str,
-        'version': str,
+        'type': six.text_type,
+        'serial_number': six.text_type,
+        'version': six.text_type,
         'meta': dict,
     })
 

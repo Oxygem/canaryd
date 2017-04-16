@@ -1,3 +1,5 @@
+from canaryd.packages import six
+
 from canaryd.plugin import Plugin
 
 # Mapping for iptables code arguments to variable names
@@ -24,7 +26,7 @@ IPTABLES_ARGS = {
 
 class Iptables(Plugin):
     spec = ('chain', {
-        'policy': str,
+        'policy': six.text_type,
         'rules': [dict],
     })
 

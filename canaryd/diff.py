@@ -49,7 +49,7 @@ def get_state_diff(plugin, plugin_state, previous_plugin_state):
 
         # Add anything that doesn't exist
         if not previous_item:
-            changes.append(Change(plugin, 'added', key, item))
+            changes.append(Change(plugin, 'added', key, data=item))
             continue
 
         # Plugins customise diff
@@ -64,6 +64,6 @@ def get_state_diff(plugin, plugin_state, previous_plugin_state):
         )
 
         if state_diff:
-            changes.append(Change(plugin, 'updated', key, state_diff))
+            changes.append(Change(plugin, 'updated', key, data=state_diff))
 
     return changes

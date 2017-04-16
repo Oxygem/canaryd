@@ -1,5 +1,7 @@
 import re
 
+from canaryd.packages import six
+
 from canaryd.plugin import Plugin
 
 USER_REGEX = r'^uid=[0-9]+\(([a-zA-Z0-9_\.\-]+)\) gid=[0-9]+\(([a-zA-Z0-9_\.\-]+)\) groups=([a-zA-Z0-9_\.\-,\(\)\s]+) (.*)$'  # noqa
@@ -8,10 +10,10 @@ GROUP_REGEX = r'^[0-9]+\(([a-zA-Z0-9_\.\-]+)\)$'
 
 class Users(Plugin):
     spec = ('user', {
-        'group': str,
-        'groups': set((str,)),
-        'home': str,
-        'shell': str,
+        'group': six.text_type,
+        'groups': set((six.text_type,)),
+        'home': six.text_type,
+        'shell': six.text_type,
     })
 
     command = '''
