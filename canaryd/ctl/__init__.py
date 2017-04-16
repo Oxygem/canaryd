@@ -6,9 +6,9 @@ from __future__ import print_function
 
 import json
 
-from os import path, system
+from os import path, remove, symlink, system
 
-from canaryd.packages import click
+from canaryd.packages import click  # noqa
 
 from canaryd import remote
 
@@ -21,6 +21,7 @@ from canaryd.plugin import (
     prepare_plugin,
 )
 from canaryd.remote import CanaryJSONEncoder
+from canaryd.script import get_scripts, get_scripts_directory
 from canaryd.settings import (
     CanarydSettings,
     get_config_directory,
@@ -212,3 +213,71 @@ def ping():
     remote.ping(settings)
 
     click.echo('OK!')
+
+
+@main.group(invoke_without_command=True)
+@click.pass_context
+def scripts(ctx):
+    '''
+    List/enable/disable scripts.
+    '''
+
+    if ctx.invoked_subcommand is not None:
+        return
+
+    scripts = get_scripts(get_settings())
+
+    click.echo('--> Scripts:')
+
+    for script in scripts:
+        click.echo('    {0}, enabled: {1}'.format(
+            click.style(script[0], bold=True),
+            script[1],
+        ))
+
+
+@scripts.command()
+@click.argument('script')
+def enable(script):
+    source_script = path.join(get_scripts_directory(), 'available', script)
+    link_name = path.join(get_scripts_directory(), 'enabled', script)
+
+    if not path.exists(source_script):
+        click.echo('No script file ({0}) exists.'.format(source_script))
+        return
+
+    if path.exists(link_name):
+        click.echo('Script {0} is already enabled.'.format(
+            click.style(script, bold=True),
+        ))
+        return
+
+    symlink(
+        source_script,
+        link_name,
+    )
+
+    click.echo('Script enabled: {0}'.format(click.style(script, bold=True)))
+
+
+@scripts.command()
+@click.argument('script')
+def disable(script):
+    source_script = path.join(get_scripts_directory(), 'available', script)
+    link_name = path.join(get_scripts_directory(), 'enabled', script)
+
+    if not path.exists(link_name):
+        click.echo('Script {0} is already disabled.'.format(
+            click.style(script, bold=True),
+        ))
+        return
+
+    if not path.islink(link_name):
+        click.echo('Script {0} is not a link. You should move it to {0}.'.format(
+            link_name, source_script,
+        ))
+        return
+
+    remove(link_name)
+
+    click.echo('Script disabled: {0}'.format(click.style(script, bold=True)))

@@ -10,8 +10,9 @@ from ConfigParser import (
     RawConfigParser,
 )
 from os import environ, geteuid, makedirs, path
+from shutil import copytree
 
-from canaryd.packages import click, six
+from canaryd.packages import click, six  # noqa
 
 from canaryd.exceptions import ConfigError
 from canaryd.log import logger
@@ -81,12 +82,14 @@ def get_config_file():
     return path.join(get_config_directory(), 'canaryd.conf')
 
 
-def get_settings(config_file):
+def get_settings(config_file=None):
     '''
     Load the config from the filesystem if provided, with defaults.
     '''
 
-    settings = CanarydSettings()
+    config_file = config_file or get_config_file()
+
+    settings = CanarydSettings(config_file=config_file)
 
     parser = RawConfigParser()
 
@@ -113,7 +116,8 @@ def write_settings_to_config(settings):
     config_directory = get_config_directory()
 
     if not path.exists(config_directory):
-        makedirs(config_directory)
+        # Bootstrap first-time install settings
+        setup_config_directory(config_directory)
 
     # Generate the config
     config = RawConfigParser()
@@ -134,8 +138,20 @@ def write_settings_to_config(settings):
     for key, value in six.iteritems(settings.__dict__):
         config.set('canaryd', key, value)
 
-    # Write the config file
-    config_file = get_config_file()
-
     with open(config_file, 'wb') as f:
         config.write(f)
+
+
+def setup_config_directory(config_directory):
+    # Ensure we have our config_directory/scripts/[available|enabled]
+    makedirs(
+        path.join(config_directory, 'scripts', 'enabled'),
+    )
+
+    # Copy built in scripts
+    copytree(
+        # Copy ./scripts/
+        path.join(path.dirname(__file__), 'scripts'),
+        # To $config/scripts/available/
+        path.join(config_directory, 'scripts', 'available'),
+    )
