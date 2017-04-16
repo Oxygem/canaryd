@@ -39,6 +39,11 @@ from .install_service import install_service
 # Parse arguments
 @click.group()
 @click.option('-v', '--verbose', count=True)
+@click.version_option(
+    version=__version__,
+    prog_name='canaryd',
+    message='%(prog)s: v%(version)s',
+)
 def main(verbose=0):
     '''
     canaryd control.
@@ -190,9 +195,9 @@ def plugins():
 
 
 @main.command()
-def version():
+def status():
     '''
-    Print the canaryd version and config location.
+    Print the current status of canaryd.
     '''
 
     click.echo('canaryd: v{0}'.format(__version__))
