@@ -2,12 +2,12 @@
 # File: canaryd/daemon.py
 # Desc: the canaryd daemon
 
-from time import time, sleep
+from time import sleep, time
 
 from canaryd.diff import get_state_diff
 from canaryd.log import logger
 from canaryd.plugin import get_plugin_states
-from canaryd.remote import upload_state_changes, ApiError
+from canaryd.remote import ApiError, backoff, upload_state_changes
 
 
 def _sleep_until_interval(start, interval):
@@ -41,7 +41,11 @@ def _daemon_loop(plugins, previous_states, settings):
             continue
 
     try:
-        settings_changes = upload_state_changes(state_changes, settings)
+        settings_changes = backoff(
+            upload_state_changes,
+            state_changes,
+            settings,
+        )
 
         if settings_changes:
             settings.update(settings_changes)
