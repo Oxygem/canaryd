@@ -26,11 +26,11 @@ def backoff(function, *args, **kwargs):
     data = None
     interval = 0
 
-    error_message = kwargs.get('error_message', 'API error')
+    error_message = kwargs.pop('error_message', 'API error')
 
     while data is None:
         try:
-            return function(*args)
+            return function(*args, **kwargs)
 
         except ApiError as e:
             if interval <= 290:
@@ -102,27 +102,33 @@ def make_api_request(
 
     api_key = api_key or settings.api_key
 
+    url = '{0}/v{1}/{2}'.format(
+        settings.api_base,
+        settings.api_version,
+        endpoint,
+    )
+
+    logger.debug('Making API request: {0}'.format(url))
+
     if json:
-        kwargs['data'] = json_dumps(json, cls=CanaryJSONEncoder)
+        json_data = json_dumps(json, cls=CanaryJSONEncoder)
+        kwargs['data'] = json_data
         kwargs['headers'] = {
             'Content-Type': 'application/json',
         }
 
+        logger.debug('Request data: {0}'.format(json_data))
+
     try:
         response = method(
-            '{0}/v{1}/{2}'.format(
-                settings.api_base,
-                settings.api_version,
-                endpoint,
-            ),
+            url,
+            timeout=30,
             auth=('api', api_key),
             **kwargs
         )
+
     except requests.ConnectionError as e:
-        raise ApiError(
-            0,
-            'Could not connect: {0}'.format(e),
-        )
+        raise ApiError(0, 'Could not connect: {0}'.format(e))
 
     # Try to get some response JSON data
     response_data = {}

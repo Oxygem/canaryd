@@ -1,6 +1,6 @@
 from os import path
 from pkgutil import get_data
-from subprocess import CalledProcessError, PIPE
+from subprocess import CalledProcessError
 
 from canaryd.packages import click
 from canaryd.packages.check_output import check_output
@@ -10,7 +10,6 @@ def which(command):
     try:
         return check_output(
             ('which', command),
-            stderr=PIPE,
         ).strip()
 
     except (CalledProcessError, OSError):

@@ -38,20 +38,19 @@ from .install_service import install_service
 
 # Parse arguments
 @click.group()
-@click.option('-v', '--verbose', count=True)
+@click.option('-v', '--verbose', is_flag=True)
+@click.option('--debug', is_flag=True)
 @click.version_option(
     version=__version__,
     prog_name='canaryd',
     message='%(prog)s: v%(version)s',
 )
-def main(verbose=0):
+def main(verbose, debug):
     '''
     canaryd control.
     '''
 
-    # For canaryctl we want warnings to show, so always bump verbosity
-    verbose += 1
-    setup_logging(verbose)
+    setup_logging(verbose, debug)
 
 
 @main.command()
@@ -153,16 +152,19 @@ def state(plugin):
     # Trigger load of all plugins first
     get_plugins()
 
+    settings = get_settings()
     target_plugin = get_plugin_by_name(plugin)
 
     if not target_plugin:
         raise TypeError('Invalid plugin: {0}'.format(plugin))
 
-    prepare_plugin(target_plugin)
+    if prepare_plugin(target_plugin, settings) is not True:
+        logger.critical('Error preparing plugin')
+        return
 
     click.echo('State for {0}:'.format(plugin))
 
-    status, data = get_plugin_state(target_plugin)
+    status, data = get_plugin_state(target_plugin, settings)
 
     if status:
         print(json.dumps(
@@ -174,7 +176,7 @@ def state(plugin):
         logger.critical((
             'Unexpected exception while getting {0} state: '
             '{1}({2})'
-        ).format(plugin.name, data.__class__.__name__, data))
+        ).format(target_plugin.name, data.__class__.__name__, data))
 
 
 @main.command()
@@ -210,16 +212,14 @@ def ping():
     Ping servicecanary.com.
     '''
 
-    config_file = get_config_file()
+    settings = get_settings()
 
-    if not path.exists(config_file):
+    if not path.exists(settings.config_file):
         click.echo((
             'No config file ({0}) exists, '
             'please run `canaryctl init`'
-        ).format(config_file))
+        ).format(settings.config_file))
         return
-
-    settings = get_settings(config_file)
 
     # Ping the API
     remote.ping(settings)

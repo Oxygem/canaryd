@@ -21,6 +21,10 @@ class LogFilter(logging.Filter):
         self.levels = levels
 
     def filter(self, record):
+        # Warnings only for vendored packages
+        if record.name.startswith('canaryd.packages'):
+            return record.levelno >= logging.WARNING
+
         return record.levelno in self.levels
 
 
@@ -50,18 +54,15 @@ class LogFormatter(logging.Formatter):
             return super(LogFormatter, self).format(record)
 
 
-def setup_logging(verbosity):
+def setup_logging(verbose, debug):
     # Figure out the log level
-    log_level = logging.CRITICAL
+    log_level = logging.WARNING
 
-    if verbosity >= 3:
-        log_level = logging.DEBUG
-
-    elif verbosity == 2:
+    if verbose:
         log_level = logging.INFO
 
-    if verbosity == 1:
-        log_level = logging.WARNING
+    if debug:
+        log_level = logging.DEBUG
 
     # Set the log level
     logger.setLevel(log_level)
@@ -86,9 +87,7 @@ def setup_logging(verbosity):
     logger.addHandler(stdout_handler)
     logger.addHandler(stderr_handler)
 
-    logger.debug('Log level set to: {0}'.format(
-        logging.getLevelName(log_level),
-    ))
+    return log_level
 
 
 def setup_file_logging(filename):
@@ -96,9 +95,8 @@ def setup_file_logging(filename):
     logger.addHandler(handler)
 
 
-def print_exception():
-    if logger.level != logging.DEBUG:
+def print_exception(debug_only=False):
+    if debug_only and logger.level != logging.DEBUG:
         return
 
-    # Dev mode, so lets dump as much data as we have
     traceback.print_exc()
