@@ -66,10 +66,15 @@ class CanarydSettings(object):
             self.log_file = path.join('/', 'var', 'log', 'canaryd.log')
 
     def update(self, data):
-        for key, value in six.iteritems(data):
-            setattr(self, key, value)
+        changed_keys = []
 
-        logger.debug('Settings updated: {0}'.format(data))
+        for key, value in six.iteritems(data):
+            if getattr(self, key, None) != value:
+                setattr(self, key, value)
+                changed_keys.append(key)
+
+        logger.debug('Settings updated: {0} <= {1}'.format(changed_keys, data))
+        return changed_keys
 
 
 def get_config_directory():
