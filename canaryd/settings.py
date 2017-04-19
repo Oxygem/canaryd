@@ -107,16 +107,17 @@ def get_settings(config_file=None):
 
     parser = RawConfigParser()
 
-    try:
-        parser.read(config_file)
-        canaryd_config_items = parser.items('canaryd')
+    if path.exists(config_file):
+        try:
+            parser.read(config_file)
+            canaryd_config_items = parser.items('canaryd')
 
-    except ConfigParserError as e:
-        logger.critical('Error in config file ({0}): {1}'.format(config_file, e.message))
-        raise ConfigError('Config file error')
+            settings.update(dict(canaryd_config_items))
+            settings.update(dict(canaryd_config_items))
 
-    settings.update(dict(canaryd_config_items))
-    logger.info('Loaded settings file: {0}'.format(config_file))
+        except ConfigParserError as e:
+            logger.critical('Error in config file ({0}): {1}'.format(config_file, e.message))
+            raise ConfigError('Config file error')
 
     return settings
 
