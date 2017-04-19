@@ -45,7 +45,7 @@ class CanarydSettings(object):
     log_file = None
     debug = False
 
-    collect_interval_s = 60
+    collect_interval_s = 30
 
     # API access key
     api_key = API_KEY
