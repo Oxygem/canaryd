@@ -56,6 +56,15 @@ class CanarydSettings(object):
     def __init__(self, **kwargs):
         self.update(kwargs)
 
+        # If no log file specified, we're root and /var/log exists, use that
+        if (
+            self.log_file is None
+            and geteuid() <= 0
+            and path.exists(path.join('/', 'var', 'log'))
+        ):
+            logger.debug('Root user, so setting log file to /var/log/canaryd.log')
+            self.log_file = path.join('/', 'var', 'log', 'canaryd.log')
+
     def update(self, data):
         for key, value in six.iteritems(data):
             setattr(self, key, value)
