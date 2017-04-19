@@ -104,7 +104,7 @@ class Iptables(Plugin):
         return chains
 
     @staticmethod
-    def generate_events(chain_name, data_changes):
+    def generate_events(chain_name, data_changes, settings):
         # Check policy
         if 'policy' in data_changes:
             yield 'updated', None, {

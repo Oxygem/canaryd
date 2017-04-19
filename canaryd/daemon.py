@@ -18,7 +18,7 @@ def _sleep_until_interval(start, interval):
 
 
 def _daemon_loop(plugins, previous_states, settings):
-    states = get_plugin_states(plugins)
+    states = get_plugin_states(plugins, settings)
     state_changes = []
 
     for plugin, status_data in states:
@@ -48,7 +48,11 @@ def _daemon_loop(plugins, previous_states, settings):
         )
 
         if settings_changes:
-            settings.update(settings_changes)
+            changed_keys = settings.update(settings_changes)
+            if changed_keys:
+                logger.info('Remote settings update: {0}'.format(
+                    ', '.join(changed_keys),
+                ))
 
     except ApiError as e:
         e.log()

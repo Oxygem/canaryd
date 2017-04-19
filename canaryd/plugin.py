@@ -6,7 +6,7 @@ import re
 
 from glob import glob
 from os import path
-from subprocess import CalledProcessError, PIPE
+from subprocess import CalledProcessError
 
 from canaryd.packages import six
 from canaryd.packages.check_output import check_output
@@ -50,6 +50,23 @@ class Plugin(object):
     def is_change(key, previous_item, item):
         return True
 
+    def cleanup(self):
+        pass
+
+    def get_state(self, settings):
+        data = check_output(
+            self.command,
+            shell=True,
+        )
+
+        return self.parse(data)
+
+    def prepare(self, settings):
+        check_output(
+            self.prepare_command or self.command,
+            shell=True,
+        )
+
     def log(self, message):
         message = '[{0}]: {1}'.format(self.name, message)
         logger.debug(message)
@@ -59,9 +76,9 @@ class Plugin(object):
 
         if key not in spec:
             raise ValueError(
-                'Key {0} not found in plugin {1} spec: {2}'.format(
-                    key,
+                'Key not found in plugin {0} spec: {1} (value = {2})'.format(
                     self.name,
+                    key,
                     value,
                 ),
             )
@@ -149,36 +166,38 @@ def get_plugin_by_name(plugin_name):
     return NAME_TO_PLUGIN.get(plugin_name)
 
 
-def prepare_plugin(plugin):
+def prepare_plugin(plugin, settings):
     logger.debug('Preparing plugin: {0}'.format(plugin))
 
     try:
-        data = check_output(
-            plugin.prepare_command or plugin.command,
-            stderr=PIPE,
-            shell=True,
-        )
+        plugin.prepare(settings)
 
     except (CalledProcessError, OSError) as e:
-        logger.warning('Error preparing plugin: {0}: {1}'.format(
-            plugin.name, e,
+        logger.info('Plugin command missing/failed: {0}'.format(
+            plugin.name,
         ))
-        return False
+        print_exception(debug_only=True)
+        return False, e
 
-    if hasattr(plugin, 'prepare'):
-        plugin.prepare(data)
+    except Exception as e:
+        logger.warning('Error preparing plugin: {0}: {1}'.format(
+            plugin.name,
+            e,
+        ))
+        print_exception()
+        return False, e
 
     return True
 
 
-def get_and_prepare_working_plugins():
+def get_and_prepare_working_plugins(settings):
     all_plugins = get_plugins()
     working_plugins = []
 
     for plugin in all_plugins:
-        status = prepare_plugin(plugin)
+        status = prepare_plugin(plugin, settings)
 
-        if status:
+        if status is True:
             working_plugins.append(plugin)
 
     logger.info('Loaded plugins: {0}'.format(', '.join([
@@ -189,33 +208,31 @@ def get_and_prepare_working_plugins():
     return working_plugins
 
 
-def get_plugin_state(plugin):
+def cleanup_plugins(plugins):
+    for plugin in plugins:
+        try:
+            plugin.cleanup()
+
+        except Exception as e:
+            logger.warning(
+                'Error cleaning plugin: {0}: {1}'.format(plugin.name, e),
+            )
+            print_exception()
+            return False, e
+
+
+def get_plugin_state(plugin, settings):
     '''
     Gets state output from a single plugin.
     '''
 
-    if not plugin.command:
-        return False, AttributeError('Invalid command')
-
     logger.debug('Running plugin: {0}'.format(plugin))
 
     try:
-        data = check_output(
-            plugin.command,
-            stderr=PIPE,
-            shell=True,
-        )
+        state = plugin.get_state(settings)
 
     except Exception as e:
-        logger.debug('Error running plugin: {0}: {1}', plugin, e)
-        print_exception()
-        return False, e
-
-    try:
-        state = plugin.parse(data)
-
-    except Exception as e:
-        logger.debug('Error parsing plugin: {0}: {1}'.format(plugin, e))
+        logger.debug('Error running plugin: {0}: {1}'.format(plugin, e))
         print_exception()
         return False, e
 
@@ -225,12 +242,12 @@ def get_plugin_state(plugin):
     return True, state
 
 
-def get_plugin_states(plugins):
+def get_plugin_states(plugins, settings):
     '''
     Gets state output from multiple plugins.
     '''
 
     return [
-        (plugin, get_plugin_state(plugin))
+        (plugin, get_plugin_state(plugin, settings))
         for plugin in plugins
     ]
