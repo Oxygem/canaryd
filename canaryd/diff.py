@@ -1,4 +1,6 @@
-from canaryd.packages import six
+from canaryd.packages import six  # noqa
+
+from canaryd.log import logger
 
 
 class Change(object):
@@ -10,11 +12,34 @@ class Change(object):
         self.data = data
 
     def serialise(self):
-        if self.type == 'updated':
-            data = self.plugin.serialise_update(self.data)
+        data = None
 
-        else:
-            data = self.plugin.serialise_item(self.data)
+        if self.data:
+            update_data = self.data
+
+            # COMPAT w/canaryd < 0.2
+            # Legacy support where added/deleted would either have data/None,
+            # rather than data changes (where every key: (old_value, new_value)).
+            if self.type in ('added', 'deleted') and not all(
+                isinstance(item, tuple)
+                for _, item in six.iteritems(self.data)
+            ):
+                if self.type == 'added':
+                    update_data = dict(
+                        (key, (None, value))
+                        for key, value in six.iteritems(self.data)
+                    )
+
+                elif self.type == 'deleted':
+                    update_data = dict(
+                        (key, (value, None))
+                        for key, value in six.iteritems(self.data)
+                    )
+
+                logger.info('Converted legacy data: {0}'.format(self.data))
+
+            # Serialise the data changes
+            data = self.plugin.serialise_changes(update_data)
 
         return self.type, self.key, data
 

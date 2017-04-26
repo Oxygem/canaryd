@@ -90,7 +90,7 @@ class Plugin(object):
         spec = self.spec[1]
         self.check_spec_key(key, value)
 
-        if isinstance(spec[key], set):
+        if isinstance(spec[key], set) and value:
             return list(value)
 
         return value
@@ -107,7 +107,7 @@ class Plugin(object):
             for key, item in six.iteritems(state)
         )
 
-    def serialise_update(self, changes):
+    def serialise_changes(self, changes):
         return dict(
             (key, (self.serialise_value(key, item[0]), self.serialise_value(key, item[1])))
             for key, item in six.iteritems(changes)
