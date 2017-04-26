@@ -52,6 +52,7 @@ def main(verbose, debug):
         return
 
     # Initial ping for API presence
+    logger.info('Ping API...')
     backoff(
         ping, settings,
         error_message='Could not ping',

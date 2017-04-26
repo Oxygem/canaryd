@@ -6,6 +6,9 @@ class CanarydError(ClickException):
     Generic canaryd exception.
     '''
 
+    def __init__(self, message='exiting!', *args, **kwargs):
+        return super(CanarydError, self).__init__(message, *args, **kwargs)
+
 
 class UserCancelError(CanarydError):
     '''

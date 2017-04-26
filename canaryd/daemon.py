@@ -18,6 +18,8 @@ def _sleep_until_interval(start, interval):
 
 
 def _daemon_loop(plugins, previous_states, settings):
+    logger.info('Getting plugin states...')
+
     states = get_plugin_states(plugins, settings)
     state_changes = []
 
@@ -39,6 +41,8 @@ def _daemon_loop(plugins, previous_states, settings):
                 '{1}({2})'
             ).format(plugin.name, data.__class__.__name__, data))
             continue
+
+    logger.info('Uploading state changes...')
 
     try:
         settings_changes = upload_state_changes(

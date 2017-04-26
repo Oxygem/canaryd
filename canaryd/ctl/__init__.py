@@ -13,7 +13,7 @@ from canaryd.packages import click  # noqa
 from canaryd import remote
 
 from canaryd.exceptions import CanarydError
-from canaryd.log import logger, setup_logging
+from canaryd.log import setup_logging
 from canaryd.plugin import (
     get_and_prepare_working_plugins,
     get_plugin_by_name,
@@ -73,7 +73,7 @@ def init(ctx, start, key):
         did_register = ctx.invoke(register, key=key)
 
         if not did_register:
-            raise CanarydError('Failed to register')
+            raise CanarydError(click.style('Failed to register', 'red'))
 
     # Install the service
     click.echo('--> Installing canaryd service')
@@ -156,11 +156,19 @@ def state(plugin):
     target_plugin = get_plugin_by_name(plugin)
 
     if not target_plugin:
-        raise TypeError('Invalid plugin: {0}'.format(plugin))
+        raise CanarydError(click.style(
+            'Invalid plugin: {0}'.format(plugin),
+            'red',
+        ))
 
-    if prepare_plugin(target_plugin, settings) is not True:
-        logger.critical('Error preparing plugin')
-        return
+    prepare_status = prepare_plugin(target_plugin, settings)
+
+    if prepare_status is not True:
+        _, e = prepare_status
+        raise CanarydError(click.style(
+            'Plugin unavailable: {0}'.format(target_plugin.name),
+            'yellow',
+        ))
 
     click.echo('State for {0}:'.format(plugin))
 
@@ -173,10 +181,15 @@ def state(plugin):
             indent=4,
         ))
     else:
-        logger.critical((
-            'Unexpected exception while getting {0} state: '
-            '{1}({2})'
-        ).format(target_plugin.name, data.__class__.__name__, data))
+        raise CanarydError(click.style(
+            'Unexpected exception while getting {0} state: {1}({2})'.format(
+                target_plugin.name,
+                data.__class__.__name__,
+                data,
+            ),
+            'red',
+            bold=True,
+        ))
 
 
 @main.command()
@@ -191,9 +204,9 @@ def plugins():
 
     working_plugins = get_and_prepare_working_plugins(get_settings())
 
-    click.echo('--> Enabled plugins: {0}'.format(', '.join(
-        plugin.name for plugin in working_plugins
-    )))
+    click.echo('--> Enabled plugins:')
+    for plugin in working_plugins:
+        click.echo(click.style('    {0}'.format(plugin.name), bold=True))
 
 
 @main.command()
@@ -255,8 +268,10 @@ def enable(script):
     link_name = path.join(get_scripts_directory(), 'enabled', script)
 
     if not path.exists(source_script):
-        click.echo('No script file ({0}) exists.'.format(source_script))
-        return
+        raise CanarydError(click.style(
+            'No script file ({0}) exists.'.format(source_script),
+            'red',
+        ))
 
     if path.exists(link_name):
         click.echo('Script {0} is already enabled.'.format(
@@ -285,10 +300,12 @@ def disable(script):
         return
 
     if not path.islink(link_name):
-        click.echo('Script {0} is not a link. You should move it to {0}.'.format(
-            link_name, source_script,
+        raise CanarydError(click.style(
+            'Script {0} is not a link. You should move it to: {1}.'.format(
+                link_name, source_script,
+            ),
+            'yellow',
         ))
-        return
 
     remove(link_name)
 

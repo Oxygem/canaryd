@@ -191,6 +191,8 @@ def prepare_plugin(plugin, settings):
 
 
 def get_and_prepare_working_plugins(settings):
+    logger.info('Loading plugins...')
+
     all_plugins = get_plugins()
     working_plugins = []
 
@@ -232,7 +234,7 @@ def get_plugin_state(plugin, settings):
         state = plugin.get_state(settings)
 
     except Exception as e:
-        logger.debug('Error running plugin: {0}: {1}'.format(plugin, e))
+        logger.warning('Error running plugin: {0}: {1}'.format(plugin, e))
         print_exception()
         return False, e
 
