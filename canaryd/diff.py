@@ -10,15 +10,16 @@ class Change(object):
         self.data = data
 
     def serialise(self):
-        data = None
-
         if self.type == 'updated':
             data = self.plugin.serialise_update(self.data)
 
-        elif self.type == 'added':
+        else:
             data = self.plugin.serialise_item(self.data)
 
         return self.type, self.key, data
+
+    def __repr__(self):
+        return '{0}'.format((self.plugin, self.type, self.key, self.data))
 
 
 def make_diffs(plugin, changes):
@@ -33,15 +34,20 @@ def get_state_diff(plugin, plugin_state, previous_plugin_state):
     Diffs two state dicts and returns a list of changes.
 
     Changes:
-        All come as a tuple of ``(type, key, data, message=None)``.
+        All come as a tuple of ``(plugin, type, key, data=None)``.
     '''
 
     changes = []
 
     # Look through the previous state to find any items that have been removed
-    for key, state in six.iteritems(previous_plugin_state):
+    for key, previous_item in six.iteritems(previous_plugin_state):
         if key not in plugin_state:
-            changes.append(Change(plugin, 'deleted', key))
+            state_diff = dict(
+                (k, (v, None))
+                for k, v in six.iteritems(previous_item)
+            )
+
+            changes.append(Change(plugin, 'deleted', key, data=state_diff))
 
     # Loop the new state
     for key, item in six.iteritems(plugin_state):
@@ -49,7 +55,11 @@ def get_state_diff(plugin, plugin_state, previous_plugin_state):
 
         # Add anything that doesn't exist
         if not previous_item:
-            changes.append(Change(plugin, 'added', key, data=item))
+            state_diff = dict(
+                (k, (None, v))
+                for k, v in six.iteritems(item)
+            )
+            changes.append(Change(plugin, 'added', key, data=state_diff))
             continue
 
         # Plugins customise diff
