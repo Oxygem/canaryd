@@ -38,7 +38,6 @@ class Meta(Plugin):
 
             if matches:
                 duration, users, av1, av5, av15 = matches.groups()
-                data.append(('load_average', [float(av1), float(av5), float(av15)]))
                 data.append(('users', int(users)))
 
                 days = 0
