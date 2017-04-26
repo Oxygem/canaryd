@@ -9,7 +9,7 @@ from time import time
 from canaryd.packages import click  # noqa
 
 from canaryd.daemon import run_daemon
-from canaryd.log import logger, setup_file_logging, setup_logging
+from canaryd.log import logger, print_exception, setup_file_logging, setup_logging
 from canaryd.plugin import (
     cleanup_plugins,
     get_and_prepare_working_plugins,
@@ -90,7 +90,7 @@ def main(verbose, debug):
 
         run_daemon(plugins, previous_states, settings, start_time=start_time)
 
-    # This is OK! Cleanup plugins before exceptions propagate
+    # Cleanup plugins before exceptions propagate
     finally:
         cleanup_plugins(plugins)
 
@@ -101,7 +101,6 @@ try:
 except KeyboardInterrupt:
     logger.info('Exiting canaryd...')
 
-except Exception:
-    # TODO: public Sentry logging
-
+except Exception as e:
+    print_exception()
     raise
