@@ -48,6 +48,8 @@ def _daemon_loop(plugins, previous_states, settings):
         upload_state_changes,
         state_changes,
         settings,
+        error_message='Could not sync state changes',
+        max_wait=settings.collect_interval_s,
     )
 
     if settings_changes:

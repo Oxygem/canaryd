@@ -56,6 +56,7 @@ def main(verbose, debug):
     backoff(
         ping, settings,
         error_message='Could not ping',
+        max_wait=settings.collect_interval_s,
     )
 
     # Load the plugin list
@@ -74,6 +75,7 @@ def main(verbose, debug):
         remote_settings = backoff(
             sync_states, states, settings,
             error_message='Could not sync state',
+            max_wait=settings.collect_interval_s,
         )
 
         # Update settings w/remote ones

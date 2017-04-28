@@ -13,6 +13,9 @@ SESSION = None
 
 class CanaryJSONEncoder(JSONEncoder):
     def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+
         if hasattr(obj, 'serialise'):
             return obj.serialise()
 
@@ -27,13 +30,14 @@ def backoff(function, *args, **kwargs):
     interval = 0
 
     error_message = kwargs.pop('error_message', 'API error')
+    max_wait = kwargs.pop('max_wait', 300)
 
     while data is None:
         try:
             return function(*args, **kwargs)
 
         except ApiError as e:
-            if interval <= 290:
+            if interval + 10 <= max_wait:
                 interval += 10
 
             e.log()
