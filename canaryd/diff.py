@@ -21,7 +21,7 @@ class Change(object):
             # Legacy support where added/deleted would either have data/None,
             # rather than data changes (where every key: (old_value, new_value)).
             if self.type in ('added', 'deleted') and not all(
-                isinstance(item, tuple)
+                isinstance(item, (tuple, list)) and len(item) == 2
                 for _, item in six.iteritems(self.data)
             ):
                 if self.type == 'added':
