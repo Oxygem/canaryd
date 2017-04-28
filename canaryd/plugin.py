@@ -90,7 +90,7 @@ class Plugin(object):
         spec = self.spec[1]
         self.check_spec_key(key, value)
 
-        if isinstance(spec[key], set) and value:
+        if isinstance(spec[key], set) and isinstance(value, set):
             return list(value)
 
         return value
