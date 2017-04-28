@@ -1,0 +1,3 @@
+include canaryd/scripts/*
+include canaryd/init_scripts/*
+include canaryd/packages/requests/cacert.pem

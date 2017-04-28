@@ -69,10 +69,14 @@ setup_kwargs = {
     'packages': PACKAGES,
     'scripts': SCRIPTS,
     'include_package_data': True,
-    # Include the init scripts in the install
     'package_data': {
-        'canaryd': ['init_scripts/*'],
-        'canaryd.packages.requests': ['*.pem'],
+        'canaryd': (
+            'init_scripts/*',
+            'scripts/*',
+        ),
+        'canaryd.packages.requests': (
+            '*.pem',
+        ),
     },
 }
 
