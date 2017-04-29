@@ -69,14 +69,16 @@ setup_kwargs = {
     'packages': PACKAGES,
     'scripts': SCRIPTS,
     'include_package_data': True,
+    # This must match the contents of MANIFEST.in, to provide full support for
+    # distutil, setuptools everywhere. Annoying.
     'package_data': {
-        'canaryd': (
+        'canaryd': [
             'init_scripts/*',
             'scripts/*',
-        ),
-        'canaryd.packages.requests': (
+        ],
+        'canaryd.packages.requests': [
             '*.pem',
-        ),
+        ],
     },
 }
 
