@@ -9,6 +9,7 @@ from canaryd.settings import CanarydSettings
 from canaryd.version import __version__
 
 SESSION = None
+REQUEST_TIMEOUT = 30
 
 
 class CanaryJSONEncoder(JSONEncoder):
@@ -126,13 +127,18 @@ def make_api_request(
     try:
         response = method(
             url,
-            timeout=30,
+            timeout=REQUEST_TIMEOUT,
             auth=('api', api_key),
             **kwargs
         )
 
+    # Connection errors and timeouts
     except requests.ConnectionError as e:
-        raise ApiError(0, 'Could not connect: {0}'.format(e))
+        raise ApiError(0, 'Could not connect to {0}: {1}'.format(url, e))
+
+    # Read timeouts
+    except requests.Timeout as e:
+        raise ApiError(0, 'Timed out reading from {0}: {1}'.format(url, e))
 
     # Try to get some response JSON data
     response_data = {}
