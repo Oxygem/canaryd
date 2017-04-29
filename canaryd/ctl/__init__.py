@@ -1,5 +1,5 @@
 # cansryd
-# File: canaryd/canaryct/__init__.py
+# File: canaryd/canaryctl/__init__.py
 # Desc: canaryctl functions
 
 from __future__ import print_function
@@ -22,7 +22,7 @@ from canaryd.plugin import (
     get_plugins,
     prepare_plugin,
 )
-from canaryd.remote import CanaryJSONEncoder
+from canaryd.remote import ApiError, CanaryJSONEncoder
 from canaryd.script import get_scripts, get_scripts_directory
 from canaryd.settings import (
     CanarydSettings,
@@ -205,7 +205,7 @@ def state(plugin):
 @main.command()
 def plugins():
     '''
-    List all plugins.
+    List available and enabled plugins.
     '''
 
     click.echo('--> Available plugins: {0}'.format(', '.join(
@@ -225,36 +225,47 @@ def status():
     Print the current status of canaryd.
     '''
 
-    click.echo('canaryd: v{0}'.format(__version__))
-    click.echo('config: {0}'.format(get_config_file()))
+    config_file = get_config_file()
 
+    click.echo('config file: {0}'.format(config_file))
 
-@main.command()
-def ping():
-    '''
-    Ping servicecanary.com.
-    '''
-
-    settings = get_settings()
-
-    if not path.exists(settings.config_file):
+    if not path.exists(config_file):
         click.echo((
             'No config file ({0}) exists, '
             'please run `canaryctl init`'
-        ).format(settings.config_file))
+        ).format(config_file))
         return
 
-    # Ping the API
-    remote.ping(settings)
+    settings = get_settings()
 
-    click.echo('OK!')
+    try:
+        remote.ping(settings)
+        status = click.style('online', 'green')
+
+    except ApiError as e:
+        e.log()
+        status = click.style('offline', 'red')
+
+    click.echo('connection: {0}'.format(status))
 
 
 @main.group(invoke_without_command=True)
 @click.pass_context
 def scripts(ctx):
     '''
-    List/enable/disable scripts.
+    List and manage scripts for canaryd.
+
+    \b
+    # List scripts
+    canaryctl scripts
+
+    \b
+    # Enable a script
+    canaryctl scripts enable <script.sh>
+
+    \b
+    # Disable a script
+    canaryctl scripts disable <script.sh>
     '''
 
     if ctx.invoked_subcommand is not None:
@@ -274,6 +285,10 @@ def scripts(ctx):
 @scripts.command()
 @click.argument('script')
 def enable(script):
+    '''
+    Disable a script.
+    '''
+
     source_script = path.join(get_scripts_directory(), 'available', script)
     link_name = path.join(get_scripts_directory(), 'enabled', script)
 
@@ -300,6 +315,10 @@ def enable(script):
 @scripts.command()
 @click.argument('script')
 def disable(script):
+    '''
+    Enable a script.
+    '''
+
     source_script = path.join(get_scripts_directory(), 'available', script)
     link_name = path.join(get_scripts_directory(), 'enabled', script)
 
