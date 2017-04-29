@@ -5,6 +5,7 @@
 from __future__ import print_function
 
 import json
+import logging
 
 from os import path, remove, symlink, system
 
@@ -13,7 +14,7 @@ from canaryd.packages import click  # noqa
 from canaryd import remote
 
 from canaryd.exceptions import CanarydError
-from canaryd.log import setup_logging
+from canaryd.log import logger, setup_logging
 from canaryd.plugin import (
     get_and_prepare_working_plugins,
     get_plugin_by_name,
@@ -25,6 +26,7 @@ from canaryd.remote import CanaryJSONEncoder
 from canaryd.script import get_scripts, get_scripts_directory
 from canaryd.settings import (
     CanarydSettings,
+    ensure_config_directory,
     get_config_directory,
     get_config_file,
     get_settings,
@@ -42,7 +44,7 @@ from .install_service import install_service
 @click.option('--debug', is_flag=True)
 @click.version_option(
     version=__version__,
-    prog_name='canaryd',
+    prog_name='canaryctl',
     message='%(prog)s: v%(version)s',
 )
 def main(verbose, debug):
@@ -50,7 +52,15 @@ def main(verbose, debug):
     canaryd control.
     '''
 
-    setup_logging(verbose, debug)
+    log_level = setup_logging(verbose, debug)
+
+    logger.info('Starting canaryctl v{0}'.format(__version__))
+    logger.info('Log level set to: {0}'.format(
+        logging.getLevelName(log_level),
+    ))
+
+    # Ensure the scripts directory (in config) exists
+    ensure_config_directory()
 
 
 @main.command()

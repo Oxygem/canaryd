@@ -96,6 +96,10 @@ def get_config_file():
     return path.join(get_config_directory(), 'canaryd.conf')
 
 
+def get_scripts_directory():
+    return path.join(get_config_directory(), 'scripts')
+
+
 def get_settings(config_file=None):
     '''
     Load the config from the filesystem if provided, with defaults.
@@ -116,7 +120,9 @@ def get_settings(config_file=None):
             settings.update(dict(canaryd_config_items))
 
         except ConfigParserError as e:
-            logger.critical('Error in config file ({0}): {1}'.format(config_file, e.message))
+            logger.critical('Error in config file ({0}): {1}'.format(
+                config_file, e.message,
+            ))
             raise ConfigError('Config file error')
 
     return settings
@@ -128,11 +134,7 @@ def write_settings_to_config(settings):
     '''
 
     # Ensure the config directory exists
-    config_directory = get_config_directory()
-
-    if not path.exists(config_directory):
-        # Bootstrap first-time install settings
-        setup_config_directory(config_directory)
+    ensure_config_directory()
 
     # Generate the config
     config = RawConfigParser()
@@ -143,7 +145,10 @@ def write_settings_to_config(settings):
         config.read(config_file)
 
     except ConfigParserError as e:
-        logger.critical('Error in config file ({0}): {1}'.format(config_file, e.message))
+        logger.critical('Error in config file ({0}): {1}'.format(
+            config_file, e.message,
+        ))
+        raise ConfigError('Config file error')
 
     try:
         config.add_section('canaryd')
@@ -157,16 +162,35 @@ def write_settings_to_config(settings):
         config.write(f)
 
 
-def setup_config_directory(config_directory):
-    # Ensure we have our config_directory/scripts/[available|enabled]
-    makedirs(
-        path.join(config_directory, 'scripts', 'enabled'),
-    )
+def ensure_config_directory():
+    # Make sure the config directory exists
+    config_directory = get_config_directory()
 
-    # Copy built in scripts
-    copytree(
-        # Copy ./scripts/
-        path.join(path.dirname(__file__), 'scripts'),
-        # To $config/scripts/available/
-        path.join(config_directory, 'scripts', 'available'),
-    )
+    if not path.exists(config_directory):
+        logger.debug('Creating config directory: {0}'.format(config_directory))
+        makedirs(config_directory)
+
+    # Make sure the scripts directory exists
+    scripts_directory = get_scripts_directory()
+
+    if not path.exists(scripts_directory):
+        logger.debug('Creating scripts directory: {0}'.format(scripts_directory))
+
+        # Make the scripts & scripts/enabled directories
+        makedirs(path.join(scripts_directory, 'enabled'))
+
+        # Copy built in scripts to the scripts/available directory
+        available_scripts_directory = path.join(
+            config_directory, 'scripts', 'available',
+        )
+
+        logger.debug(
+            'Copying default scripts to: {0}'.format(available_scripts_directory),
+        )
+
+        copytree(
+            # Copy ./scripts/
+            path.join(path.dirname(__file__), 'scripts'),
+            # To $config/scripts/available/
+            available_scripts_directory,
+        )

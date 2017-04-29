@@ -16,13 +16,18 @@ from canaryd.plugin import (
     get_plugin_states,
 )
 from canaryd.remote import backoff, ping, sync_states
-from canaryd.settings import get_settings
+from canaryd.settings import ensure_config_directory, get_settings
 from canaryd.version import __version__
 
 
 @click.command()
 @click.option('-v', '--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
+@click.version_option(
+    version=__version__,
+    prog_name='canaryd',
+    message='%(prog)s: v%(version)s',
+)
 def main(verbose, debug):
     '''
     Run the canaryd daemon.
@@ -35,6 +40,9 @@ def main(verbose, debug):
         logging.getLevelName(log_level),
     ))
 
+    # Ensure the config directory exists
+    ensure_config_directory()
+
     # Load the settings, using our config file if provided
     settings = get_settings()
 
@@ -42,8 +50,7 @@ def main(verbose, debug):
     if settings.log_file:
         setup_file_logging(settings.log_file)
 
-    # Debug setting override
-    # TODO: remove in favor of --debug
+    # Settings can set debug on if needed
     if settings.debug == 'true':
         logger.setLevel(logging.DEBUG)
 
@@ -100,9 +107,6 @@ def main(verbose, debug):
 
 try:
     main()
-
-except KeyboardInterrupt:
-    logger.info('Exiting canaryd...')
 
 except Exception:
     # TODO: public Sentry logging
