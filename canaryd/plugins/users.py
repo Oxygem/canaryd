@@ -1,11 +1,14 @@
-import re
-
 from canaryd.packages import six
 
 from canaryd.plugin import Plugin
 
-USER_REGEX = r'^uid=[0-9]+\(([a-zA-Z0-9_\.\-]+)\) gid=[0-9]+\(([a-zA-Z0-9_\.\-]+)\) groups=([a-zA-Z0-9_\.\-,\(\)\s]+) (.*)$'  # noqa
-GROUP_REGEX = r'^[0-9]+\(([a-zA-Z0-9_\.\-]+)\)$'
+# Attempt to import pwd/grp - the users plugin is *nix only
+try:
+    import pwd
+    import grp
+except ImportError:
+    pwd = None
+    grp = None
 
 
 class Users(Plugin):
@@ -16,61 +19,41 @@ class Users(Plugin):
         'shell': six.text_type,
     })
 
-    command = '''
-        for i in `cat /etc/passwd | cut -d: -f1`; do
-            ID=`id $i`
-            META=`cat /etc/passwd | grep ^$i: | cut -d: -f6-7`
-            echo "$ID $META"
-        done
-    '''
+    def prepare(self, settings):
+        if any(var is None for var in (pwd, grp)):
+            raise self.PrepareError('Missing either pwd or group modules.')
 
-    @staticmethod
-    def parse(output):
+    def get_state(self, settings):
         users = {}
 
-        for line in output.splitlines():
-                matches = re.match(USER_REGEX, line)
+        # Get all groups and map by ID -> group
+        groups_data = grp.getgrall()
 
-                if matches:
-                    # Parse out the home/shell
-                    home_shell = matches.group(4)
-                    home = shell = None
+        groups_by_id = dict(
+            (group.gr_gid, group)
+            for group in groups_data
+        )
 
-                    # /blah: is just a home
-                    if home_shell.endswith(':'):
-                        home = home_shell[:1]
+        # Get basic user data
+        users_data = pwd.getpwall()
 
-                    # :/blah is just a shell
-                    elif home_shell.startswith(':'):
-                        shell = home_shell[1:]
+        for user in users_data:
+            users[user.pw_name] = {
+                'groups': set(),
+                'home': user.pw_dir,
+                'shell': user.pw_shell,
+            }
 
-                    # Both home & shell
-                    elif ':' in home_shell:
-                        home, shell = home_shell.split(':')
+            group = groups_by_id.get(user.pw_gid)
+            if group:
+                users[user.pw_name]['group'] = group.gr_name
 
-                    # Main user group
-                    group = matches.group(2)
+        # Loop back through groups and apply any additional to users
+        for group in groups_data:
+            for username in group.gr_mem:
+                if username not in users:
+                    continue
 
-                    # Parse the groups
-                    groups = []
-                    for group_matches in matches.group(3).split(','):
-                        name = re.match(GROUP_REGEX, group_matches.strip())
-                        if name:
-                            name = name.group(1)
-                        else:
-                            continue
-
-                        # We only want secondary groups here
-                        if name != group:
-                            groups.append(name)
-
-                    groups = set(groups)
-
-                    users[matches.group(1)] = {
-                        'group': group,
-                        'groups': groups,
-                        'home': home,
-                        'shell': shell,
-                    }
+                users[username]['groups'].add(group.gr_name)
 
         return users
