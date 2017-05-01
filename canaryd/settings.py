@@ -65,6 +65,9 @@ class CanarydSettings(object):
             logger.debug('Root user, so setting log file to /var/log/canaryd.log')
             self.log_file = path.join('/', 'var', 'log', 'canaryd.log')
 
+    def __getattr__(self, key):
+        return getattr(self, key, None)
+
     def update(self, data):
         changed_keys = []
 
