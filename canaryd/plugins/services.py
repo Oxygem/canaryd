@@ -103,3 +103,52 @@ class Services(Plugin):
             )
 
         return services
+
+    @staticmethod
+    def generate_events(type_, key, data_changes, settings):
+        # If the script has been removed, resolve any leftover issues and exit
+        # (the delete event is still created).
+        if type_ == 'deleted':
+            yield 'resolved', None, None
+            return
+
+        # Track if the service starts/stops
+        if 'running' in data_changes:
+            _, to_running = data_changes['running']
+
+            if to_running:
+                yield 'updated', '{0} started'.format(key), data_changes
+
+            else:
+                yield 'updated', '{0} stopped'.format(key), data_changes
+
+        # No up/down change but PID changed? Service restarted!
+        elif 'pid' in data_changes:
+            yield 'updated', '{0} restarted'.format(key), data_changes
+
+        # Finally, check the ports!
+        if 'up_ports' in data_changes:
+            from_ports, to_ports = data_changes['up_ports']
+
+            # No ports up now?
+            if not to_ports:
+                if settings.service_critical:
+                    yield (
+                        'critical',
+                        'All {0} ports down'.format(key),
+                        data_changes,
+                    )
+
+            # We lost 1+ port, but not all?
+            elif len(to_ports) < len(from_ports):
+                if settings.service_warning:
+                    yield (
+                        'warning',
+                        'Some {0} ports down'.format(key),
+                        data_changes,
+                    )
+
+            # We have more ports than before? Assume resolved
+            # TODO: improve this
+            else:
+                yield 'resolved', 'All {0} ports up'.format(key), data_changes
