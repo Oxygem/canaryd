@@ -13,7 +13,7 @@ SYSTEMD_REGEX = r'^([a-z\-]+)\.service\s+[a-z\-]+\s+[a-z]+\s+([a-z]+)'
 UPSTART_REGEX = r'^([a-z\-]+) [a-z]+\/([a-z]+),?\s?(process)?\s?([0-9]+)?'
 
 
-def get_pid_to_ports():
+def get_pid_to_listens():
     output = check_output(
         'lsof -i -n -P -s TCP:LISTEN',
         shell=True,
@@ -28,10 +28,16 @@ def get_pid_to_ports():
             continue
 
         pid = int(bits[1])
-        ip_host = bits[-2]
-        port = int(ip_host.rsplit(':', 1)[1])
 
-        pid_to_ports.setdefault(pid, set()).add(port)
+        # Get the type of IP (4/6)
+        ip_type = bits[4].lower()
+
+        # Work out the host:port bit
+        ip_host = bits[-2]
+        host, port = ip_host.rsplit(':', 1)
+        port = int(port)
+
+        pid_to_ports.setdefault(pid, set()).add((ip_type, host, port))
 
     return pid_to_ports
 

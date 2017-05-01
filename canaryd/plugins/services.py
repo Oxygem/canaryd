@@ -11,7 +11,7 @@ from canaryd.plugin import Plugin
 from .services_util import (
     get_initd_services,
     get_launchd_services,
-    get_pid_to_ports,
+    get_pid_to_listens,
     get_systemd_services,
     get_upstart_services,
 )
@@ -25,12 +25,24 @@ def update_missing_keys(target, data):
     ))
 
 
-def check_port(port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def check_port(ip_type, host, port):
+    # Open our IPv4 or IPv6 socket
+    socket_type = socket.AF_INET if ip_type == 'ipv4' else socket.AF_INET6
+    sock = socket.socket(socket_type, socket.SOCK_STREAM)
+
+    # If listening everywhere, just try localhost
+    if host == '*':
+        if ip_type == 'ipv4':
+            host = '127.0.0.1'
+        else:
+            host = '::1'
 
     try:
-        result = sock.connect_ex(('127.0.0.1', port))
+        result = sock.connect_ex((host, port))
         return result == 0
+
+    except (socket.error, socket.gaierror):
+        pass
 
     finally:
         sock.close()
@@ -73,17 +85,21 @@ class Services(Plugin):
                 update_missing_keys(services, get_initd_services())
 
         # Get mapping of PID -> listening ports
-        pid_to_ports = get_pid_to_ports()
+        pid_to_listens = get_pid_to_listens()
 
         # Augment services with their ports
         for name, data in six.iteritems(services):
-            if 'pid' not in data or data['pid'] not in pid_to_ports:
+            if 'pid' not in data or data['pid'] not in pid_to_listens:
                 continue
 
-            data['ports'] = pid_to_ports[data['pid']]
-            data['up_ports'] = [
-                port for port in pid_to_ports[data['pid']]
-                if check_port(port)
-            ]
+            data['ports'] = set(
+                port
+                for _, _, port in pid_to_listens[data['pid']]
+            )
+
+            data['up_ports'] = set(
+                port for ip_type, host, port in pid_to_listens[data['pid']]
+                if check_port(ip_type, host, port)
+            )
 
         return services
