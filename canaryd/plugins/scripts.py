@@ -75,8 +75,9 @@ class Scripts(Plugin):
         return results
 
     @staticmethod
-    def generate_events(type_, script_name, data_changes, settings):
-        # If the script has been removed, resolve any leftover issues and exit
+    def generate_events(type_, key, data_changes, settings):
+        # If the script has been removed, resolve any leftover issues and exit.
+        # (the delete event is still created).
         if type_ == 'deleted':
             yield 'resolved', None, None
             return
