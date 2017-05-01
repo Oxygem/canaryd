@@ -176,7 +176,7 @@ def state(plugin):
     if prepare_status is not True:
         _, e = prepare_status
         raise CanarydError(click.style(
-            'Plugin unavailable: {0}'.format(target_plugin.name),
+            'Plugin unavailable: {0} ({1})'.format(target_plugin.name, e),
             'yellow',
         ))
 
