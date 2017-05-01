@@ -46,11 +46,15 @@ class Plugin(object):
     prepare_command = None
     parent = None
 
+    class PrepareError(Exception):
+        pass
+
     @staticmethod
     def is_change(key, previous_item, item):
         return True
 
-    def cleanup(self):
+    @staticmethod
+    def cleanup():
         pass
 
     def get_state(self, settings):
@@ -171,6 +175,13 @@ def prepare_plugin(plugin, settings):
 
     try:
         plugin.prepare(settings)
+
+    except Plugin.PrepareError as e:
+        logger.info('Plugin prepare failed: {0}: {1}'.format(
+            plugin.name, e.message,
+        ))
+        print_exception(debug_only=True)
+        return False, e
 
     except (CalledProcessError, OSError) as e:
         logger.info('Plugin command missing/failed: {0}'.format(
