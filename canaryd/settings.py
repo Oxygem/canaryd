@@ -66,7 +66,10 @@ class CanarydSettings(object):
             self.log_file = path.join('/', 'var', 'log', 'canaryd.log')
 
     def __getattr__(self, key):
-        return getattr(self, key, None)
+        try:
+            return super(CanarydSettings, self).__getattr__(key)
+        except AttributeError:
+            pass
 
     def update(self, data):
         changed_keys = []
