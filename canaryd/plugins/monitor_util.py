@@ -9,7 +9,7 @@ from os import path
 from canaryd.packages import six
 from canaryd.packages.check_output import check_output
 
-DF_REGEX = r'([a-zA-Z0-9\/\-_]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]{1,3})%\s+([a-zA-Z\/0-9\-_\s]+)'
+DF_REGEX = r'([a-zA-Z0-9@:_\.\/\-]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]{1,3})%\s+([a-zA-Z\/0-9\-_\s]+)'
 
 
 def get_ps_cpu_stats():
@@ -228,6 +228,7 @@ def get_disk_stats():
 
     for line in output.splitlines():
         matches = re.match(DF_REGEX, line)
+
         if matches:
             if matches.group(1) in ('none', 'udev', 'tmpfs'):
                 continue
