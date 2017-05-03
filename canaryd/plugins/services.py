@@ -29,6 +29,7 @@ def check_port(ip_type, host, port):
     # Open our IPv4 or IPv6 socket
     socket_type = socket.AF_INET if ip_type == 'ipv4' else socket.AF_INET6
     sock = socket.socket(socket_type, socket.SOCK_STREAM)
+    sock.settimeout(1)
 
     # If listening everywhere, just try localhost
     if host == '*':
