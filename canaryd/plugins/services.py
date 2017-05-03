@@ -91,6 +91,7 @@ class Services(Plugin):
         # Augment services with their ports
         for name, data in six.iteritems(services):
             if 'pid' not in data or data['pid'] not in pid_to_listens:
+                data['up_ports'] = set()
                 continue
 
             data['ports'] = set(
@@ -132,7 +133,7 @@ class Services(Plugin):
             from_ports, to_ports = data_changes['up_ports']
 
             # No ports up now?
-            if not to_ports:
+            if from_ports and not to_ports:
                 if settings.service_critical:
                     yield (
                         'critical',
@@ -141,7 +142,7 @@ class Services(Plugin):
                     )
 
             # We lost 1+ port, but not all?
-            elif len(to_ports) < len(from_ports):
+            elif from_ports and len(to_ports) < len(from_ports):
                 if settings.service_warning:
                     yield (
                         'warning',
