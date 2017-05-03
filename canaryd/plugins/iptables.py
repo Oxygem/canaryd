@@ -137,9 +137,7 @@ class Iptables(Plugin):
                 yield 'deleted', '{0} removed from {1}'.format(
                     rule_type.title(),
                     chain_name,
-                ), {
-                    rule_type: deleted_rules,
-                }
+                ), data_changes
 
             # Find new rules
             new_rules = []
@@ -159,9 +157,7 @@ class Iptables(Plugin):
                 yield 'added', '{0} added to {1}'.format(
                     rule_type.title(),
                     chain_name,
-                ), {
-                    rule_type: new_rules,
-                }
+                ), data_changes
 
 
 class Ip6tables(Iptables):
