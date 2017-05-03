@@ -108,6 +108,10 @@ class Services(Plugin):
 
     @staticmethod
     def generate_events(type_, key, data_changes, settings):
+        # For new services, no events
+        if type_ == 'added':
+            return
+
         # If the script has been removed, resolve any leftover issues and exit
         # (the delete event is still created).
         if type_ == 'deleted':
