@@ -43,11 +43,6 @@ class PluginMeta(type):
 
 @six.add_metaclass(PluginMeta)
 class Plugin(object):
-    spec = None
-    command = None
-    prepare_command = None
-    parent = None
-
     class PrepareError(Exception):
         pass
 
