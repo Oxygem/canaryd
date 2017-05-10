@@ -29,14 +29,16 @@ def underscore(name):
 
 class PluginMeta(type):
     def __init__(cls, name, bases, attrs):
-        if name != 'Plugin':
-            name = underscore(name)
+        if name == 'Plugin':
+            return
 
-            plugin_instance = cls()
-            plugin_instance.name = name
+        name = underscore(name)
 
-            PLUGINS.append(plugin_instance)
-            NAME_TO_PLUGIN[name] = plugin_instance
+        plugin_instance = cls()
+        plugin_instance.name = name
+
+        PLUGINS.append(plugin_instance)
+        NAME_TO_PLUGIN[name] = plugin_instance
 
 
 @six.add_metaclass(PluginMeta)
