@@ -33,8 +33,8 @@ def install_service():
 
     # OSX/Darwin
     if which('launchctl'):
-        script = get_data('canaryd', path.join('init_scripts', 'canaryd.plist'))
-        script_path = path.join('/', 'Library', 'LaunchDaemons', 'canaryd.plist')
+        script = get_data('canaryd', path.join('init_scripts', 'com.oxygem.canaryd.plist'))
+        script_path = path.join('/', 'Library', 'LaunchDaemons', 'com.oxygem.canaryd.plist')
         start_command = 'launchctl load {0}'.format(script_path)
 
     # Systemd
