@@ -83,7 +83,10 @@ class Services(Plugin):
                 update_missing_keys(services, get_upstart_services())
 
             if path.exists('/etc/init.d'):
-                update_missing_keys(services, get_initd_services())
+                update_missing_keys(
+                    services,
+                    get_initd_services(existing_services=services),
+                )
 
         # Get mapping of PID -> listening ports
         pid_to_listens = get_pid_to_listens()

@@ -1,5 +1,7 @@
 import re
 
+from os import listdir
+
 from subprocess import CalledProcessError
 
 from canaryd.packages.check_output import check_output
@@ -11,6 +13,8 @@ LAUNCHCTL_IGNORE_NAMES = ('oneshot', 'mdworker', 'mbfloagent')
 INITD_REGEX = r'([a-zA-Z0-9\-]+)=([0-9]+)=([0-9]+)?'
 SYSTEMD_REGEX = r'^([a-z\-]+)\.service\s+[a-z\-]+\s+[a-z]+\s+([a-z]+)'
 UPSTART_REGEX = r'^([a-z\-]+) [a-z]+\/([a-z]+),?\s?(process)?\s?([0-9]+)?'
+
+IGNORE_INIT_SCRIPTS = []
 
 
 def get_pid_to_listens():
@@ -84,56 +88,62 @@ def get_launchd_services():
     return services
 
 
-def get_initd_services():
-    output = check_output('''
-        for SERVICE in `ls /etc/init.d/`; do
-            _=`cat /etc/init.d/$SERVICE | grep status`
-            if [ "$?" = "0" ]; then
-                PID=` \
-                    ps --ppid 1 -o 'tty,pid,comm' \
-                    | grep ^?.*$SERVICE \
-                    | head -n 1 \
-                    | sed -n -e 's/?\s\+\([0-9]\+\)\s\+.*/\\1/p' \
-                `
-                STATUS=`/etc/init.d/$SERVICE status`
-                echo "$SERVICE=$?=$PID"
-            fi
-        done
-    ''', shell=True)
+def get_initd_services(existing_services=None):
+    existing_services = existing_services or []
 
+    service_names = listdir('/etc/init.d/')
     services = {}
 
-    for line in output.splitlines():
-        matches = re.match(INITD_REGEX, line)
-        if matches:
-            status = int(matches.group(2))
-            pid = matches.group(3)
+    for name in service_names:
+        if name in existing_services or name in IGNORE_INIT_SCRIPTS:
+            continue
 
-            if pid:
-                pid = int(pid)
+        with open('/etc/init.d/{0}'.format(name)) as script:
+            if 'status' not in script.read():
+                IGNORE_INIT_SCRIPTS.append(name)
+                continue
 
-            # Exit code 0 = OK/running
-            if status == 0:
-                status = True
+        status = False
 
-            # Exit codes 1-3 = DOWN/not running
-            elif status < 4:
-                status = False
+        try:
+            check_output(
+                'grep /etc//etc/init.d/{0} status'.format(name),
+                shell=True,
+            )
 
-            # Exit codes 4+ = unknown
-            else:
-                status = None
+            status = True
 
-            services[matches.group(1)] = {
-                'running': status or isinstance(pid, int),
-                'pid': pid,
-            }
+        except CalledProcessError:
+            pass
+
+        pid = None
+
+        try:
+            pid_line = check_output(
+                "ps --ppid 1 -o 'tty,pid,comm' | grep '^?.*\s{0}.*$'".format(name),
+                shell=True,
+            )
+
+            bits = pid_line.strip().split()
+
+            try:
+                pid = int(bits[-2])
+            except (TypeError, ValueError):
+                pass
+
+        except CalledProcessError:
+            pass
+
+        services[name] = {
+            'running': status or isinstance(pid, int),
+            'pid': pid,
+        }
 
     return services
 
 
 def get_systemd_services():
-    output = get_systemd_services(
+    output = check_output(
         'systemctl -alt service list-units',
         shell=True,
     )
