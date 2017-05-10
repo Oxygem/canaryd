@@ -55,24 +55,28 @@ def get_proc_cpu_stats():
         bits = line.split()
         key, details = bits[0], [int(bit) for bit in bits[1:8]]
 
-        if key == 'cpu':
-            if key in cpus:
-                # Calculate usage (second cat)
-                diffs = dict(
-                    (column, details[i] - cpus[key][i])
-                    for i, column in enumerate(columns)
-                )
-                total = sum(six.itervalues(diffs))
+        if key != 'cpu':
+            continue
 
-            else:
-                # Set details (first cat)
-                cpus[key] = details
+        if key in cpus:
+            # Calculate usage (second cat)
+            diffs = dict(
+                (column, details[i] - cpus[key][i])
+                for i, column in enumerate(columns)
+            )
+            total = sum(six.itervalues(diffs))
+
+        else:
+            # Set details (first cat)
+            cpus[key] = details
+
+    idle_and_iowait = diffs['idle'] + diffs['iowait']
 
     return {
         'cpu': {
-            'value': total - diffs['idle'],
+            'value': total - idle_and_iowait,
             'max': total,
-            'percentage': (total - diffs['idle']) / total * 100,
+            'percentage': (total - idle_and_iowait) / total * 100,
         },
         'iowait': {
             'value': diffs['iowait'],
