@@ -16,7 +16,6 @@ PACKAGES = (
     'canaryd',
     'canaryd.ctl',
     'canaryd.plugins',
-    'canaryd.plugins.mixins',
 
     # Packages
     'canaryd.packages',
