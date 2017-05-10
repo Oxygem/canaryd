@@ -140,7 +140,15 @@ class Monitor(Plugin):
     def generate_events(type_, key, data_changes, settings):
         settings_key = key
 
-        if key not in ('cpu', 'memory'):
+        # Swap is treated like memory (>X% warning/critical)
+        if key == 'swap':
+            settings_key = 'memory'
+
+        # IO wait is *not* currently supported
+        elif key == 'iowait':
+            return
+
+        elif key not in ('cpu', 'memory'):
             settings_key = 'disk'
 
         def make_event(type_, limit, time, changes):
