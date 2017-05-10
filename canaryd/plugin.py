@@ -64,7 +64,7 @@ class Plugin(object):
 
     def prepare(self, settings):
         check_output(
-            self.prepare_command or self.command,
+            getattr(self, 'prepare_command', self.command),
             shell=True,
         )
 
