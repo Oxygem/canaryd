@@ -91,6 +91,7 @@ class Services(Plugin):
         # Augment services with their ports
         for name, data in six.iteritems(services):
             if 'pid' not in data or data['pid'] not in pid_to_listens:
+                data['ports'] = set()
                 data['up_ports'] = set()
                 continue
 
