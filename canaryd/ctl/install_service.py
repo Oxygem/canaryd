@@ -30,24 +30,27 @@ def install_service():
     script = None
     script_path = None
     start_command = None
+    enable_command = None
 
     # OSX/Darwin
     if which('launchctl'):
         script = get_data('canaryd', path.join('init_scripts', 'com.oxygem.canaryd.plist'))
         script_path = path.join('/', 'Library', 'LaunchDaemons', 'com.oxygem.canaryd.plist')
         start_command = 'launchctl load {0}'.format(script_path)
+        enable_command = 'launchctl enable com.oxygem.canaryd'
 
     # Systemd
     elif which('systemctl'):
         script = get_data('canaryd', path.join('init_scripts', 'canaryd.service'))
         script_path = path.join('/', 'etc', 'systemd', 'system', 'canaryd.service')
         start_command = 'systemctl start canaryd.service'
+        enable_command = 'systemctl enable canaryd.service'
 
     # Upstart
     elif which('initctl'):
         script = get_data('canaryd', path.join('init_scripts', 'canaryd.conf'))
         script_path = path.join('/', 'etc', 'init', 'canaryd.conf')
-        start_command = 'start canaryd'
+        start_command = 'initctl start canaryd'
 
     # Init.d
     elif path.exists(path.join('/', 'etc', 'init.d')):
@@ -55,10 +58,13 @@ def install_service():
         script_path = path.join('/', 'etc', 'init.d', 'canaryd')
         start_command = 'chmod +x /etc/init.d/canaryd && /etc/init.d/canaryd start'
 
-    if any(item is None for item in (script, script_path, start_command)):
-        pass
+        if which('update-rc.d'):
+            enable_command = 'update-rc.d canaryd defaults'
+
+        elif which('chkconfig'):
+            enable_command = 'chkconfig canaryd on'
 
     write_script(script_path, script)
     click.echo('--> {0} written'.format(script_path))
 
-    return start_command
+    return start_command, enable_command

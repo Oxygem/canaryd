@@ -65,9 +65,10 @@ def main(verbose, debug):
 
 @main.command()
 @click.option('--start', is_flag=True, default=False)
+@click.option('--enable', is_flag=True, default=False)
 @click.argument('key', required=False)
 @click.pass_context
-def init(ctx, start, key):
+def init(ctx, start, enable, key):
     '''
     Create the canaryd service and start it.
 
@@ -87,7 +88,7 @@ def init(ctx, start, key):
 
     # Install the service
     click.echo('--> Installing canaryd service')
-    start_command = install_service()
+    start_command, enable_command = install_service()
 
     if (
         start or
@@ -97,6 +98,15 @@ def init(ctx, start, key):
         )
     ):
         system(start_command)
+
+    if enable_command and (
+        enable or
+        click.confirm(
+            'Enable canaryd service ({0})?'.format(enable_command),
+            default=True,
+        )
+    ):
+        system(enable_command)
 
 
 @main.command()
