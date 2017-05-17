@@ -154,7 +154,10 @@ class Monitor(Plugin):
         def make_event(type_, limit, time, changes):
             message_key = key
 
-            if settings_key != 'disk':
+            if settings_key == 'cpu':
+                message_key = 'CPU'
+
+            elif settings_key != 'disk':
                 message_key = message_key.title()
 
             message = '{0} is over {1}%'.format(message_key, limit)
