@@ -48,6 +48,12 @@ class Monitor(Plugin):
         '15_min_percentage': float,
     })
 
+    # Disable update diff-ing - meaning generate_events always sees the full
+    # state (the full state is always sent to the server). This is needed because
+    # we need to check for both critical and warning, which might have different
+    # average timescales - so we always need value and 1/5/15 min averages.
+    diff_updates = False
+
     collect_interval = None
 
     def setup_history(self):
@@ -233,5 +239,5 @@ class Monitor(Plugin):
 
                     resolved_changes[data_key] = data_changes[data_key]
 
-        if all(key in resolved_changes for key in wanted_data_keys):
+        if all(k in resolved_changes for k in wanted_data_keys):
             yield make_event('resolved', None, None, resolved_changes)

@@ -43,6 +43,8 @@ class PluginMeta(type):
 
 @six.add_metaclass(PluginMeta)
 class Plugin(object):
+    diff_updates = True
+
     class PrepareError(Exception):
         pass
 

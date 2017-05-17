@@ -98,7 +98,15 @@ def get_state_diff(plugin, plugin_state, previous_plugin_state):
             if v != previous_item.get(k)
         )
 
+        # If something changed - send the event!
         if state_diff:
+            # If this plugin disables diffs, remake the state diff w/everything
+            if not plugin.diff_updates:
+                state_diff = dict(
+                    (k, (previous_item.get(k), v))
+                    for k, v in six.iteritems(item)
+                )
+
             changes.append(Change(plugin, 'updated', key, data=state_diff))
 
     return changes
