@@ -1,8 +1,12 @@
 [Unit]
 Description=canaryd
+After=network.target
 
 [Service]
 Type=simple
 User=root
 ExecStart=CANARYD_LOCATION
 Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
