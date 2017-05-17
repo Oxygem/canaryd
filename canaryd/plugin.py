@@ -27,6 +27,10 @@ def underscore(name):
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
+class NoPluginError(Exception):
+    pass
+
+
 class PluginMeta(type):
     def __init__(cls, name, bases, attrs):
         if name == 'Plugin':
@@ -166,7 +170,10 @@ def get_plugin_names():
 
 
 def get_plugin_by_name(plugin_name):
-    return NAME_TO_PLUGIN.get(plugin_name)
+    if plugin_name not in NAME_TO_PLUGIN:
+        raise NoPluginError('Missing plugin: {0}'.format(plugin_name))
+
+    return NAME_TO_PLUGIN[plugin_name]
 
 
 def prepare_plugin(plugin, settings):
