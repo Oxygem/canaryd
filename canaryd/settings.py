@@ -4,15 +4,15 @@
 
 import platform
 
-from ConfigParser import (
-    DuplicateSectionError,
-    Error as ConfigParserError,
-    RawConfigParser,
-)
 from os import environ, geteuid, makedirs, path
 from shutil import copytree
 
 from canaryd.packages import click, six  # noqa
+from canaryd.packages.six.moves.configparser import (  # noqa
+    DuplicateSectionError,
+    Error as ConfigParserError,
+    RawConfigParser,
+)
 
 from canaryd.exceptions import ConfigError
 from canaryd.log import logger
