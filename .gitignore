@@ -1,6 +1,8 @@
 *.egg-info
 *.pyc
 
+.vagrant*
+
 # Packaging
 dist/
 build/
