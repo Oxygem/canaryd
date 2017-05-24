@@ -1,0 +1,14 @@
+FROM centos:6
+MAINTAINER nick@oxygem.com
+
+# Install
+RUN yum install -y rpm-build
+
+# Work in that directory
+WORKDIR /opt/canaryd
+
+# Add the code
+ADD . /opt/canaryd
+
+# Run the build
+RUN python setup.py bdist_rpm

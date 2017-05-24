@@ -1,0 +1,16 @@
+FROM ubuntu:16.04
+MAINTAINER nick@oxygem.com
+
+# Install
+RUN apt-get update
+RUN apt-get install -y debhelper python-pip
+RUN pip install stdeb
+
+# Work in the codebase
+WORKDIR /opt/canaryd
+
+# Add the code
+ADD . /opt/canaryd
+
+# Run the build
+RUN python setup.py --command-packages=stdeb.command bdist_deb
