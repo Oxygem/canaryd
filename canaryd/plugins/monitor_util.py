@@ -26,7 +26,7 @@ def get_ps_cpu_stats():
         cpu_percentage = float(output.strip())
 
     except (TypeError, ValueError):
-        return
+        return {}
 
     return {
         'cpu': {
