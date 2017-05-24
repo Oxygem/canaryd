@@ -4,6 +4,8 @@ from subprocess import CalledProcessError, PIPE, Popen, STDOUT
 def check_output(*popenargs, **kwargs):
     process = Popen(stdout=PIPE, stderr=STDOUT, *popenargs, **kwargs)
     output, _ = process.communicate()
+    output = output.decode('utf-8')
+
     retcode = process.poll()
     if retcode:
         cmd = kwargs.get('args')
