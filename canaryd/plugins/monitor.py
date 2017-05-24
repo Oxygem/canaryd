@@ -58,7 +58,7 @@ class Monitor(Plugin):
 
     def setup_history(self):
         # Number of items needed if one per collect interval to total 15 mins
-        intervals = (15 * 60) / self.collect_interval
+        intervals = int(round((15 * 60) / self.collect_interval))
         logger.info('Setup interval history with {0} slots'.format(intervals))
 
         self.history = defaultdict(lambda: deque((), intervals))
