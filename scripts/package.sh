@@ -4,7 +4,8 @@
 set -e
 
 VERSION=`python setup.py --version`
-DEB_VERSION=`echo $VERSION | sed 's/\.dev/~dev/'`
+# Deb outputs 0.2~dev0
+DEB_VERSION=`echo $VERSION | sed 's/\.\([a-z]\)/~\1/'`
 
 
 function build() {
@@ -59,3 +60,4 @@ docker rm canaryd-rpm-build canaryd-deb-build > /dev/null
 
 echo
 echo "<-- Packages build!"
+exit 0
