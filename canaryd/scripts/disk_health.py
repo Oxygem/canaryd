@@ -8,6 +8,7 @@ from canaryd.packages.check_output import check_output
 
 
 try:
+    # Ensure smartctl is present & working
     check_output(
         'smartctl --version',
         shell=True,
@@ -104,3 +105,6 @@ if criticals:
 
 if exit_code == 0:
     print('All disks healthy')
+
+
+sys.exit(exit_code)
