@@ -122,7 +122,7 @@ class Monitor(Plugin):
                 if len(history) >= interval_length:
                     data[key][interval_key] = round(sum(
                         item['percentage']
-                        for item in list(islice(history, 0, interval_length))
+                        for item in list(islice(history, int(interval_length)))
                     ) / interval_length, 2)
 
         return data
