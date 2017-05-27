@@ -25,9 +25,6 @@ scripts/clean.sh
 # Build source and wheel packages
 python setup.py sdist bdist_wheel
 
-# Build .deb and .rpm packages
-scripts/package.sh
-
 
 echo "--> Upload to pypi..."
 # Upload w/Twine
