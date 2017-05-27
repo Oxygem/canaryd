@@ -28,10 +28,13 @@ def get_pid_to_listens():
     for line in output.splitlines():
         bits = line.split()
 
-        if bits[-1] != '(LISTEN)':
+        if len(bits) < 5 or bits[-1] != '(LISTEN)':
             continue
 
-        pid = int(bits[1])
+        try:
+            pid = int(bits[1])
+        except (TypeError, ValueError):
+            continue
 
         # Get the type of IP (4/6)
         ip_type = bits[4].lower()
