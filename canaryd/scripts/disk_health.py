@@ -6,6 +6,19 @@ from subprocess import CalledProcessError
 
 from canaryd.packages.check_output import check_output
 
+SMART_RETURN_BITS = {
+    0: False,  # command line parse error
+    1: 'device open failed',
+    2: 'SMART command failed',
+    3: 'disk failing',
+    # We track thresholds via stdout
+    4: True,  # pre-fail attrs <= thresh
+    5: True,  # pre-fail attrs <= thresh in past
+    # We track errors via stdout
+    6: True,  # error log
+    7: True,  # self-test errors
+}
+
 
 try:
     # Ensure smartctl is present & working
@@ -49,11 +62,21 @@ for disk in disks:
         )
 
     except CalledProcessError as e:
-        # If the disk doesn't support SMART, ignore it
-        if 'Operation not supported by device' not in e.output:
-            raise
+        smart_data = e.output
 
-        continue
+        for i in SMART_RETURN_BITS:
+            bit = e.returncode & i
+            if bit and i in SMART_RETURN_BITS:
+                return_bit = SMART_RETURN_BITS[i]
+
+                if return_bit is False:
+                    raise
+
+                if return_bit is True:
+                    continue
+
+                criticals.append('Disk {0} error: {1}'.format(disk, return_bit))
+                break
 
     for line in smart_data.splitlines():
         # First check SMART's overall status
@@ -75,6 +98,10 @@ for disk in disks:
         name = bits[1]
         value = int(bits[3])
         threshold = int(bits[5])
+
+        # Skip where both the value and threshold are 0, like power_on_hours/etc
+        if value == 0 and threshold == 0:
+            continue
 
         # From: https://superuser.com/a/354254
         # Each Attribute also has a Threshold value (whose range is 0 to 255)
