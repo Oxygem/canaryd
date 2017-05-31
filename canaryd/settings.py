@@ -4,8 +4,8 @@
 
 import platform
 
-from os import environ, geteuid, makedirs, path
-from shutil import copytree
+from os import environ, geteuid, listdir, makedirs, path
+from shutil import copyfile
 
 from canaryd.packages import click, six  # noqa
 from canaryd.packages.six.moves.configparser import (  # noqa
@@ -168,6 +168,23 @@ def write_settings_to_config(settings):
         config.write(f)
 
 
+def copy_builtin_scripts():
+    # Copy built in scripts to the scripts/available directory
+    available_scripts_directory = path.join(get_scripts_directory(), 'available')
+
+    logger.debug(
+        'Copying default scripts to: {0}'.format(available_scripts_directory),
+    )
+
+    builtin_scripts_directory = path.join(path.dirname(__file__), 'scripts')
+
+    for file in listdir(builtin_scripts_directory):
+        copyfile(
+            path.join(builtin_scripts_directory, file),
+            path.join(available_scripts_directory, file),
+        )
+
+
 def ensure_config_directory():
     # Make sure the config directory exists
     config_directory = get_config_directory()
@@ -185,18 +202,4 @@ def ensure_config_directory():
         # Make the scripts & scripts/enabled directories
         makedirs(path.join(scripts_directory, 'enabled'))
 
-        # Copy built in scripts to the scripts/available directory
-        available_scripts_directory = path.join(
-            config_directory, 'scripts', 'available',
-        )
-
-        logger.debug(
-            'Copying default scripts to: {0}'.format(available_scripts_directory),
-        )
-
-        copytree(
-            # Copy ./scripts/
-            path.join(path.dirname(__file__), 'scripts'),
-            # To $config/scripts/available/
-            available_scripts_directory,
-        )
+        copy_builtin_scripts()

@@ -26,6 +26,7 @@ from canaryd.remote import ApiError, CanaryJSONEncoder
 from canaryd.script import get_scripts, get_scripts_directory
 from canaryd.settings import (
     CanarydSettings,
+    copy_builtin_scripts,
     ensure_config_directory,
     get_config_directory,
     get_config_file,
@@ -290,6 +291,15 @@ def scripts(ctx):
             click.style(script[0], bold=True),
             script[1],
         ))
+
+
+@scripts.command()
+def copy():
+    '''
+    Copy the builtin scripts into the servers canaryd settings directory.
+    '''
+
+    copy_builtin_scripts()
 
 
 @scripts.command()
