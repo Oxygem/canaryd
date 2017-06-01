@@ -57,7 +57,7 @@ for disk in disks:
     try:
         # List health and attributes
         smart_data = check_output(
-            'smartctl -A -H {0}'.format(disk),
+            'smartctl -a {0}'.format(disk),
             shell=True,
         )
 
