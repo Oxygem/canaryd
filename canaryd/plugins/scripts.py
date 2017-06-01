@@ -103,4 +103,5 @@ class Scripts(Plugin):
                 yield 'warning', message, data
 
             elif to_code == 0:
-                yield 'resolved', message, data
+                # Include all the changes - including output
+                yield 'resolved', message, data_changes
