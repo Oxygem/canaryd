@@ -5,7 +5,7 @@
 import platform
 
 from os import environ, geteuid, listdir, makedirs, path
-from shutil import copyfile
+from shutil import copy
 
 from canaryd.packages import click, six  # noqa
 from canaryd.packages.six.moves.configparser import (  # noqa
@@ -179,7 +179,7 @@ def copy_builtin_scripts():
     builtin_scripts_directory = path.join(path.dirname(__file__), 'scripts')
 
     for file in listdir(builtin_scripts_directory):
-        copyfile(
+        copy(
             path.join(builtin_scripts_directory, file),
             path.join(available_scripts_directory, file),
         )
@@ -199,7 +199,8 @@ def ensure_config_directory():
     if not path.exists(scripts_directory):
         logger.debug('Creating scripts directory: {0}'.format(scripts_directory))
 
-        # Make the scripts & scripts/enabled directories
+        # Make the scripts, scripts/enabled & scripts/available directories
         makedirs(path.join(scripts_directory, 'enabled'))
+        makedirs(path.join(scripts_directory, 'available'))
 
         copy_builtin_scripts()
