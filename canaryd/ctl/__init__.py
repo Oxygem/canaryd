@@ -7,7 +7,7 @@ from __future__ import print_function
 import json
 import logging
 
-from os import path, remove, symlink, system
+from os import path, system
 
 from canaryd.packages import click  # noqa
 
@@ -23,7 +23,14 @@ from canaryd.plugin import (
     prepare_plugin,
 )
 from canaryd.remote import ApiError, CanaryJSONEncoder
-from canaryd.script import get_scripts, get_scripts_directory
+from canaryd.script import (
+    disable_script,
+    enable_script,
+    get_scripts,
+    NoScriptChangesError,
+    NoScriptFoundError,
+    ScriptNotLinkError,
+)
 from canaryd.settings import (
     CanarydSettings,
     copy_builtin_scripts,
@@ -306,28 +313,23 @@ def copy():
 @click.argument('script')
 def enable(script):
     '''
-    Disable a script.
+    Enable a script.
     '''
 
-    source_script = path.join(get_scripts_directory(), 'available', script)
-    link_name = path.join(get_scripts_directory(), 'enabled', script)
+    try:
+        enable_script(script)
 
-    if not path.exists(source_script):
+    except NoScriptFoundError as e:
         raise CanarydError(click.style(
-            'No script file ({0}) exists.'.format(source_script),
+            'No script file ({0}) exists.'.format(e.message),
             'red',
         ))
 
-    if path.exists(link_name):
+    except NoScriptChangesError:
         click.echo('Script {0} is already enabled.'.format(
             click.style(script, bold=True),
         ))
         return
-
-    symlink(
-        source_script,
-        link_name,
-    )
 
     click.echo('Script enabled: {0}'.format(click.style(script, bold=True)))
 
@@ -336,26 +338,25 @@ def enable(script):
 @click.argument('script')
 def disable(script):
     '''
-    Enable a script.
+    Disable a script.
     '''
 
-    source_script = path.join(get_scripts_directory(), 'available', script)
-    link_name = path.join(get_scripts_directory(), 'enabled', script)
+    try:
+        disable_script(script)
 
-    if not path.exists(link_name):
+    except NoScriptFoundError as e:
+        raise CanarydError(click.style(
+            'No script file ({0}) exists.'.format(e.message),
+            'red',
+        ))
+
+    except ScriptNotLinkError as e:
+        raise CanarydError(click.style(e.message, 'yellow'))
+
+    except NoScriptChangesError:
         click.echo('Script {0} is already disabled.'.format(
             click.style(script, bold=True),
         ))
         return
-
-    if not path.islink(link_name):
-        raise CanarydError(click.style(
-            'Script {0} is not a link. You should move it to: {1}.'.format(
-                link_name, source_script,
-            ),
-            'yellow',
-        ))
-
-    remove(link_name)
 
     click.echo('Script disabled: {0}'.format(click.style(script, bold=True)))
