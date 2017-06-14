@@ -77,3 +77,5 @@ class Hardware(Plugin):
         for key in TOP_LEVEL_STRING_KEYS:
             if previous_item.get(key) != item.get(key):
                 return True
+
+        return False
