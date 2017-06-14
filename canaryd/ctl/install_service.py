@@ -40,7 +40,7 @@ def install_service():
         script = get_data('canaryd', path.join('init_scripts', 'com.oxygem.canaryd.plist'))
         script_path = path.join('/', 'Library', 'LaunchDaemons', 'com.oxygem.canaryd.plist')
         start_command = 'launchctl load {0}'.format(script_path)
-        enable_command = 'launchctl enable com.oxygem.canaryd'
+        enable_command = 'launchctl enable system/com.oxygem.canaryd'
 
     # Systemd
     elif which('systemctl'):
