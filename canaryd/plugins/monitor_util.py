@@ -1,6 +1,5 @@
 from __future__ import division
 
-import re
 import sys
 
 from multiprocessing import cpu_count
@@ -8,8 +7,6 @@ from os import path
 
 from canaryd.packages import six
 from canaryd.packages.check_output import check_output
-
-DF_REGEX = r'([a-zA-Z0-9@:_\.\/\-]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]{1,3})%\s+([a-zA-Z\/0-9\-_\s]+)'
 
 
 def get_ps_cpu_stats():
@@ -231,21 +228,23 @@ def get_disk_stats():
     devices = {}
 
     for line in output.splitlines():
-        matches = re.match(DF_REGEX, line)
+        bits = line.split()
+        filesystem = bits[0]
 
-        if matches:
-            if matches.group(1) in ('none', 'udev', 'tmpfs'):
-                continue
+        if not filesystem.startswith('/'):
+            continue
 
-            value = int(matches.group(3))
-            max_ = int(matches.group(2))
+        value = int(bits[2])
+        max_ = int(bits[1])
 
-            percentage = round(value / max_ * 100, 2)
+        percentage = round(value / max_ * 100, 2)
 
-            devices[matches.group(6)] = {
-                'percentage': percentage,
-                'value': int(round(value / 1024)),
-                'max': int(round(max_ / 1024)),
-            }
+        mount = bits[-1]
+
+        devices[mount] = {
+            'percentage': percentage,
+            'value': int(round(value / 1024)),
+            'max': int(round(max_ / 1024)),
+        }
 
     return devices
