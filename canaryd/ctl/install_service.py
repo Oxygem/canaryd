@@ -17,8 +17,11 @@ def which(command):
 
 
 def write_script(script_path, script):
-    canaryd_location = which('canaryd')
+    # get_data returns binary, so make it a string
+    script = script.decode('utf-8')
 
+    # Swap in the location of canaryd
+    canaryd_location = which('canaryd')
     script = script.replace('CANARYD_LOCATION', canaryd_location)
 
     # Write the init system script
