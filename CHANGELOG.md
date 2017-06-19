@@ -1,4 +1,4 @@
-# v0.2 (WIP)
+# v0.2
 
 First release to include `.deb` and `.rpm` packages and build tools.
 
