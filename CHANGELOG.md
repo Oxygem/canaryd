@@ -1,3 +1,7 @@
+# v0.2.1
+
++ Fix monitor plugin edge case: ignore blank lines in `/proc/stat`
+
 # v0.2
 
 First release to include `.deb` and `.rpm` packages and build tools.
