@@ -49,6 +49,9 @@ def get_proc_cpu_stats():
     total = None
 
     for line in output.splitlines():
+        if not line:
+            continue
+
         bits = line.split()
         key, details = bits[0], [int(bit) for bit in bits[1:8]]
 
