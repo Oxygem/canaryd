@@ -77,7 +77,9 @@ def get_launchd_services():
         if name_bits[-1].isdigit():
             name = '.'.join(name_bits[:-1])
 
-        data = {}
+        data = {
+            'init_system': 'launchd',
+        }
 
         try:
             data['pid'] = int(bits[0])
@@ -140,6 +142,7 @@ def get_initd_services(existing_services=None):
         services[name] = {
             'running': status or isinstance(pid, int),
             'pid': pid,
+            'init_system': 'initd',
         }
 
     return services
@@ -181,6 +184,7 @@ def get_systemd_services():
             services[name] = {
                 'running': matches.group(2) == 'running',
                 'pid': pid,
+                'init_system': 'systemd',
             }
 
     return services
@@ -205,6 +209,7 @@ def get_upstart_services():
             services[matches.group(1)] = {
                 'running': matches.group(2) == 'running',
                 'pid': pid,
+                'init_system': 'upstart',
             }
 
     return services
