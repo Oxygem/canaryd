@@ -242,7 +242,7 @@ def get_disk_stats():
 
         percentage = round(value / max_ * 100, 2)
 
-        mount = bits[-1]
+        mount = ' '.join(bits[5:])
 
         devices[mount] = {
             'percentage': percentage,
