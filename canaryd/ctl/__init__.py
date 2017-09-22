@@ -47,9 +47,9 @@ from .install_service import install_service
 
 
 # Parse arguments
-@click.group()
+@click.group(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('-v', '--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
+@click.option('-d', '--debug', is_flag=True)
 @click.version_option(
     version=__version__,
     prog_name='canaryctl',

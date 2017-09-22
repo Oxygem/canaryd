@@ -20,9 +20,9 @@ from canaryd.settings import ensure_config_directory, get_settings
 from canaryd.version import __version__
 
 
-@click.command()
+@click.command(context_settings={'help_option_names': ['-h', '--help']})
 @click.option('-v', '--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
+@click.option('-d', '--debug', is_flag=True)
 @click.version_option(
     version=__version__,
     prog_name='canaryd',
