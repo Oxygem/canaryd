@@ -3,6 +3,7 @@ import socket
 
 from distutils.spawn import find_executable
 from os import path
+from subprocess import CalledProcessError
 
 from canaryd.packages import six
 
@@ -90,24 +91,29 @@ class Services(Plugin):
                 )
 
         # Get mapping of PID -> listening ports
-        pid_to_listens = get_pid_to_listens()
+        try:
+            pid_to_listens = get_pid_to_listens()
 
-        # Augment services with their ports
-        for name, data in six.iteritems(services):
-            if 'pid' not in data or data['pid'] not in pid_to_listens:
-                data['ports'] = set()
-                data['up_ports'] = set()
-                continue
+        except (CalledProcessError, OSError):
+            pass
 
-            data['ports'] = set(
-                port
-                for _, _, port in pid_to_listens[data['pid']]
-            )
+        else:
+            # Augment services with their ports
+            for name, data in six.iteritems(services):
+                if 'pid' not in data or data['pid'] not in pid_to_listens:
+                    data['ports'] = set()
+                    data['up_ports'] = set()
+                    continue
 
-            data['up_ports'] = set(
-                port for ip_type, host, port in pid_to_listens[data['pid']]
-                if check_port(ip_type, host, port)
-            )
+                data['ports'] = set(
+                    port
+                    for _, _, port in pid_to_listens[data['pid']]
+                )
+
+                data['up_ports'] = set(
+                    port for ip_type, host, port in pid_to_listens[data['pid']]
+                    if check_port(ip_type, host, port)
+                )
 
         return services
 
