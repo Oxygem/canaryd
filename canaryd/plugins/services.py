@@ -67,7 +67,8 @@ class Services(Plugin):
     def prepare(settings):
         pass
 
-    def get_state(self, settings):
+    @staticmethod
+    def get_state(settings):
         services = {}
 
         os_type = platform.system().lower()
