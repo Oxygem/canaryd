@@ -5,7 +5,7 @@ from time import sleep
 
 from canaryd.log import logger
 from canaryd.packages import requests
-from canaryd.settings import CanarydSettings
+from canaryd.settings import get_settings
 from canaryd.version import __version__
 
 SESSION = None
@@ -103,7 +103,7 @@ def make_api_request(
     method, endpoint,
     api_key=None, settings=None, json=None, **kwargs
 ):
-    settings = settings or CanarydSettings()
+    settings = settings or get_settings()
 
     api_key = api_key or settings.api_key
 
@@ -169,16 +169,14 @@ def make_api_request(
 
 
 def ping(settings):
-    response_data = make_api_request(
+    return make_api_request(
         get_session().get,
         'server/{0}/ping'.format(settings.server_id),
         settings=settings,
     )
 
-    return response_data.get('ping') == 'pong'
 
-
-def upload_states_return_settings(url, states, settings, json=None):
+def _upload_states_return_settings(url, states, settings, json=None):
     json = json or states
 
     if json is not states:
@@ -199,7 +197,7 @@ def sync_states(states, settings):
     from the server (settings).
     '''
 
-    return upload_states_return_settings(
+    return _upload_states_return_settings(
         'server/{0}/sync'.format(settings.server_id),
         make_states_dict(states),
         settings,
@@ -215,10 +213,24 @@ def upload_state_changes(states, settings):
     Uploads partial state to api.servicecanary.com.
     '''
 
-    return upload_states_return_settings(
+    return _upload_states_return_settings(
         'server/{0}/state'.format(settings.server_id),
         make_changes_dict(states),
         settings,
+    )
+
+
+def create_event(settings, plugin, type, description, data=None):
+    return make_api_request(
+        get_session().post,
+        'server/{0}/event'.format(settings.server_id),
+        settings=settings,
+        json={
+            'plugin': plugin,
+            'type': type,
+            'description': description,
+            'data': data,
+        },
     )
 
 

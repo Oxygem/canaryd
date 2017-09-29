@@ -22,7 +22,7 @@ from canaryd.plugin import (
     get_plugins,
     prepare_plugin,
 )
-from canaryd.remote import ApiError, CanaryJSONEncoder
+from canaryd.remote import ApiError, CanaryJSONEncoder, create_event
 
 from canaryd.settings import (
     ensure_config_directory,
@@ -258,3 +258,28 @@ def status():
         status = click.style('offline', 'red')
 
     click.echo('connection: {0}'.format(status))
+
+
+@main.command()
+@click.argument('plugin')
+@click.argument('type')
+@click.argument('description')
+@click.argument('data', required=False)
+def event(plugin, type, description, data=None):
+    '''
+    Push a custom event to Service Canary.
+    '''
+
+    settings = get_settings()
+
+    if data:
+        data = json.loads(data)
+
+    response_data = create_event(settings, plugin, type, description, data)
+
+    if response_data['created']:
+        click.echo('Event created: {0}'.format(
+            click.style(response_data['event_id'], bold=True),
+        ))
+    else:
+        click.echo(click.style('Event not created', 'red'))
