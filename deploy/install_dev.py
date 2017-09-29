@@ -1,14 +1,14 @@
-from pyinfra import host
+from pyinfra import inventory, state
 from pyinfra.modules import files, pkg, server
 
 SUDO = True
 
 
 # OpenBSD doesn't come with Python!
-if host.fact.os == 'OpenBSD':
+with state.limit(inventory.get_host('@vagrant/openbsd58', [])):
     pkg.packages(
         {'Install Python 2.7'},
-        'python-2.7.10',
+        'python-2.7',
     )
 
     files.link(
@@ -19,12 +19,20 @@ if host.fact.os == 'OpenBSD':
 
 
 server.shell(
+    {'Install pip'},
+    (
+        'wget https://bootstrap.pypa.io/get-pip.py',
+        'python get-pip.py',
+    ),
+)
+
+
+server.shell(
     {'Install canaryd'},
     (
-        # Clear the build directory so we don't break the path
-        'rm -rf build/',
         # Install canaryd
-        'python setup.py install',
+        'python setup.py develop',
     ),
     chdir='/opt/canaryd',
+    serial=True,
 )
