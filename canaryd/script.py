@@ -2,6 +2,10 @@ from os import listdir, path, remove, symlink
 
 from canaryd.settings import get_scripts_directory
 
+INVALID_EXTENSIONS = (
+    '.pyc',
+)
+
 
 class ScriptException(Exception):
     pass
@@ -30,6 +34,10 @@ def get_scripts(settings):
     enabled_scripts = listdir(path.join(get_scripts_directory(), 'enabled'))
 
     all_scripts = set(available_scripts + enabled_scripts)
+    all_scripts = filter(
+        lambda script: not script.endswith(INVALID_EXTENSIONS),
+        all_scripts,
+    )
 
     return (
         (script, script in enabled_scripts)
