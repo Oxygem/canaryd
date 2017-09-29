@@ -13,6 +13,7 @@ LAUNCHCTL_IGNORE_NAMES = ('oneshot', 'mdworker', 'mbfloagent')
 INITD_REGEX = r'([a-zA-Z0-9\-]+)=([0-9]+)=([0-9]+)?'
 SYSTEMD_REGEX = r'^([a-z\-]+)\.service\s+[a-z\-]+\s+[a-z]+\s+([a-z]+)'
 UPSTART_REGEX = r'^([a-z\-]+) [a-z]+\/([a-z]+),?\s?(process)?\s?([0-9]+)?'
+SUPERVISOR_REGEX = r'([a-z\-]+)\s+([A-Z]+)\s+pid\s([0-9]+)'
 
 IGNORE_INIT_SCRIPTS = []
 
@@ -245,6 +246,31 @@ def get_upstart_services():
                 'pid': pid,
                 'enabled': enabled,
                 'init_system': 'upstart',
+            }
+
+    return services
+
+
+def get_supervisor_services():
+    output = check_output(
+        'supervisorctl status',
+        shell=True,
+    )
+
+    services = {}
+
+    for line in output.splitlines():
+        matches = re.match(SUPERVISOR_REGEX, line)
+
+        if matches:
+            name = matches.group(1)
+            status = matches.group(2)
+            pid = matches.group(3)
+
+            services[name] = {
+                'running': status == 'RUNNING',
+                'pid': pid,
+                'init_system': 'supervisor',
             }
 
     return services

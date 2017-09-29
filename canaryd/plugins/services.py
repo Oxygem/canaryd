@@ -13,6 +13,7 @@ from .services_util import (
     get_initd_services,
     get_launchd_services,
     get_pid_to_listens,
+    get_supervisor_services,
     get_systemd_services,
     get_upstart_services,
 )
@@ -78,18 +79,20 @@ class Services(Plugin):
         if os_type == 'darwin':
             services = get_launchd_services()
 
-        elif os_type == 'linux':
-            if find_executable('systemctl'):
-                update_missing_keys(services, get_systemd_services())
+        if find_executable('systemctl'):
+            update_missing_keys(services, get_systemd_services())
 
-            if find_executable('initctl'):
-                update_missing_keys(services, get_upstart_services())
+        if find_executable('initctl'):
+            update_missing_keys(services, get_upstart_services())
 
-            if path.exists(path.join(os_sep, 'etc', 'init.d')):
-                update_missing_keys(
-                    services,
-                    get_initd_services(existing_services=services),
-                )
+        if path.exists(path.join(os_sep, 'etc', 'init.d')):
+            update_missing_keys(
+                services,
+                get_initd_services(existing_services=services),
+            )
+
+        if find_executable('supervisorctl'):
+            update_missing_keys(services, get_supervisor_services())
 
         # Get mapping of PID -> listening ports
         try:
