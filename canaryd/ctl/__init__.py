@@ -1,4 +1,4 @@
-# cansryd
+# canaryd
 # File: canaryd/canaryctl/__init__.py
 # Desc: canaryctl functions
 
@@ -25,7 +25,6 @@ from canaryd.plugin import (
 from canaryd.remote import ApiError, CanaryJSONEncoder
 
 from canaryd.settings import (
-    CanarydSettings,
     ensure_config_directory,
     get_config_directory,
     get_config_file,
@@ -152,7 +151,9 @@ will not function properly.
     server_id = remote.register(key=key)
 
     # Create our settings
-    settings = CanarydSettings(api_key=key, server_id=server_id)
+    settings = get_settings()
+    settings.api_key = key
+    settings.server_id = server_id
 
     # Write the settings to the config file
     write_settings_to_config(settings)
