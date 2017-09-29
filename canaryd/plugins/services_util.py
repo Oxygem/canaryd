@@ -1,6 +1,6 @@
 import re
 
-from os import listdir
+from os import listdir, path, sep as os_sep
 
 from subprocess import CalledProcessError
 
@@ -139,9 +139,25 @@ def get_initd_services(existing_services=None):
         except CalledProcessError:
             pass
 
+        # Check if enabled
+        enabled = False
+
+        try:
+            found_links = check_output(
+                'find /etc/rc*.d/S*{0} -type l'.format(name),
+                shell=True,
+            )
+
+            if found_links.strip():
+                enabled = True
+
+        except CalledProcessError:
+            pass
+
         services[name] = {
             'running': status or isinstance(pid, int),
             'pid': pid,
+            'enabled': enabled,
             'init_system': 'initd',
         }
 
@@ -162,28 +178,32 @@ def get_systemd_services():
         if matches:
             name = matches.group(1)
 
-            pid = None
+            # Get service info to extract pid/enabled status
+            service_output = check_output(
+                'systemctl show {0}.service'.format(name),
+                shell=True,
+            )
 
-            try:
-                pid = check_output(
-                    'systemctl status {0}.service | grep "Main PID:"'.format(name),
-                    shell=True,
-                )
-                pid = pid.split()
+            service_meta = {}
+            for line in service_output.splitlines():
+                key, value = line.split('=', 1)
+                service_meta[key] = value
 
-                for bit in pid:
-                    try:
-                        pid = int(bit)
-                        break
-                    except ValueError:
-                        pass
+            # Skip/ignore Type=oneshot services
+            if 'Type' in service_meta and service_meta['Type'] == 'oneshot':
+                continue
 
-            except (CalledProcessError, OSError):
-                pass
+            pid = service_meta.get(
+                'ExecMainPID',
+                service_meta.get('MainPID', None),
+            )
+
+            enabled = service_meta.get('UnitFileState') == 'enabled'
 
             services[name] = {
                 'running': matches.group(2) == 'running',
                 'pid': pid,
+                'enabled': enabled,
                 'init_system': 'systemd',
             }
 
@@ -201,14 +221,28 @@ def get_upstart_services():
     for line in output.splitlines():
         matches = re.match(UPSTART_REGEX, line)
         if matches:
+            name = matches.group(1)
             pid = matches.group(4)
 
             if pid:
                 pid = int(pid)
 
-            services[matches.group(1)] = {
+            enabled = True
+
+            # Check if enabled by looking in any override file
+            override_filename = path.join(
+                os_sep, 'etc', 'init',
+                '{0}.override'.format(name),
+            )
+            if path.exists(override_filename):
+                with open(override_filename) as script:
+                    if 'manual' in script.read():
+                        enabled = False
+
+            services[name] = {
                 'running': matches.group(2) == 'running',
                 'pid': pid,
+                'enabled': enabled,
                 'init_system': 'upstart',
             }
 

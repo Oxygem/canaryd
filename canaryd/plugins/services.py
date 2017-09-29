@@ -2,7 +2,7 @@ import platform
 import socket
 
 from distutils.spawn import find_executable
-from os import path
+from os import path, sep as os_sep
 from subprocess import CalledProcessError
 
 from canaryd.packages import six
@@ -59,6 +59,7 @@ class Services(Plugin):
     spec = ('service', {
         'running': bool,
         'pid': int,
+        'enabled': bool,
         'init_system': six.text_type,
         'ports': set((int,)),
         'up_ports': set((int,)),
@@ -84,7 +85,7 @@ class Services(Plugin):
             if find_executable('initctl'):
                 update_missing_keys(services, get_upstart_services())
 
-            if path.exists('/etc/init.d'):
+            if path.exists(path.join(os_sep, 'etc', 'init.d')):
                 update_missing_keys(
                     services,
                     get_initd_services(existing_services=services),
