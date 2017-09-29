@@ -6,7 +6,7 @@ from __future__ import print_function
 
 from canaryd.remote import ApiError
 
-from . import main
+from . import main, scripts  # noqa
 
 
 try:
