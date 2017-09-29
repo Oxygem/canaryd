@@ -1,3 +1,16 @@
+# v0.3 (WIP)
+
++ Add CLI events: `canaryctl event PLUGIN TYPE DESCRIPTION [DATA]`
++ Add **containers** plugin
++ Add **packages** plugin
++ Add `supervisord` support to services plugin
++ Track whether services are enabled, and which init system they belong too
++ Add `-h`, `-d` short options for `--help`, `--debug`
++ Start tracking/generating issues for IOWait
++ Fix: initd status
++ Fix: listing `*.pyc` files as scripts
+
+
 # v0.2.1
 
 + Fix monitor plugin edge case: ignore blank lines in `/proc/stat`
