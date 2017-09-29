@@ -150,11 +150,8 @@ class Monitor(Plugin):
         if key == 'swap':
             settings_key = 'memory'
 
-        # IO wait is *not* currently supported
-        elif key == 'iowait':
-            return
-
-        elif key not in ('cpu', 'memory'):
+        # Anything not cpu/memory/iowait is assumed a disk
+        elif key not in ('cpu', 'memory', 'iowait'):
             settings_key = 'disk'
 
         def make_event(type_, limit, time, changes):
