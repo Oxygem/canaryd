@@ -96,31 +96,32 @@ def get_launchd_services():
 def get_initd_services(existing_services=None):
     existing_services = existing_services or []
 
-    service_names = listdir('/etc/init.d/')
+    init_dir = path.join(os_sep, 'etc', 'init.d')
+    service_names = listdir(init_dir)
     services = {}
 
     for name in service_names:
         if name in existing_services or name in IGNORE_INIT_SCRIPTS:
             continue
 
-        with open('/etc/init.d/{0}'.format(name)) as script:
+        script_path = path.join(init_dir, name)
+
+        with open(script_path) as script:
             if 'status' not in script.read():
                 IGNORE_INIT_SCRIPTS.append(name)
                 continue
 
+        # Get the status
         status = False
 
         try:
-            check_output(
-                'grep /etc//etc/init.d/{0} status'.format(name),
-                shell=True,
-            )
-
+            check_output((script_path, 'status'))
             status = True
 
-        except CalledProcessError:
+        except (OSError, CalledProcessError):
             pass
 
+        # Get the PID
         pid = None
 
         try:
