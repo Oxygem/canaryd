@@ -106,7 +106,7 @@ def get_scripts_directory():
     return path.join(get_config_directory(), 'scripts')
 
 
-def get_settings(config_file=None):
+def _get_settings(config_file=None):
     '''
     Load the config from the filesystem if provided, with defaults.
     '''
@@ -132,6 +132,22 @@ def get_settings(config_file=None):
             raise ConfigError('Config file error')
 
     return settings
+
+
+SETTINGS = None
+
+
+def get_settings(config_file=None):
+    '''
+    Cached/public version of _get_settings.
+    '''
+
+    global SETTINGS
+
+    if SETTINGS is None:
+        SETTINGS = _get_settings()
+
+    return SETTINGS
 
 
 def write_settings_to_config(settings):
