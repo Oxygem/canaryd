@@ -142,6 +142,9 @@ class Services(Plugin):
 
             else:
                 yield 'updated', '{0} stopped'.format(key), data_changes
+                # We stopped the service - so it's ports being up is no longer
+                # an issue.
+                return
 
         # No up/down change but PID changed? Service restarted!
         elif 'pid' in data_changes:
@@ -171,5 +174,5 @@ class Services(Plugin):
 
             # We have more ports than before? Assume resolved
             # TODO: improve this
-            else:
+            elif to_ports:
                 yield 'resolved', 'All {0} ports up'.format(key), data_changes
