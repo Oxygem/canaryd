@@ -6,6 +6,8 @@ import logging
 import sys
 import traceback
 
+from logging.handlers import SysLogHandler
+
 from canaryd.packages import click
 from canaryd.packages import six
 
@@ -90,9 +92,14 @@ def setup_logging(verbose, debug):
     return log_level
 
 
-def setup_file_logging(filename):
-    handler = logging.FileHandler(filename)
-    logger.addHandler(handler)
+def setup_logging_from_settings(settings):
+    if settings.log_file:
+        handler = logging.FileHandler(settings.log_file)
+        logger.addHandler(handler)
+
+    if settings.syslog_facility:
+        handler = SysLogHandler(facility=settings.syslog_facility)
+        logger.addHandler(handler)
 
 
 def print_exception(debug_only=False):

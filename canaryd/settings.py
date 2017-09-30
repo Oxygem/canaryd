@@ -43,6 +43,8 @@ class CanarydSettings(object):
     api_version = API_VERSION
 
     log_file = None
+    syslog_facility = None
+
     debug = False
 
     collect_interval_s = 30
@@ -113,7 +115,7 @@ def _get_settings(config_file=None):
 
     config_file = config_file or get_config_file()
 
-    settings = CanarydSettings(config_file=config_file)
+    settings = CanarydSettings()
 
     parser = RawConfigParser()
 
@@ -145,7 +147,7 @@ def get_settings(config_file=None):
     global SETTINGS
 
     if SETTINGS is None:
-        SETTINGS = _get_settings()
+        SETTINGS = _get_settings(config_file=config_file)
 
     return SETTINGS
 
