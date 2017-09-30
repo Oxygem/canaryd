@@ -9,7 +9,7 @@ from time import time
 from canaryd.packages import click  # noqa
 
 from canaryd.daemon import run_daemon
-from canaryd.log import logger, setup_file_logging, setup_logging
+from canaryd.log import logger, setup_logging, setup_logging_from_settings
 from canaryd.plugin import (
     cleanup_plugins,
     get_and_prepare_working_plugins,
@@ -46,9 +46,8 @@ def main(verbose, debug):
     # Load the settings, using our config file if provided
     settings = get_settings()
 
-    # Setup any log file
-    if settings.log_file:
-        setup_file_logging(settings.log_file)
+    # Setup any log file/syslog
+    setup_logging_from_settings(settings)
 
     # Settings can set debug on if needed
     if settings.debug == 'true':
