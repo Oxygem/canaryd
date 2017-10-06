@@ -124,22 +124,26 @@ def get_initd_services(existing_services=None):
 
         # Get the PID
         pid = None
+        pid_line = None
 
         try:
             pid_line = check_output(
-                "ps --ppid 1 -o 'tty,pid,comm' | grep '^?.*\s{0}.*$'".format(name),
+                '''
+                ps --ppid 1 -o 'tty,pid,comm' | \
+                grep '^\?.*\s{0}.*$' | \
+                head -n 1
+                '''.format(name),
                 shell=True,
             )
+        except CalledProcessError:
+            pass
 
+        if pid_line:
             bits = pid_line.strip().split()
-
             try:
                 pid = int(bits[-2])
             except (TypeError, ValueError):
                 pass
-
-        except CalledProcessError:
-            pass
 
         # Check if enabled
         enabled = False
