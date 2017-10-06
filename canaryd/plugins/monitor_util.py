@@ -107,6 +107,8 @@ def parse_memory_stats(
         'MemFree:': 'memory_free',
         'Buffers:': 'memory_free',
         'Cached:': 'memory_free',
+        'SReclaimable:': 'memory_free',
+        'Shmem:': 'memory_free',
 
         'SwapTotal:': 'swap_total',
         'SwapFree:': 'swap_free',
