@@ -244,7 +244,22 @@ def get_disk_stats():
 
         percentage = round(value / max_ * 100, 2)
 
-        mount = ' '.join(bits[5:])
+        # Loop backwards through the line bits until we find the bit starting
+        # with "/". This means we capture the entire mount path, even if it
+        # includes spaces, but also prevents us capturing too much (since df
+        # output varies between platforms, like macOS).
+        mount_bits = []
+        # We know the first few are always blocks/size/used/etc
+        possible_bits = bits[2:]
+
+        while possible_bits:
+            latest_bit = possible_bits.pop()
+            mount_bits.insert(0, latest_bit)
+
+            if latest_bit.startswith('/'):
+                break
+
+        mount = ' '.join(mount_bits)
 
         devices[mount] = {
             'percentage': percentage,
