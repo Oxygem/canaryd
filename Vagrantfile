@@ -28,17 +28,17 @@ Vagrant.configure('2') do |config|
         debian.vm.box = 'bento/debian-7'
     end
 
-    # ??? (systemd)
+    # systemd
     config.vm.define :debian8 do |debian|
         debian.vm.box = 'bento/debian-8'
     end
 
-    # ??? (systemd)
+    # systemd
     config.vm.define :debian9 do |debian|
         debian.vm.box = 'bento/debian-9'
     end
 
-    # ??? (init.d) / python2.6
+    # upstart / python2.6
     config.vm.define :centos6 do |centos|
         centos.vm.box = 'bento/centos-6'
     end
@@ -49,8 +49,7 @@ Vagrant.configure('2') do |config|
     end
 
     # rc.d
-    # config.vm.define :openbsd58 do |openbsd|
-    #     openbsd.vm.box = 'twingly/openbsd-5.8-amd64'
-    #     openbsd.vm.synced_folder './', '/opt/canaryd', type: 'rsync'
-    # end
+    config.vm.define :openbsd6 do |openbsd|
+        openbsd.vm.box = 'ryanmaclean/openbsd-6.0'
+    end
 end
