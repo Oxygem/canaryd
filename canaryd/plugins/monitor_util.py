@@ -228,7 +228,7 @@ def get_disk_stats():
     Parses df output.
     '''
 
-    output = check_output('df -k', shell=True)
+    output = check_output('df -kP', shell=True)
 
     devices = {}
 
