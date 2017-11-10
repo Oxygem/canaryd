@@ -42,6 +42,14 @@ class Monitor(Plugin):
         'value': int,
         'max': int,
 
+        # Rolling time max/mins
+        '1_min_max_percentage': float,
+        '1_min_min_percentage': float,
+        '5_min_max_percentage': float,
+        '5_min_min_percentage': float,
+        '15_min_max_percentage': float,
+        '15_min_min_percentage': float,
+
         # Rolling percentage averages
         '1_min_percentage': float,
         '5_min_percentage': float,
@@ -105,9 +113,9 @@ class Monitor(Plugin):
         self.get_stats()
 
         intervals = {
-            '1_min_percentage': max(60 / self.collect_interval, 1),
-            '5_min_percentage': max((5 * 60) / self.collect_interval, 1),
-            '15_min_percentage': max((15 * 60) / self.collect_interval, 1),
+            '1_min': max(60 / self.collect_interval, 1),
+            '5_min': max((5 * 60) / self.collect_interval, 1),
+            '15_min': max((15 * 60) / self.collect_interval, 1),
         }
 
         data = {}
@@ -119,11 +127,22 @@ class Monitor(Plugin):
             data[key] = history[0]
 
             for interval_key, interval_length in six.iteritems(intervals):
-                if len(history) >= interval_length:
-                    data[key][interval_key] = round(sum(
-                        item['percentage']
-                        for item in list(islice(history, int(interval_length)))
-                    ) / interval_length, 2)
+                if len(history) < interval_length:
+                    continue
+
+                items = [
+                    item['percentage']
+                    for item in islice(history, int(interval_length))
+                ]
+
+                percentage_key = '{0}_percentage'.format(interval_key)
+                data[key][percentage_key] = round(sum(items) / interval_length, 2)
+
+                min_key = '{0}_min_percentage'.format(interval_key)
+                data[key][min_key] = min(items)
+
+                max_key = '{0}_max_percentage'.format(interval_key)
+                data[key][max_key] = max(items)
 
         return data
 
@@ -143,7 +162,7 @@ class Monitor(Plugin):
         return '{0} {1}: {2}'.format(type_name.title(), type_, key)
 
     @staticmethod
-    def generate_events(type_, key, data_changes, settings):
+    def generate_events(event_type, key, data_changes, settings):
         settings_key = key
 
         # Swap is treated like memory (>X% warning/critical)
@@ -154,7 +173,7 @@ class Monitor(Plugin):
         elif key not in ('cpu', 'memory', 'iowait'):
             settings_key = 'disk'
 
-        def make_event(type_, limit, time, changes):
+        def make_event(alert_type, type_, limit, time, changes):
             message_key = key
 
             if settings_key == 'cpu':
@@ -163,78 +182,119 @@ class Monitor(Plugin):
             elif settings_key != 'disk':
                 message_key = message_key.title()
 
+            # Time=0, instant alert
             message = '{0} is over {1}%'.format(message_key, limit)
 
+            time_to_text = {
+                60: '1 minute',
+                300: '5 minutes',
+                900: '15 minutes',
+            }
+
             if time > 0:
-                if time == 60:
-                    time = '1 minute'
+                time_text = time_to_text[time]
 
-                elif time == 300:
-                    time = '5 minutes'
+                if type_ == 'always':
+                    message = '{0} over {1}% for {2}'.format(
+                        message_key, limit, time_text,
+                    )
 
-                elif time == 900:
-                    time = '15 minutes'
+                elif type_ == 'once':
+                    message = '{0} over {1}% in the last {2}'.format(
+                        message_key, limit, time_text,
+                    )
 
-                message = '{0} has been over {1}% for {2}'.format(
-                    message_key, limit, time,
-                )
+                else:
+                    message = '{0} average over {1}% for {2}'.format(
+                        message_key, limit, time_text,
+                    )
 
             if limit is None:
                 message = '{0} is back to normal'.format(message_key)
 
-            return type_, message, changes
+            return alert_type, message, changes
 
         # If the item has been removed, resolve any lefover issues and exit
-        if type_ == 'deleted':
-            yield make_event('resolved', None, None, None)
+        if event_type == 'deleted':
+            yield make_event('resolved', None, None, None, None)
             return
 
         time_setting_to_key = {
             0: 'percentage',
-            60: '1_min_percentage',
-            300: '5_min_percentage',
-            900: '15_min_percentage',
+            60: '1_min',
+            300: '5_min',
+            900: '15_min',
         }
 
         # Status of over-limit values (is_warning, was_warning)
         resolved_changes = {}
         wanted_data_keys = set()
 
-        for type_ in ('critical', 'warning'):
+        for alert_type in ('critical', 'warning'):
             enabled = getattr(
                 settings,
-                '{0}_{1}'.format(settings_key, type_),
+                '{0}_{1}'.format(settings_key, alert_type),
             )
 
             if not enabled:
                 continue
 
+            # The length of time to be over
+            time = getattr(
+                settings,
+                '{0}_{1}_time_s'.format(settings_key, alert_type),
+            )
+
+            # Invalid time? Ignore it!
+            if time not in time_setting_to_key:
+                continue
+
+            data_key = time_setting_to_key[time]
+
+            # Always (default), average or once
+            type_ = getattr(
+                settings,
+                '{0}_{1}_type'.format(settings_key, alert_type),
+            )
+
+            # If we're instant, use the latest/current percentage as-is
+            if time > 0:
+                type_to_key_formatter = {
+                    'always': '{0}_min_percentage',
+                    'once': '{0}_max_percentage',
+                    'average': '{0}_percentage',
+                }
+
+                new_data_key = type_to_key_formatter[type_].format(data_key)
+
+                # COMPAT w/<0.3 (no X_[min|max]_percentage)
+                # Default to the rolling average as that's the only thing supported
+                if new_data_key not in data_changes:
+                    type_ = 'average'
+                    data_key = '{0}_percentage'.format(data_key)
+                else:
+                    data_key = new_data_key
+
+            # The limit to go over
             limit = getattr(
                 settings,
                 # Eg cpu_warning_limit
-                '{0}_{1}_limit'.format(settings_key, type_),
+                '{0}_{1}_limit'.format(settings_key, alert_type),
             )
 
-            time = getattr(
-                settings,
-                '{0}_{1}_time_s'.format(settings_key, type_),
-            )
+            wanted_data_keys.add(data_key)
 
-            if time in time_setting_to_key:
-                data_key = time_setting_to_key[time]
-                wanted_data_keys.add(data_key)
+            if data_key in data_changes:
+                old_value, value = data_changes[data_key]
 
-                if data_key in data_changes:
-                    old_value, value = data_changes[data_key]
+                if value > limit:
+                    yield make_event(alert_type, type_, limit, time, {
+                        data_key: data_changes[data_key],
+                    })
+                    # This works because critical is run before warning
+                    return
 
-                    if value > limit:
-                        yield make_event(type_, limit, time, {
-                            data_key: data_changes[data_key],
-                        })
-                        # This works because critical is run before warning
-                        return
-
-                    resolved_changes[data_key] = data_changes[data_key]
+                resolved_changes[data_key] = data_changes[data_key]
 
         if all(k in resolved_changes for k in wanted_data_keys):
-            yield make_event('resolved', None, None, resolved_changes)
+            yield make_event('resolved', None, None, None, resolved_changes)
