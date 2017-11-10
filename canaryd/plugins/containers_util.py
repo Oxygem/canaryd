@@ -51,9 +51,8 @@ def get_lxc_containers():
         shell=True,
     )
 
-    containers = {}
-
     data = json.loads(output)
+    containers = {}
 
     for container in data:
         container_data = {
@@ -62,6 +61,30 @@ def get_lxc_containers():
         }
 
         container_key = 'lxc/{0}'.format(container['name'])
+        containers[container_key] = container_data
+
+    return containers
+
+
+def get_openvz_containers():
+    output = check_output(
+        'vzlist -a -j',
+        shell=True,
+    )
+    combined_json = ''.join(output)
+
+    data = json.loads(combined_json)
+    containers = {}
+
+    for container in data:
+        container_data = {
+            'runtime': 'openvz',
+            'running': container['status'] == 'running',
+            'image': container['ostemplate'],
+            'ips': container['ip'],
+        }
+
+        container_key = 'openvz/{0}'.format(container['ctid'])
         containers[container_key] = container_data
 
     return containers

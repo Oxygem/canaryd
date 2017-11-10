@@ -4,18 +4,23 @@ from canaryd.packages import six
 
 from canaryd.plugin import Plugin
 
-from .containers_util import get_docker_containers, get_lxc_containers
+from .containers_util import (
+    get_docker_containers,
+    get_lxc_containers,
+    get_openvz_containers,
+)
 
 
 class Containers(Plugin):
     spec = ('container', {
+        'runtime': six.text_type,
         'running': bool,
         'pid': int,
         'command': six.text_type,
         'environment': [six.text_type],
         'image': six.text_type,
         'names': [six.text_type],
-        'runtime': six.text_type,
+        'ips': [six.text_type],
     })
 
     @staticmethod
@@ -30,5 +35,8 @@ class Containers(Plugin):
 
         if find_executable('lxc'):
             containers.update(get_lxc_containers())
+
+        if find_executable('vzlist'):
+            containers.update(get_openvz_containers())
 
         return containers
