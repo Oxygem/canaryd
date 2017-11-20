@@ -8,7 +8,7 @@ LSHW_CLASSES = ('bridge', 'processor', 'memory', 'disk', 'network')
 TOP_LEVEL_DICT_KEYS = ('capabilities', 'configuration')
 TOP_LEVEL_STRING_KEYS = (
     'serial', 'version', 'vendor',
-    'product', 'description', 'handle',
+    'product', 'handle',
     'serial_number',  # legacy support
 )
 
