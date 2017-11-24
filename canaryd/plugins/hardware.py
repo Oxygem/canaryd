@@ -8,7 +8,7 @@ LSHW_CLASSES = ('bridge', 'processor', 'memory', 'disk', 'network')
 TOP_LEVEL_DICT_KEYS = ('capabilities', 'configuration')
 TOP_LEVEL_STRING_KEYS = (
     'serial', 'version', 'vendor',
-    'product', 'handle',
+    'product', 'handle', 'description',
     'serial_number',  # legacy support
 )
 
@@ -71,10 +71,15 @@ class Hardware(Plugin):
         return dict(data)
 
     @staticmethod
-    def is_change(key, previous_item, item):
+    def is_change(item_key, previous_item, item):
         # If any of our top level keys (serial, vendor, product, etc) change,
         # count as a change. Anything nested (meta, capabilities, etc) is ignored.
         for key in TOP_LEVEL_STRING_KEYS:
+            # Ignore changes to this as sometimes lshw temporarily changes the
+            # description of disks from SCSI <> ATA and drops other data.
+            if key == 'description':
+                continue
+
             if previous_item.get(key) != item.get(key):
                 return True
 
