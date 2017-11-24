@@ -7,8 +7,10 @@
 + Track whether services are enabled, and which init system they belong too
 + Add `-h`, `-d` short options for `--help`, `--debug`
 + Start tracking/generating issues for IOWait
++ Start tracking min/max % for each interval in monitor plugin (enabling alerting on always/average/once)
 + Fix: initd status
 + Fix: listing `*.pyc` files as scripts
++ Fix bug in hardware plugin where disks would change description (from `lshw`) incorrectly (now ignored)
 
 
 # v0.2.1
