@@ -39,8 +39,10 @@ class Monitor(Plugin):
 
         # The value, max and the % used
         'percentage': float,
-        'value': int,
-        'max': int,
+
+        # New (>=0.3) replacements for above
+        'current_value': (int, 'long'),
+        'current_max': (int, 'long'),
 
         # Rolling time max/mins
         '1_min_max_percentage': float,
@@ -54,6 +56,10 @@ class Monitor(Plugin):
         '1_min_percentage': float,
         '5_min_percentage': float,
         '15_min_percentage': float,
+
+        # Legacy support (<0.3)
+        'value': int,
+        'max': int,
     })
 
     # Disable update diff-ing - meaning generate_events always sees the full

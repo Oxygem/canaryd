@@ -74,13 +74,13 @@ def get_proc_cpu_stats():
 
     return {
         'cpu': {
-            'value': total - idle_and_iowait,
-            'max': total,
+            'current_value': total - idle_and_iowait,
+            'current_max': total,
             'percentage': (total - idle_and_iowait) / total * 100,
         },
         'iowait': {
-            'value': diffs['iowait'],
-            'max': total,
+            'current_value': diffs['iowait'],
+            'current_max': total,
             'percentage': diffs['iowait'] / total * 100
         },
     }
@@ -158,8 +158,8 @@ def get_proc_memory_stats():
 
     data = {
         'memory': {
-            'value': int(stats['memory_total'] - stats['memory_free']),
-            'max': int(stats['memory_total']),
+            'current_value': int(stats['memory_total'] - stats['memory_free']),
+            'current_max': int(stats['memory_total']),
             'percentage': round(
                 (stats['memory_total'] - stats['memory_free']) / stats['memory_total'] * 100,
                 2,
@@ -169,8 +169,8 @@ def get_proc_memory_stats():
 
     if stats['swap_total'] > 0:
         data['swap'] = {
-            'value': int(stats['swap_total'] - stats['swap_free']),
-            'max': int(stats['swap_total']),
+            'current_value': int(stats['swap_total'] - stats['swap_free']),
+            'current_max': int(stats['swap_total']),
             'percentage': round(
                 (stats['swap_total'] - stats['swap_free']) / stats['swap_total'] * 100,
                 2,
@@ -203,8 +203,8 @@ def get_vm_stat_memory_stats():
 
     return {
         'memory': {
-            'value': int(total_memory - stats['memory_free']),
-            'max': int(total_memory),
+            'current_value': int(total_memory - stats['memory_free']),
+            'current_max': int(total_memory),
             'percentage': round(
                 (total_memory - stats['memory_free']) / total_memory * 100,
                 2,
@@ -263,8 +263,8 @@ def get_disk_stats():
 
         devices[mount] = {
             'percentage': percentage,
-            'value': int(round(value / 1024)),
-            'max': int(round(max_ / 1024)),
+            'current_value': int(round(value / 1024)),
+            'current_max': int(round(max_ / 1024)),
         }
 
     return devices
