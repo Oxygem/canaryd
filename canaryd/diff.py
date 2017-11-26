@@ -92,10 +92,13 @@ def get_state_diff(plugin, plugin_state, previous_plugin_state):
             continue
 
         # Create the diff, which is a key -> (old, new) values
+        all_keys = list(six.iterkeys(item)) + list(six.iterkeys(previous_item))
+        all_keys = set(all_keys)
+
         state_diff = dict(
-            (k, (previous_item.get(k), v))
-            for k, v in six.iteritems(item)
-            if v != previous_item.get(k)
+            (k, (previous_item.get(k), item.get(k)))
+            for k in all_keys
+            if item.get(k) != previous_item.get(k)
         )
 
         # If something changed - send the event!
