@@ -72,14 +72,28 @@ class Hardware(Plugin):
 
     @staticmethod
     def is_change(item_key, previous_item, item):
+        # Check for disks changing output temporarily from lshw
+        # See: https://github.com/Oxygem/canaryd/issues/18
+        previous_description = previous_item.get('description')
+        description = item.get('description')
+
+        if (
+            # If we go ATA Disk -> SCSI Disk
+            previous_description and description
+            and previous_description == 'ATA Disk'
+            and description == 'SCSI Disk'
+            # And serial/version/product go from something -> None
+            and all(
+                previous_item.get(key) and item.get(key) is None
+                for key in ('serial', 'version', 'product')
+            )
+        ):
+            print('FALSE')
+            return False
+
         # If any of our top level keys (serial, vendor, product, etc) change,
         # count as a change. Anything nested (meta, capabilities, etc) is ignored.
         for key in TOP_LEVEL_STRING_KEYS:
-            # Ignore changes to this as sometimes lshw temporarily changes the
-            # description of disks from SCSI <> ATA and drops other data.
-            if key == 'description':
-                continue
-
             if previous_item.get(key) != item.get(key):
                 return True
 
