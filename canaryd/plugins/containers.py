@@ -17,8 +17,8 @@ class Containers(Plugin):
         'running': bool,
         'pid': int,
         'command': six.text_type,
-        'environment': [six.text_type],
         'image': six.text_type,
+        'environment': [six.text_type],
         'names': [six.text_type],
         'ips': [six.text_type],
     })
