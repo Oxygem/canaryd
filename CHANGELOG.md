@@ -11,6 +11,7 @@
 + Fix: initd status
 + Fix: listing `*.pyc` files as scripts
 + Fix bug in hardware plugin where disks would change description (from `lshw`) incorrectly (now ignored)
++ Remove users from beta plugin (never a change)
 
 
 # v0.2.1
