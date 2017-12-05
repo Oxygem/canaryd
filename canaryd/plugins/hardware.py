@@ -88,7 +88,6 @@ class Hardware(Plugin):
                 for key in ('serial', 'version', 'product')
             )
         ):
-            print('FALSE')
             return False
 
         # If any of our top level keys (serial, vendor, product, etc) change,
