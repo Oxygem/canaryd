@@ -51,7 +51,9 @@ def get_docker_containers():
         if container_data['running']:
             container_data['pid'] = container['State']['Pid']
 
-        container_key = 'docker/{0}'.format(container_data['names'][0])
+        container_id = container['Id'][:6]
+        container_key = 'docker/{0}'.format(container_id)
+
         containers[container_key] = _make_container(container_data)
 
     return containers
