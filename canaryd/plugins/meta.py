@@ -8,7 +8,7 @@ from canaryd.packages.check_output import check_output
 from canaryd.plugin import Plugin
 
 UPTIME_REGEX = re.compile((
-    'up\s+(.*?),\s+([0-9]+) '
+    'up\s+(.*?),\s+[0-9]+ '
     'users?,\s+load averages?: '
     '([0-9]+\.[0-9][0-9]),?\s+([0-9]+\.[0-9][0-9]),?\s+([0-9]+\.[0-9][0-9])'
 ))
@@ -21,7 +21,7 @@ def ensure_datetime(datetime_or_string):
     return datetime.strptime(datetime_or_string, '%Y-%m-%dT%H:%M:%S')
 
 
-def get_uptime_and_users():
+def get_uptime():
     data = []
     output = check_output('uptime', shell=True)
 
@@ -30,8 +30,7 @@ def get_uptime_and_users():
         matches = re.search(UPTIME_REGEX, line)
 
         if matches:
-            duration, users, av1, av5, av15 = matches.groups()
-            data.append(('users', int(users)))
+            duration, av1, av5, av15 = matches.groups()
 
             days = 0
             hours = 0
@@ -84,7 +83,7 @@ class Meta(Plugin):
 
     @staticmethod
     def get_state(settings):
-        data = get_uptime_and_users()
+        data = get_uptime()
         data.append(('hostname', socket.gethostname()))
         data.append(('kernel', get_uname_data('s')))
         data.append(('kernel_release', get_uname_data('r')))
@@ -103,21 +102,15 @@ class Meta(Plugin):
         # Check to see if we rebooted, if not there's no change
         if key == 'up_since':
             previous_up = ensure_datetime(previous_item['value'])
+            # Account for slight jitter
+            previous_up += timedelta(minutes=1)
+
             up = ensure_datetime(item['value'])
 
-            if (
-                previous_up.day == up.day
-                and previous_up.hour == up.hour
-                # Uptime is 1+ minutes less than previous
-                and (previous_up.minute + 1) < up.minute
-            ):
+            if (previous_up < up):
                 return True
             else:
                 return False
-
-        # The # of active users shouldn't generate events!
-        if key == 'users':
-            return False
 
         return True
 
