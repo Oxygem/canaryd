@@ -6,7 +6,10 @@ from time import sleep, time
 
 from canaryd.diff import get_state_diff
 from canaryd.log import logger
-from canaryd.plugin import get_plugin_states
+from canaryd.plugin import (
+    get_and_prepare_working_plugins,
+    get_plugin_states,
+)
 from canaryd.remote import backoff, upload_state_changes
 
 
@@ -17,8 +20,11 @@ def _sleep_until_interval(start, interval):
         sleep(interval - time_taken)
 
 
-def _daemon_loop(plugins, previous_states, settings):
+def _daemon_loop(previous_states, settings):
     logger.info('Getting plugin states...')
+
+    # Load the plugin list
+    plugins = get_and_prepare_working_plugins(settings)
 
     states = get_plugin_states(plugins, settings)
     state_changes = []
@@ -60,7 +66,7 @@ def _daemon_loop(plugins, previous_states, settings):
             ))
 
 
-def run_daemon(plugins, previous_states, settings, start_time=None):
+def run_daemon(previous_states, settings, start_time=None):
     if start_time:
         _sleep_until_interval(
             start_time, settings.collect_interval_s,
@@ -69,7 +75,7 @@ def run_daemon(plugins, previous_states, settings, start_time=None):
     while True:
         start = time()
 
-        _daemon_loop(plugins, previous_states, settings)
+        _daemon_loop(previous_states, settings)
 
         _sleep_until_interval(
             start, settings.collect_interval_s,

@@ -78,8 +78,9 @@ class Monitor(Plugin):
         self.history = defaultdict(lambda: deque((), intervals))
 
     def prepare(self, settings):
-        self.collect_interval = settings.collect_interval_s
-        self.setup_history()
+        if self.collect_interval != settings.collect_interval_s:
+            self.collect_interval = settings.collect_interval_s
+            self.setup_history()
 
     def get_stats(self):
         seen_keys = set()

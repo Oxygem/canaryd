@@ -4,6 +4,7 @@
 
 import re
 
+from distutils.spawn import find_executable
 from glob import glob
 from os import path
 from subprocess import CalledProcessError
@@ -65,10 +66,11 @@ class Plugin(object):
         return self.parse(data)
 
     def prepare(self, settings):
-        check_output(
-            getattr(self, 'prepare_command', self.command),
-            shell=True,
-        )
+        command_bits = self.command.split()
+        command = command_bits[0]
+
+        if not find_executable(command):
+            raise OSError('Could not find executable: {0}'.format(command))
 
     def log(self, message):
         message = '[{0}]: {1}'.format(self.name, message)
@@ -204,8 +206,6 @@ def prepare_plugin(plugin, settings):
 
 
 def get_and_prepare_working_plugins(settings):
-    logger.info('Loading plugins...')
-
     all_plugins = get_plugins()
     working_plugins = []
 
