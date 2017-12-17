@@ -247,22 +247,28 @@ def get_plugin_state(plugin, settings):
 
     logger.debug('Running plugin: {0}'.format(plugin))
 
+    status = False
+    state = None
+
     try:
         state = plugin.get_state(settings)
+        status = True
 
     except plugin.TimeoutError as e:
         logger.warning('Timeout running plugin: {0}'.format(plugin))
-        return False, e
+        state = e
 
     except Exception as e:
         logger.warning('Error running plugin: {0}: {1}'.format(plugin, e))
         print_exception()
-        return False, e
+        state = e
 
     if not isinstance(state, (dict, list)):
-        return False, TypeError('Invalid state type: {0}'.format(state))
+        state = TypeError('Invalid state type: {0}'.format(state))
 
-    return True, state
+    # Reset the alarm
+    signal.alarm(0)
+    return status, state
 
 
 def get_plugin_states(plugins, settings):
