@@ -8,6 +8,8 @@
 + Add `-h`, `-d` short options for `--help`, `--debug`
 + Start tracking/generating issues for IOWait
 + Start tracking min/max % for each interval in monitor plugin (enabling alerting on always/average/once)
++ Implement timeout for plugins so a hanging command doesn't break the daemon
++ Check/prepare plugins every iteration; use `find_executable` instead of just executing for performance
 + Fix: initd status
 + Fix: listing `*.pyc` files as scripts
 + Fix bug in hardware plugin where disks would change description (from `lshw`) incorrectly (now ignored)
