@@ -11,7 +11,6 @@ from canaryd.packages import click  # noqa
 from canaryd.daemon import run_daemon
 from canaryd.log import logger, setup_logging, setup_logging_from_settings
 from canaryd.plugin import (
-    cleanup_plugins,
     get_and_prepare_working_plugins,
     get_plugin_states,
 )
@@ -68,40 +67,34 @@ def main(verbose, debug):
     # Load the plugin list
     plugins = get_and_prepare_working_plugins(settings)
 
-    # Now we have plugins - capture any exception and cleanup before it raises
-    try:
-        # Get the initial state
-        logger.info('Getting initial state...')
-        start_time = time()
-        states = get_plugin_states(plugins, settings)
+    # Get the initial state
+    logger.info('Getting initial state...')
+    start_time = time()
+    states = get_plugin_states(plugins, settings)
 
-        # Sync this state and get settings
-        logger.info('Syncing initial state...')
+    # Sync this state and get settings
+    logger.info('Syncing initial state...')
 
-        remote_settings = backoff(
-            sync_states, states, settings,
-            error_message='Could not sync state',
-            max_wait=settings.collect_interval_s,
-        )
+    remote_settings = backoff(
+        sync_states, states, settings,
+        error_message='Could not sync state',
+        max_wait=settings.collect_interval_s,
+    )
 
-        # Update settings w/remote ones
-        settings.update(remote_settings)
+    # Update settings w/remote ones
+    settings.update(remote_settings)
 
-        # Run the loop
-        logger.info('Starting daemon loop...')
+    # Run the loop
+    logger.info('Starting daemon loop...')
 
-        # Make previous states dict
-        previous_states = dict(
-            (plugin, status_data[1])
-            for plugin, status_data in states
-            if status_data[0]
-        )
+    # Make previous states dict
+    previous_states = dict(
+        (plugin, status_data[1])
+        for plugin, status_data in states
+        if status_data[0]
+    )
 
-        run_daemon(plugins, previous_states, settings, start_time=start_time)
-
-    # This is OK! Cleanup plugins before exceptions propagate
-    finally:
-        cleanup_plugins(plugins)
+    run_daemon(previous_states, settings, start_time=start_time)
 
 
 try:

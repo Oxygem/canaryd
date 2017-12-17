@@ -56,10 +56,6 @@ class Plugin(object):
     def is_change(key, previous_item, item):
         return True
 
-    @staticmethod
-    def cleanup():
-        pass
-
     def get_state(self, settings):
         data = check_output(
             self.command,
@@ -225,19 +221,6 @@ def get_and_prepare_working_plugins(settings):
     ])))
 
     return working_plugins
-
-
-def cleanup_plugins(plugins):
-    for plugin in plugins:
-        try:
-            plugin.cleanup()
-
-        except Exception as e:
-            logger.warning(
-                'Error cleaning plugin: {0}: {1}'.format(plugin.name, e),
-            )
-            print_exception()
-            return False, e
 
 
 def get_plugin_state(plugin, settings):
