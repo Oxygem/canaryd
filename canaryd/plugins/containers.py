@@ -8,6 +8,7 @@ from .containers_util import (
     get_docker_containers,
     get_lxc_containers,
     get_openvz_containers,
+    get_virsh_containers,
 )
 
 
@@ -39,5 +40,8 @@ class Containers(Plugin):
 
         if find_executable('vzlist'):
             containers.update(get_openvz_containers())
+
+        if find_executable('virsh'):
+            containers.update(get_virsh_containers())
 
         return containers

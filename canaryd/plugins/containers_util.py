@@ -103,3 +103,30 @@ def get_openvz_containers():
         containers[container_key] = _make_container(container_data)
 
     return containers
+
+
+def get_virsh_containers():
+    output = check_output(
+        'virsh list --all',
+        shell=True,
+    )
+    containers = {}
+
+    for line in output.splitlines()[2:]:
+        bits = line.split()
+
+        if len(bits) != 3:
+            continue
+
+        id, name, state = bits
+
+        container_data = {
+            'runtime': 'virsh',
+            'names': [name],
+            'running': state == 'running',
+        }
+
+        container_key = 'virsh/{0}'.format(name)
+        containers[container_key] = _make_container(container_data)
+
+    return containers
