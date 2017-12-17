@@ -71,6 +71,7 @@ def get_lxc_containers():
     for container in data:
         container_data = {
             'runtime': 'lxc',
+            'names': [container['name']],
             'running': container['status'] == 'Running',
         }
 
@@ -93,9 +94,9 @@ def get_openvz_containers():
     for container in data:
         container_data = {
             'runtime': 'openvz',
-            'running': container['status'] == 'running',
-            'image': container['ostemplate'],
             'ips': container['ip'],
+            'image': container['ostemplate'],
+            'running': container['status'] == 'running',
         }
 
         container_key = 'openvz/{0}'.format(container['ctid'])
