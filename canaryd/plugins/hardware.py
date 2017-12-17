@@ -1,5 +1,7 @@
 import json
 
+from collections import deque
+
 from canaryd.packages import six
 
 from canaryd.plugin import Plugin
@@ -62,34 +64,46 @@ class Hardware(Plugin):
     spec = ('key', get_hardware_spec())
 
     command = 'lshw -json'
+    current_state = None
 
-    @staticmethod
-    def parse(output):
+    def __init__(self):
+        self.previous_states = deque((), 2)
+
+    def parse(self, output):
+        # Parse and generate state
         lshw_data = json.loads(output)
         data = get_lshw_items(lshw_data.get('children', []))
 
-        return dict(data)
+        self.previous_states.append(dict(data))
+
+        # First call? Just return the state
+        if len(self.previous_states) == 1:
+            self.current_state = self.previous_states[0]
+            return self.current_state
+
+        other_state, latest_state = self.previous_states
+
+        for key, item in six.iteritems(latest_state):
+            # New item not in previous state? OK!
+            if key not in other_state:
+                self.current_state[key] = item
+
+            # Item is same as previous state? OK!
+            elif key in other_state and all(
+                other_state[key].get(k) == item.get(k)
+                for k in TOP_LEVEL_STRING_KEYS
+            ):
+                self.current_state[key] = item
+
+        # Remove any items dropped from current state in latest_state
+        for key, item in six.iteritems(self.current_state):
+            if key not in latest_state:
+                del self.current_state[key]
+
+        return self.current_state
 
     @staticmethod
     def is_change(item_key, previous_item, item):
-        # Check for disks changing output temporarily from lshw
-        # See: https://github.com/Oxygem/canaryd/issues/18
-        previous_description = previous_item.get('description')
-        description = item.get('description')
-
-        if (
-            # If we go ATA Disk -> SCSI Disk
-            previous_description and description
-            and previous_description == 'ATA Disk'
-            and description == 'SCSI Disk'
-            # And serial/version/product go from something -> None
-            and all(
-                previous_item.get(key) and item.get(key) is None
-                for key in ('serial', 'version', 'product')
-            )
-        ):
-            return False
-
         # If any of our top level keys (serial, vendor, product, etc) change,
         # count as a change. Anything nested (meta, capabilities, etc) is ignored.
         for key in TOP_LEVEL_STRING_KEYS:
