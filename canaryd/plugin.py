@@ -2,7 +2,10 @@
 # File: canaryd/plugin.py
 # Desc: functions for handling the various built in state gathering plugins
 
+from __future__ import division
+
 import re
+import signal
 
 from distutils.spawn import find_executable
 from glob import glob
@@ -52,6 +55,12 @@ class Plugin(object):
 
     class PrepareError(Exception):
         pass
+
+    class TimeoutError(Exception):
+        pass
+
+    def __repr__(self):
+        return self.name
 
     @staticmethod
     def is_change(key, previous_item, item):
@@ -228,10 +237,22 @@ def get_plugin_state(plugin, settings):
     Gets state output from a single plugin.
     '''
 
+    def _handle_timeout(signum, frame):
+        raise plugin.TimeoutError()
+
+    # A plugin can only run for MAX half the interval time
+    max_time = int(round(settings.collect_interval_s / 2))
+    signal.signal(signal.SIGALRM, _handle_timeout)
+    signal.alarm(max_time)
+
     logger.debug('Running plugin: {0}'.format(plugin))
 
     try:
         state = plugin.get_state(settings)
+
+    except plugin.TimeoutError as e:
+        logger.warning('Timeout running plugin: {0}'.format(plugin))
+        return False, e
 
     except Exception as e:
         logger.warning('Error running plugin: {0}: {1}'.format(plugin, e))
