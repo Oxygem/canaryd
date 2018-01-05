@@ -70,10 +70,19 @@ class Hardware(Plugin):
         self.previous_states = deque((), 2)
 
     def parse(self, output):
+        '''
+        The last two states are tracked and compared such that items change
+        after two identical iterations of state.
+
+        This is to account for lshw output changing for one random iteration in
+        thousands: https://github.com/Oxygem/canaryd/issues/18
+        '''
+
         # Parse and generate state
         lshw_data = json.loads(output)
         data = get_lshw_items(lshw_data.get('children', []))
 
+        # Rotating list of the latest two states
         self.previous_states.append(dict(data))
 
         # First call? Just return the state
