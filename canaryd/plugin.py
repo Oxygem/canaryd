@@ -240,12 +240,12 @@ def get_plugin_state(plugin, settings):
     def _handle_timeout(signum, frame):
         raise plugin.TimeoutError()
 
-    # A plugin can only run for MAX half the interval time
+    logger.debug('Running plugin: {0}'.format(plugin))
+
+    # Set an alarm: a plugin can only run for MAX half the interval time
     max_time = int(round(settings.collect_interval_s / 2))
     signal.signal(signal.SIGALRM, _handle_timeout)
     signal.alarm(max_time)
-
-    logger.debug('Running plugin: {0}'.format(plugin))
 
     status = False
     state = None
@@ -263,11 +263,13 @@ def get_plugin_state(plugin, settings):
         print_exception()
         state = e
 
+    # Always reset the alarm
+    finally:
+        signal.alarm(0)
+
     if not isinstance(state, (dict, list)):
         state = TypeError('Invalid state type: {0}'.format(state))
 
-    # Reset the alarm
-    signal.alarm(0)
     return status, state
 
 
