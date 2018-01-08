@@ -1,9 +1,8 @@
 from os import path
 from pkgutil import get_data
-from subprocess import CalledProcessError
 
 from canaryd.packages import click
-from canaryd.subprocess import check_output
+from canaryd.subprocess import CalledProcessError, check_output
 
 
 def which(command):

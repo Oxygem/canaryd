@@ -2,13 +2,13 @@ from __future__ import division
 
 from collections import defaultdict, deque
 from itertools import islice
-from subprocess import CalledProcessError
 from time import sleep, time
 
 from canaryd.packages import six
 
 from canaryd.log import logger  # noqa
 from canaryd.plugin import Plugin
+from canaryd.subprocess import CalledProcessError
 
 from .monitor_util import get_cpu_stats, get_disk_stats, get_memory_stats
 
