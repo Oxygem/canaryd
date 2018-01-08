@@ -6,6 +6,7 @@ import logging
 import sys
 import traceback
 
+from datetime import datetime
 from logging.handlers import SysLogHandler
 
 from canaryd.packages import click
@@ -49,7 +50,9 @@ class LogFormatter(logging.Formatter):
             if record.levelno in self.level_to_format:
                 message = self.level_to_format[record.levelno](message)
 
-            return '{0} {1}'.format(record.levelname, message)
+            now = datetime.now().replace(microsecond=0).isoformat()
+
+            return '{0} {1} {2}'.format(now, record.levelname, message)
 
         # If not a string, pass to standard Formatter
         else:
