@@ -2,11 +2,11 @@ from os import path
 from subprocess import CalledProcessError
 
 from canaryd.packages import six
-from canaryd.packages.check_output import check_output
 from canaryd.packages.six.moves import shlex_quote
 
 from canaryd.plugin import Plugin
 from canaryd.script import get_scripts, get_scripts_directory
+from canaryd.subprocess import check_output
 
 
 class Scripts(Plugin):

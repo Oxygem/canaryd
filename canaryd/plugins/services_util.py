@@ -2,9 +2,7 @@ import re
 
 from os import listdir, path, sep as os_sep
 
-from subprocess import CalledProcessError
-
-from canaryd.packages.check_output import check_output
+from canaryd.subprocess import CalledProcessError, check_output
 
 # We ignore these as they regularly get deleted/added as part of normal OSX
 # lifecycle - and as such any events generated are not of use.

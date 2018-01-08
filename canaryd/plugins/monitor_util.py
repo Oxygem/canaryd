@@ -6,7 +6,7 @@ from multiprocessing import cpu_count
 from os import path
 
 from canaryd.packages import six
-from canaryd.packages.check_output import check_output
+from canaryd.subprocess import check_output
 
 
 def get_ps_cpu_stats():

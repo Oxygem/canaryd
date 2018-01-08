@@ -1,6 +1,6 @@
 import json
 
-from canaryd.packages.check_output import CalledProcessError, check_output
+from canaryd.subprocess import CalledProcessError, check_output
 
 
 def _make_container(data):

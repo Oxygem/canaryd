@@ -3,9 +3,8 @@ import socket
 
 from datetime import datetime, timedelta
 
-from canaryd.packages.check_output import check_output
-
 from canaryd.plugin import Plugin
+from canaryd.subprocess import check_output
 
 UPTIME_REGEX = re.compile((
     'up\s+(.*?),\s+[0-9]+ '

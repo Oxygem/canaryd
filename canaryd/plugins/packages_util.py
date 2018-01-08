@@ -1,7 +1,7 @@
 import re
 
 from canaryd.packages import six
-from canaryd.packages.check_output import check_output
+from canaryd.subprocess import check_output
 
 DEB_REGEX = r'^[a-z]+\s+([a-zA-Z0-9\+\-\.]+):?[a-zA-Z0-9]*\s+([a-zA-Z0-9:~\.\-\+]+).+$'
 RPM_REGEX = r'^([a-zA-Z0-9_\-\+]+)\-([0-9a-z\.\-]+)\.[a-z0-9_\.]+$'

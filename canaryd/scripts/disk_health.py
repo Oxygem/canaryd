@@ -2,9 +2,7 @@
 
 import sys
 
-from subprocess import CalledProcessError
-
-from canaryd.packages.check_output import check_output
+from canaryd.subprocess import CalledProcessError, check_output
 
 SMART_RETURN_BITS = {
     0: False,  # command line parse error

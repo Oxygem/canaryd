@@ -10,12 +10,11 @@ import signal
 from distutils.spawn import find_executable
 from glob import glob
 from os import path
-from subprocess import CalledProcessError
 
 from canaryd.packages import six
-from canaryd.packages.check_output import check_output
 from canaryd.packages.importlib import import_module
 
+from canaryd.subprocess import check_output
 from canaryd.log import logger, print_exception # noqa
 
 PLUGINS = []
@@ -196,7 +195,7 @@ def prepare_plugin(plugin, settings):
         print_exception(debug_only=True)
         return False, e
 
-    except (CalledProcessError, OSError) as e:
+    except OSError as e:
         logger.info('Plugin command missing/failed: {0}'.format(
             plugin.name,
         ))
