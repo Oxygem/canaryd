@@ -10,10 +10,12 @@
 + Start tracking min/max % for each interval in monitor plugin (enabling alerting on always/average/once)
 + Implement timeout for plugins so a hanging command doesn't break the daemon
 + Check/prepare plugins every iteration; use `find_executable` instead of just executing for performance
++ Add `log_rotation` and `log_rotation_count` settings
 + Fix: initd status
 + Fix: listing `*.pyc` files as scripts
 + Fix bug in hardware plugin where disks would change description (from `lshw`) incorrectly (now ignored)
 + Remove users from beta plugin (never a change)
++ Replace `check_output` recreation w/`subprocess32`
 
 
 # v0.2.1
