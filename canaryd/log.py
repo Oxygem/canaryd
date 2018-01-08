@@ -97,7 +97,33 @@ def setup_logging(verbose, debug):
 
 def setup_logging_from_settings(settings):
     if settings.log_file:
-        handler = logging.FileHandler(settings.log_file)
+        rotation = settings.log_file_rotation
+        count = settings.log_file_rotation_count
+
+        try:
+            rotation = int(rotation)
+        except (TypeError, ValueError):
+            pass
+
+        if isinstance(rotation, int):
+            handler = logging.handlers.RotatingFileHandler(
+                settings.log_file,
+                maxBytes=rotation,
+                backupCount=count,
+            )
+
+        elif isinstance(rotation, six.string_types):
+            handler = logging.handlers.TimedRotatingFileHandler(
+                settings.log_file,
+                maxBytes=rotation,
+                backupCount=count,
+            )
+
+        else:
+            handler = logging.FileHandler(settings.log_file)
+
+        formatter = LogFormatter()
+        handler.setFormatter(formatter)
         logger.addHandler(handler)
 
     if settings.syslog_facility:

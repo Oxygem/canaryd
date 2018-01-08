@@ -43,6 +43,12 @@ class CanarydSettings(object):
     api_version = API_VERSION
 
     log_file = None
+    # Rotate logs by this size (in bytes!) or a TimedRotatingFileHandler interval
+    log_file_rotation = None
+    # Number of files to rotate
+    log_file_rotation_count = 5
+
+    # syslog facility to log to
     syslog_facility = None
 
     debug = False
