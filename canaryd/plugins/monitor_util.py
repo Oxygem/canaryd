@@ -6,7 +6,7 @@ from multiprocessing import cpu_count
 from os import path
 
 from canaryd.packages import six
-from canaryd.subprocess import check_output
+from canaryd.subprocess import get_command_output
 
 
 def get_ps_cpu_stats():
@@ -14,9 +14,8 @@ def get_ps_cpu_stats():
     Uses ps + awk to total CPU usage, then divide by # CPUs to get the final %.
     '''
 
-    output = check_output(
+    output = get_command_output(
         "ps -A -o %cpu | awk '{s+=$1} END {print s}'",
-        shell=True,
     )
 
     try:
@@ -37,9 +36,8 @@ def get_proc_cpu_stats():
     Parses 2x /proc/stat output to calculate CPU %.
     '''
 
-    output = check_output(
+    output = get_command_output(
         'cat /proc/stat && sleep 1 && cat /proc/stat',
-        shell=True,
     )
 
     # Parse /proc/stat
@@ -146,9 +144,8 @@ def get_proc_memory_stats():
     Parses /proc/meminfo output.
     '''
 
-    output = check_output(
+    output = get_command_output(
         'cat /proc/meminfo',
-        shell=True,
     )
 
     stats = parse_memory_stats(
@@ -181,17 +178,15 @@ def get_proc_memory_stats():
 
 
 def get_vm_stat_memory_stats():
-    output = check_output(
+    output = get_command_output(
         'sysctl hw.memsize',
-        shell=True,
     )
 
     bits = output.split()
     total_memory = int(bits[1]) / 1024 / 1024
 
-    output = check_output(
+    output = get_command_output(
         'vm_stat',
-        shell=True,
     )
 
     stats = parse_memory_stats(
@@ -228,7 +223,7 @@ def get_disk_stats():
     Parses df output.
     '''
 
-    output = check_output('df -kP', shell=True)
+    output = get_command_output('df -kP')
 
     devices = {}
 

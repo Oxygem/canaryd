@@ -4,7 +4,7 @@ import socket
 from datetime import datetime, timedelta
 
 from canaryd.plugin import Plugin
-from canaryd.subprocess import check_output
+from canaryd.subprocess import get_command_output
 
 UPTIME_REGEX = re.compile((
     'up\s+(.*?),\s+[0-9]+ '
@@ -22,7 +22,7 @@ def ensure_datetime(datetime_or_string):
 
 def get_uptime():
     data = []
-    output = check_output('uptime', shell=True)
+    output = get_command_output('uptime')
 
     for line in output.splitlines():
         line = line.strip()
@@ -63,9 +63,8 @@ def get_uptime():
 
 
 def get_uname_data(flag):
-    output = check_output(
+    output = get_command_output(
         'uname -{0}'.format(flag),
-        shell=True,
     )
 
     return output.strip()

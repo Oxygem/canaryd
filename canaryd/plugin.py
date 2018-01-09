@@ -14,7 +14,7 @@ from os import path
 from canaryd.packages import six
 from canaryd.packages.importlib import import_module
 
-from canaryd.subprocess import check_output
+from canaryd.subprocess import get_command_output
 from canaryd.log import logger, print_exception # noqa
 
 PLUGINS = []
@@ -66,9 +66,8 @@ class Plugin(object):
         return True
 
     def get_state(self, settings):
-        data = check_output(
+        data = get_command_output(
             self.command,
-            shell=True,
         )
 
         return self.parse(data)

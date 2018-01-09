@@ -2,12 +2,12 @@ from os import path
 from pkgutil import get_data
 
 from canaryd.packages import click
-from canaryd.subprocess import CalledProcessError, check_output
+from canaryd.subprocess import CalledProcessError, get_command_output
 
 
 def which(command):
     try:
-        return check_output(
+        return get_command_output(
             ('which', command),
         ).strip()
 

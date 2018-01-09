@@ -1,6 +1,6 @@
 import json
 
-from canaryd.subprocess import CalledProcessError, check_output
+from canaryd.subprocess import CalledProcessError, get_command_output
 
 
 def _make_container(data):
@@ -19,9 +19,8 @@ def get_docker_containers():
     containers = {}
 
     try:
-        output = check_output(
+        output = get_command_output(
             'docker inspect `docker ps -qa`',
-            shell=True,
         )
 
     # Either Docker is down or there are no containers
@@ -60,9 +59,8 @@ def get_docker_containers():
 
 
 def get_lxc_containers():
-    output = check_output(
+    output = get_command_output(
         'lxc list --fast --format json',
-        shell=True,
     )
 
     data = json.loads(output)
@@ -82,9 +80,8 @@ def get_lxc_containers():
 
 
 def get_openvz_containers():
-    output = check_output(
+    output = get_command_output(
         'vzlist -a -j',
-        shell=True,
     )
     combined_json = ''.join(output)
 
@@ -106,9 +103,8 @@ def get_openvz_containers():
 
 
 def get_virsh_containers():
-    output = check_output(
+    output = get_command_output(
         'virsh list --all',
-        shell=True,
     )
     containers = {}
 

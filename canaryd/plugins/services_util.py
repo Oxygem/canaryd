@@ -2,7 +2,7 @@ import re
 
 from os import listdir, path, sep as os_sep
 
-from canaryd.subprocess import CalledProcessError, check_output
+from canaryd.subprocess import CalledProcessError, get_command_output
 
 # We ignore these as they regularly get deleted/added as part of normal OSX
 # lifecycle - and as such any events generated are not of use.
@@ -17,9 +17,8 @@ IGNORE_INIT_SCRIPTS = []
 
 
 def get_pid_to_listens():
-    output = check_output(
+    output = get_command_output(
         'lsof -i -n -P -s TCP:LISTEN',
-        shell=True,
     )
 
     pid_to_ports = {}
@@ -53,9 +52,8 @@ def get_launchd_services():
     Execute & parse ``launchctl list``.
     '''
 
-    output = check_output(
+    output = get_command_output(
         'launchctl list',
-        shell=True,
     )
 
     services = {}
@@ -114,7 +112,7 @@ def get_initd_services(existing_services=None):
         status = False
 
         try:
-            check_output((script_path, 'status'))
+            get_command_output((script_path, 'status'))
             status = True
 
         except (OSError, CalledProcessError):
@@ -125,13 +123,12 @@ def get_initd_services(existing_services=None):
         pid_line = None
 
         try:
-            pid_line = check_output(
+            pid_line = get_command_output(
                 '''
                 ps --ppid 1 -o 'tty,pid,comm' | \
                 grep '^\?.*\s{0}.*$' | \
                 head -n 1
                 '''.format(name),
-                shell=True,
             )
         except CalledProcessError:
             pass
@@ -147,9 +144,8 @@ def get_initd_services(existing_services=None):
         enabled = False
 
         try:
-            found_links = check_output(
+            found_links = get_command_output(
                 'find /etc/rc*.d/S*{0} -type l'.format(name),
-                shell=True,
             )
 
             if found_links.strip():
@@ -169,9 +165,8 @@ def get_initd_services(existing_services=None):
 
 
 def get_systemd_services():
-    output = check_output(
+    output = get_command_output(
         'systemctl -alt service list-units',
-        shell=True,
     )
 
     services = {}
@@ -183,9 +178,8 @@ def get_systemd_services():
             name = matches.group(1)
 
             # Get service info to extract pid/enabled status
-            service_output = check_output(
+            service_output = get_command_output(
                 'systemctl show {0}.service'.format(name),
-                shell=True,
             )
 
             service_meta = {}
@@ -215,9 +209,8 @@ def get_systemd_services():
 
 
 def get_upstart_services():
-    output = check_output(
+    output = get_command_output(
         'initctl list',
-        shell=True,
     )
 
     services = {}
@@ -254,9 +247,8 @@ def get_upstart_services():
 
 
 def get_supervisor_services():
-    output = check_output(
+    output = get_command_output(
         'supervisorctl status',
-        shell=True,
     )
 
     services = {}

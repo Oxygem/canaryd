@@ -1,7 +1,7 @@
 import re
 
 from canaryd.packages import six
-from canaryd.subprocess import check_output
+from canaryd.subprocess import get_command_output
 
 DEB_REGEX = r'^[a-z]+\s+([a-zA-Z0-9\+\-\.]+):?[a-zA-Z0-9]*\s+([a-zA-Z0-9:~\.\-\+]+).+$'
 RPM_REGEX = r'^([a-zA-Z0-9_\-\+]+)\-([0-9a-z\.\-]+)\.[a-z0-9_\.]+$'
@@ -9,7 +9,7 @@ PKG_REGEX = r'^([a-zA-Z0-9_\-\+]+)\-([0-9a-z\.]+)'
 
 
 def parse_packages(package_type, command, regex, lower=True):
-    output = check_output(command, shell=True)
+    output = get_command_output(command)
 
     packages = {}
 

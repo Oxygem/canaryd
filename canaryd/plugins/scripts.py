@@ -5,7 +5,7 @@ from canaryd.packages.six.moves import shlex_quote
 
 from canaryd.plugin import Plugin
 from canaryd.script import get_scripts, get_scripts_directory
-from canaryd.subprocess import CalledProcessError, check_output
+from canaryd.subprocess import CalledProcessError, get_command_output
 
 
 class Scripts(Plugin):
@@ -55,9 +55,8 @@ class Scripts(Plugin):
 
         for script, script_path in scripts:
             try:
-                output = check_output(
+                output = get_command_output(
                     shlex_quote(script_path),
-                    shell=True,
                 )
 
                 results[script] = {

@@ -2,7 +2,7 @@
 
 import sys
 
-from canaryd.subprocess import CalledProcessError, check_output
+from canaryd.subprocess import CalledProcessError, get_command_output
 
 SMART_RETURN_BITS = {
     0: False,  # command line parse error
@@ -20,9 +20,8 @@ SMART_RETURN_BITS = {
 
 try:
     # Ensure smartctl is present & working
-    check_output(
+    get_command_output(
         'smartctl --version',
-        shell=True,
     )
 
 except (CalledProcessError, OSError):
@@ -32,16 +31,14 @@ except (CalledProcessError, OSError):
 
 try:
     # Look for OSX disks first (OSX has /dev/sdt which breaks below)
-    disks_data = check_output(
+    disks_data = get_command_output(
         'ls /dev/disk?',
-        shell=True,
     )
 
 except (CalledProcessError, OSError):
     # Look for Linux disks (/dev/sdX, /dev/hdX)
-    disks_data = check_output(
+    disks_data = get_command_output(
         'ls /dev/[hs]d?',
-        shell=True,
     )
 
 
@@ -54,9 +51,8 @@ criticals = []
 for disk in disks:
     try:
         # List health and attributes
-        smart_data = check_output(
+        smart_data = get_command_output(
             'smartctl -a {0}'.format(disk),
-            shell=True,
         )
 
     except CalledProcessError as e:
