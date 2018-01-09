@@ -104,7 +104,7 @@ def get_initd_services(existing_services=None):
         script_path = path.join(init_dir, name)
 
         with open(script_path) as script:
-            if 'status' not in script.read():
+            if '### BEGIN INIT INFO' not in script.read():
                 IGNORE_INIT_SCRIPTS.append(name)
                 continue
 
