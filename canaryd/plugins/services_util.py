@@ -191,10 +191,10 @@ def get_systemd_services():
             if 'Type' in service_meta and service_meta['Type'] == 'oneshot':
                 continue
 
-            pid = service_meta.get(
+            pid = int(service_meta.get(
                 'ExecMainPID',
                 service_meta.get('MainPID', None),
-            )
+            ))
 
             enabled = service_meta.get('UnitFileState') == 'enabled'
 
