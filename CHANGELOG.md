@@ -1,3 +1,7 @@
+# v0.3.1
+
++ Fix bug in `which` checking
+
 # v0.3
 
 + Add CLI events: `canaryctl event PLUGIN TYPE DESCRIPTION [DATA]`
