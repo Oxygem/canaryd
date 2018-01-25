@@ -8,7 +8,7 @@ from canaryd.subprocess import CalledProcessError, get_command_output
 def which(command):
     try:
         return get_command_output(
-            ('which', command),
+            'which {0}'.format(command),
         ).strip()
 
     except (CalledProcessError, OSError):
