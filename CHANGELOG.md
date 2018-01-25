@@ -1,4 +1,4 @@
-# v0.3 (WIP)
+# v0.3
 
 + Add CLI events: `canaryctl event PLUGIN TYPE DESCRIPTION [DATA]`
 + Add **containers** plugin
