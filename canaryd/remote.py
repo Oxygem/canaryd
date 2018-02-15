@@ -115,6 +115,9 @@ def make_api_request(
 
     logger.debug('Making API request: {0}'.format(url))
 
+    if 'timeout' not in kwargs:
+        kwargs['timeout'] = REQUEST_TIMEOUT
+
     if json:
         json_data = json_dumps(json, cls=CanaryJSONEncoder)
         kwargs['data'] = json_data
@@ -127,7 +130,6 @@ def make_api_request(
     try:
         response = method(
             url,
-            timeout=REQUEST_TIMEOUT,
             auth=('api', api_key),
             **kwargs
         )
@@ -186,6 +188,9 @@ def _upload_states_return_settings(url, states, settings, json=None):
         get_session().post, url,
         settings=settings,
         json=json,
+        # Explicitly set the max (matching server) timeout for syncing states
+        # to avoid any sync "thrashing".
+        timeout=600,
     )
 
     return response_data['settings']
