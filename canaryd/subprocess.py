@@ -13,5 +13,6 @@ def get_command_output(command, *args, **kwargs):
         command,
         shell=True,
         close_fds=True,
+        stderr=STDOUT,  # noqa
         *args, **kwargs
     )
