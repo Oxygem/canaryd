@@ -2,12 +2,11 @@
 
 ### BEGIN INIT INFO
 # Provides:          canaryd
-# Required-Start:    $remote_fs $syslog
-# Required-Stop:     $remote_fs $syslog
+# Required-Start:    $all
+# Required-Stop:     $all
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Put a short description of the service here
-# Description:       Put a long description of the service here
+# Description: canaryd system monitor
 ### END INIT INFO
 
 DAEMON=CANARYD_LOCATION
@@ -25,6 +24,7 @@ fi
 
 
 # Handlers
+#
 
 do_start () {
     log_daemon_msg "Starting $DAEMON_NAME..."
@@ -48,6 +48,7 @@ do_stop () {
 
 
 # Run it!
+#
 
 case "$1" in
 
