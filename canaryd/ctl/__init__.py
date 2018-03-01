@@ -197,7 +197,7 @@ def state(plugin):
 
     if status:
         print(json.dumps(
-            target_plugin.serialise_state(data),
+            data,
             cls=CanaryJSONEncoder,
             indent=4,
         ))

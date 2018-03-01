@@ -95,59 +95,78 @@ class Plugin(object):
                 ),
             )
 
-    # Serialisation
-    #
+        wanted_type = spec[key]
+        valid = False
 
-    def serialise_value(self, key, value):
+        def validate_type(value, wanted_type):
+            return (
+                # None/null allowed for all keys
+                value is None
+                # Or the wanted type
+                or isinstance(value, wanted_type)
+                # If we wan't unicode but got bytes, OK to serialise
+                or (
+                    wanted_type is six.text_type
+                    and isinstance(value, six.binary_type)
+                )
+            )
+
+        # Any type allowed?
+        if wanted_type is None:
+            valid = True
+
+        # If the spec is a list - type is/should be the only list item, and our
+        # value should be a list of items that match the type.
+        elif isinstance(wanted_type, list):
+            wanted_type = wanted_type[0]
+
+            if isinstance(value, (list, set, tuple)) and all(
+                validate_type(v, wanted_type)
+                for v in value
+            ):
+                valid = True
+
+        elif validate_type(value, wanted_type):
+            valid = True
+
+        if not valid:
+            raise TypeError((
+                'Invalid type for key `{0}` in plugin {1} '
+                '(want type = {2}, value type = {3})'
+            ).format(key, self.name, wanted_type, type(value)))
+
+    def validate_state(self, state):
+        '''
+        Validate a given state dict is valid by checking each key/value within
+        an item match up with the spec.
+        '''
+
         spec = self.spec[1]
-        self.check_spec_key(key, value)
+        key_to_missing_count = {}
 
-        if isinstance(spec[key], set) and isinstance(value, set):
-            return list(value)
+        for key, item in six.iteritems(state):
+            # Check all the keys the item has
+            for k, v in six.iteritems(item):
+                self.check_spec_key(k, v)
 
-        return value
+            # Check, but only warn, for keys the item *doesn't* have - this is
+            # only because it's useful, plugins are free to submit incomplete
+            # items.
+            for spec_key in spec.keys():
+                if spec_key not in item:
+                    key_to_missing_count.setdefault(spec_key, 0)
+                    key_to_missing_count[spec_key] += 1
 
-    def serialise_item(self, item):
-        return dict(
-            (key, self.serialise_value(key, value))
-            for key, value in six.iteritems(item)
-        )
+        # Not all plugins expect all keys
+        if not self.warn_for_missing_keys:
+            return
 
-    def serialise_state(self, state):
-        return dict(
-            (key, self.serialise_item(item))
-            for key, item in six.iteritems(state)
-        )
-
-    def serialise_changes(self, changes):
-        return dict(
-            (key, (self.serialise_value(key, item[0]), self.serialise_value(key, item[1])))
-            for key, item in six.iteritems(changes)
-        )
-
-    # Unserialisation
-    #
-
-    def unserialise_value(self, key, value):
-        spec = self.spec[1]
-        self.check_spec_key(key, value)
-
-        if isinstance(spec[key], set):
-            return set(value)
-
-        return value
-
-    def unserialise_item(self, item):
-        return dict(
-            (key, self.unserialise_value(key, value))
-            for key, value in six.iteritems(item)
-        )
-
-    def unserialise_state(self, items):
-        return dict(
-            (key, self.unserialise_item(item))
-            for key, item in six.iteritems(items)
-        )
+        for key, missing_count in six.iteritems(key_to_missing_count):
+            logger.warning('{0} items for plugin {1} are missing key {2}'.format(
+                missing_count,
+                self.name,
+                key,
+            ))
 
 
 def get_plugins():
@@ -265,8 +284,9 @@ def get_plugin_state(plugin, settings):
     finally:
         signal.alarm(0)
 
-    if not isinstance(state, (dict, list)):
-        state = TypeError('Invalid state type: {0}'.format(state))
+    # Validate the state
+    if status:
+        plugin.validate_state(state)
 
     return status, state
 

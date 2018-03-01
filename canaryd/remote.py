@@ -85,7 +85,7 @@ def make_states_dict(states):
 
     for plugin, (status, state) in states:
         if status:
-            states_dict[plugin.name] = plugin.serialise_state(state)
+            states_dict[plugin.name] = state
 
     return states_dict
 
