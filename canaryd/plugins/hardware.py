@@ -112,11 +112,11 @@ class Hardware(Plugin):
         return self.current_state
 
     @staticmethod
-    def is_change(item_key, previous_item, item):
+    def should_apply_change(change):
         # If any of our top level keys (serial, vendor, product, etc) change,
         # count as a change. Anything nested (meta, capabilities, etc) is ignored.
-        for key in TOP_LEVEL_STRING_KEYS:
-            if previous_item.get(key) != item.get(key):
-                return True
-
-        return False
+        if change.type == 'updated':
+            return any(
+                key in change.data
+                for key in TOP_LEVEL_STRING_KEYS
+            )

@@ -52,6 +52,13 @@ class PluginMeta(type):
 class Plugin(object):
     diff_updates = True
 
+    generate_update_events = True
+    generate_added_events = True
+    generate_deleted_events = True
+
+    # Log warnings for missing keys when validating state items?
+    warn_for_missing_keys = True
+
     class PrepareError(Exception):
         pass
 
@@ -62,8 +69,24 @@ class Plugin(object):
         return self.name
 
     @staticmethod
-    def is_change(key, previous_item, item):
+    def get_action_for_change(change):
+        pass
+
+    @staticmethod
+    def get_description_for_change(change):
+        pass
+
+    @staticmethod
+    def get_change_key(data_changes):
+        return ''
+
+    @staticmethod
+    def should_apply_change(change):
         return True
+
+    @staticmethod
+    def generate_issues_from_change(change, settings):
+        pass
 
     def get_state(self, settings):
         data = get_command_output(

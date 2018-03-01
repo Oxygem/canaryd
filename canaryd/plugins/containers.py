@@ -66,5 +66,18 @@ class Containers(Plugin):
             for key, data in six.iteritems(containers)
         )
 
+    @staticmethod
+    def get_action_for_change(change):
+        if change.type != 'updated':
+            return
 
+        if 'running' in change.data:
+            was_running, _ = change.data['running']
 
+            if was_running:
+                return 'stopped'
+
+            return 'started'
+
+        if 'pid' in change.data:
+            return 'restarted'

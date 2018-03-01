@@ -79,12 +79,6 @@ def get_state_diff(plugin, plugin_state, previous_plugin_state):
             changes.append(Change(plugin, 'added', key, data=state_diff))
             continue
 
-        # Plugins customise diff
-        if plugin.is_change(key, previous_item, item) is False:
-            # We're ignoring this change, so reset the item in the plugin state
-            plugin_state[key] = previous_item
-            continue
-
         # Create the diff, which is a key -> (old, new) values
         all_keys = list(six.iterkeys(item)) + list(six.iterkeys(previous_item))
         all_keys = set(all_keys)

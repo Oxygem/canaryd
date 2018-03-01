@@ -96,14 +96,16 @@ class Meta(Plugin):
         )
 
     @staticmethod
-    def is_change(key, previous_item, item):
+    def should_apply_change(change):
         # Check to see if we rebooted, if not there's no change
-        if key == 'up_since':
-            previous_up = ensure_datetime(previous_item['value'])
+        if change.key == 'up_since':
+            old_up, new_up = change.data['value']
+
+            previous_up = ensure_datetime(old_up)
             # Account for slight jitter
             previous_up += timedelta(minutes=1)
 
-            up = ensure_datetime(item['value'])
+            up = ensure_datetime(new_up)
 
             if (previous_up < up):
                 return True
@@ -113,12 +115,9 @@ class Meta(Plugin):
         return True
 
     @staticmethod
-    def event_message(type_, key, data_changes):
-        if type_ != 'updated':
+    def get_description_for_change(change):
+        if change.type != 'updated':
             return
 
-        if key == 'up_since':
+        if change.key == 'up_since':
             return 'Server rebooted'
-
-        if key == 'hostname':
-            return 'Hostname changed'

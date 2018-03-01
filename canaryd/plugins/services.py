@@ -125,39 +125,65 @@ class Services(Plugin):
                     if check_port(ip_type, host, port)
                 )
 
-        return services
+        return dict(
+            (key, make_service_data(data))
+            for key, data in six.iteritems(services)
+        )
 
     @staticmethod
-    def generate_events(type_, key, data_changes, settings):
-        # For new services, no events
-        if type_ == 'added':
+    def get_change_key(change):
+        # Ensure the running state is included in our change key, such that
+        # if grouping we only group services that have started/stopped.
+        return change.data and change.data.get('running')
+
+    @staticmethod
+    def get_action_for_change(change):
+        if change.type != 'updated':
             return
+
+        if 'running' in change.data:
+            was_running, _ = change.data['running']
+
+            if was_running:
+                return 'stopped'
+
+            return 'started'
+
+        if 'pid' in change.data:
+            return 'restarted'
+
+    @staticmethod
+    def should_apply_change(change):
+        # If only up_ports changes, we don't want to generate an update - we'll
+        # generate any issues as needed below.
+        if change.key == 'up_ports':
+            return False
+
+    @staticmethod
+    def generate_issues_from_change(change, settings):
+        key = change.key
+        data_changes = change.data
 
         # If the script has been removed, resolve any leftover issues and exit
         # (the delete event is still created).
-        if type_ == 'deleted':
+        if change.type == 'deleted':
             yield 'resolved', None, None
             return
 
-        # Track if the service starts/stops
-        if 'running' in data_changes:
-            _, to_running = data_changes['running']
-
-            if to_running:
-                yield 'updated', '{0} started'.format(key), data_changes
-
-            else:
-                yield 'updated', '{0} stopped'.format(key), data_changes
-                # We stopped the service - so it's ports being up is no longer
-                # an issue.
-                return
-
-        # No up/down change but PID changed? Service restarted!
-        elif 'pid' in data_changes:
-            yield 'updated', '{0} restarted'.format(key), data_changes
+        # If the service *was* running, but now isn't, resolve any leftover issues
+        # as we assume ports are down intentionally.
+        if 'running' in data_changes and data_changes['running'][0]:
+            yield 'resolved', None, None
+            return
 
         # Finally, check the ports!
         if 'up_ports' in data_changes:
+            # If ports also changed, and changed to nothing, resolve anything
+            # as the service must have been turned off.
+            if 'ports' in data_changes and not data_changes['ports'][1]:
+                yield 'resolved', None, None
+                return
+
             from_ports, to_ports = data_changes['up_ports']
 
             # No ports up now?

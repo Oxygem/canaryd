@@ -68,6 +68,12 @@ class Monitor(Plugin):
     # average timescales - so we always need value and 1/5/15 min averages.
     diff_updates = False
 
+    # Don't generate events from state updates (see generate_issues_from_key_change below)
+    generate_update_events = False
+
+    # Don't log warnings when keys are missing (eg 15_min_percentage)
+    warn_for_missing_keys = False
+
     collect_interval = None
 
     def setup_history(self):
@@ -154,22 +160,11 @@ class Monitor(Plugin):
         return data
 
     @staticmethod
-    def event_message(type_, key, data_changes):
-        if type_ not in ('added', 'deleted'):
-            return
+    def generate_issues_from_key_change(change, settings):
+        key = change.key
+        event_type = change.type
+        data_changes = change.data
 
-        if 'type' not in data_changes:
-            return
-
-        type_name, new_type_name = data_changes['type']
-
-        if type_ == 'added':
-            type_name = new_type_name
-
-        return '{0} {1}: {2}'.format(type_name.title(), type_, key)
-
-    @staticmethod
-    def generate_events(event_type, key, data_changes, settings):
         settings_key = key
 
         # Swap is treated like memory (>X% warning/critical)

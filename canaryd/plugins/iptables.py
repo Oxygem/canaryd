@@ -104,60 +104,10 @@ class Iptables(Plugin):
         return chains
 
     @staticmethod
-    def generate_events(type_, chain_name, data_changes, settings):
-        # We only handle updates here, added/removed chains are handled as default
-        if type_ != 'updated':
-            return
-
-        # Check policy
-        if 'policy' in data_changes:
-            yield 'updated', None, {
-                'policy': data_changes['policy'],
-            }
-
-        # Diff rules
-        if 'rules' in data_changes:
-            previous_rules, rules = data_changes['rules']
-
-            # Find deleted roles
-            deleted_rules = []
-
-            for i, rule in enumerate(previous_rules):
-                # If we've run out of rules in the previous state, add
-                if len(rules) <= i:
-                    deleted_rules.append(rule)
-
-                # Otherwise compare
-                elif rules[i] != rule:
-                    deleted_rules.append(rule)
-
-            if deleted_rules:
-                rule_type = 'rule' if len(deleted_rules) == 1 else 'rules'
-
-                yield 'deleted', '{0} removed from {1}'.format(
-                    rule_type.title(),
-                    chain_name,
-                ), data_changes
-
-            # Find new rules
-            new_rules = []
-
-            for i, rule in enumerate(rules):
-                # If we've run out of rules in the previous state, add
-                if len(previous_rules) <= i:
-                    new_rules.append(rule)
-
-                # Otherwise compare
-                elif previous_rules[i] != rule:
-                    new_rules.append(rule)
-
-            if new_rules:
-                rule_type = 'rule' if len(new_rules) == 1 else 'rules'
-
-                yield 'added', '{0} added to {1}'.format(
-                    rule_type.title(),
-                    chain_name,
-                ), data_changes
+    def get_action_for_change(change):
+        # If we change rules only, make the action "rules updated|addded|deleted"
+        if 'rules' in change.data and len(change.data) == 1:
+            return 'rules {0}'.format(change.type)
 
 
 class Ip6tables(Iptables):
