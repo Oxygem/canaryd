@@ -9,42 +9,34 @@ class Change(object):
         self.type = type_
         self.key = key
 
+        # COMPAT w/canaryd < 0.2
+        # Legacy support where added/deleted would either have data/None,
+        # rather than data changes (where every key: (old_value, new_value)).
+        if data and self.type in ('added', 'deleted') and not all(
+            isinstance(item, (tuple, list)) and len(item) == 2
+            for _, item in six.iteritems(data)
+        ):
+            if self.type == 'added':
+                data = dict(
+                    (key, (None, value))
+                    for key, value in six.iteritems(data)
+                )
+
+            elif self.type == 'deleted':
+                data = dict(
+                    (key, (value, None))
+                    for key, value in six.iteritems(data)
+                )
+
+            logger.info('Converted legacy data: {0}'.format(data))
+
         self.data = data
 
     def serialise(self):
-        data = None
-
-        if self.data:
-            update_data = self.data
-
-            # COMPAT w/canaryd < 0.2
-            # Legacy support where added/deleted would either have data/None,
-            # rather than data changes (where every key: (old_value, new_value)).
-            if self.type in ('added', 'deleted') and not all(
-                isinstance(item, (tuple, list)) and len(item) == 2
-                for _, item in six.iteritems(self.data)
-            ):
-                if self.type == 'added':
-                    update_data = dict(
-                        (key, (None, value))
-                        for key, value in six.iteritems(self.data)
-                    )
-
-                elif self.type == 'deleted':
-                    update_data = dict(
-                        (key, (value, None))
-                        for key, value in six.iteritems(self.data)
-                    )
-
-                logger.info('Converted legacy data: {0}'.format(self.data))
-
-            # Serialise the data changes
-            data = self.plugin.serialise_changes(update_data)
-
-        return self.type, self.key, data
+        return self.type, self.key, self.data
 
     def __repr__(self):
-        return '{0}'.format((self.plugin, self.type, self.key, self.data))
+        return 'Change: {0}'.format((self.plugin, self.type, self.key, self.data))
 
 
 def make_diffs(plugin, changes):
