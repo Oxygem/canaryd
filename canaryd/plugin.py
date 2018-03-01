@@ -66,7 +66,7 @@ class Plugin(object):
         pass
 
     def __repr__(self):
-        return self.name
+        return 'Plugin: {0}'.format(self.name)
 
     @staticmethod
     def get_action_for_change(change):
