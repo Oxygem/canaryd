@@ -7,9 +7,9 @@ from canaryd.plugin import Plugin
 from canaryd.subprocess import get_command_output
 
 UPTIME_REGEX = re.compile((
-    'up\s+(.*?),\s+[0-9]+ '
-    'users?,\s+load averages?: '
-    '([0-9]+\.[0-9][0-9]),?\s+([0-9]+\.[0-9][0-9]),?\s+([0-9]+\.[0-9][0-9])'
+    r'up\s+(.*?),\s+[0-9]+ '
+    r'users?,\s+load averages?: '
+    r'([0-9]+\.[0-9][0-9]),?\s+([0-9]+\.[0-9][0-9]),?\s+([0-9]+\.[0-9][0-9])'
 ))
 
 
