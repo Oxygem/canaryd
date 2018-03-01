@@ -10,6 +10,12 @@ from .packages_util import (
     get_rpm_packages,
 )
 
+COMMAND_TO_FUNC = {
+    'dpkg': get_deb_packages,
+    'rpm': get_rpm_packages,
+    'pkg_info': get_pkg_packages,
+}
+
 
 class Packages(Plugin):
     spec = ('package', {
@@ -19,19 +25,20 @@ class Packages(Plugin):
 
     @staticmethod
     def prepare(settings):
-        pass
+        commands = COMMAND_TO_FUNC.keys()
+
+        if not any(
+            find_executable(command)
+            for command in commands
+        ):
+            raise OSError('No container commands found: {0}'.format(commands))
 
     @staticmethod
     def get_state(settings):
         packages = {}
 
-        if find_executable('dpkg'):
-            packages.update(get_deb_packages())
-
-        if find_executable('rpm'):
-            packages.update(get_rpm_packages())
-
-        if find_executable('pkg_info'):
-            packages.update(get_pkg_packages())
+        for command, func in six.iteritems(COMMAND_TO_FUNC):
+            if find_executable(command):
+                packages.update(func())
 
         return packages

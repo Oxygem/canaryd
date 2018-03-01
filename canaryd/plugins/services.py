@@ -1,4 +1,3 @@
-import platform
 import socket
 
 from distutils.spawn import find_executable
@@ -18,13 +17,13 @@ from .services_util import (
     get_upstart_services,
 )
 
+COMMAND_TO_FUNC = {
+    'launchctl': get_launchd_services,
+    'systemctl': get_systemd_services,
+    'initctl': get_upstart_services,
 
-def update_missing_keys(target, data):
-    target.update(dict(
-        (key, value)
-        for key, value in six.iteritems(data)
-        if key not in target
-    ))
+    'supervisorctl': get_supervisor_services,
+}
 
 
 def check_port(ip_type, host, port):
@@ -51,6 +50,16 @@ def check_port(ip_type, host, port):
         sock.close()
 
 
+def make_service_data(data):
+    blank_service = {
+        'ports': [],
+        'up_ports': [],
+    }
+
+    blank_service.update(data)
+    return blank_service
+
+
 class Services(Plugin):
     '''
     The services plugin provides a combined view of "system" services - ie the
@@ -62,37 +71,34 @@ class Services(Plugin):
         'pid': int,
         'enabled': bool,
         'init_system': six.text_type,
-        'ports': set((int,)),
-        'up_ports': set((int,)),
+        'ports': [int],
+        'up_ports': [int],
     })
 
     @staticmethod
     def prepare(settings):
-        pass
+        commands = COMMAND_TO_FUNC.keys()
+
+        if not path.exists(path.join(os_sep, 'etc', 'init.d')) and not any(
+            find_executable(command)
+            for command in commands
+        ):
+            raise OSError('No container commands found: {0}'.format(commands))
 
     @staticmethod
     def get_state(settings):
         services = {}
 
-        os_type = platform.system().lower()
-
-        if os_type == 'darwin':
-            services = get_launchd_services()
-
-        if find_executable('systemctl'):
-            update_missing_keys(services, get_systemd_services())
-
-        if find_executable('initctl'):
-            update_missing_keys(services, get_upstart_services())
+        for command, func in six.iteritems(COMMAND_TO_FUNC):
+            if find_executable(command):
+                services.update(func())
 
         if path.exists(path.join(os_sep, 'etc', 'init.d')):
-            update_missing_keys(
-                services,
+            services.update(
+                # Pass existing services to avoid overhead of running all the
+                # init.d status scripts.
                 get_initd_services(existing_services=services),
             )
-
-        if find_executable('supervisorctl'):
-            update_missing_keys(services, get_supervisor_services())
 
         # Get mapping of PID -> listening ports
         try:

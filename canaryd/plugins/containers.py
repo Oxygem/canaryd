@@ -11,6 +11,24 @@ from .containers_util import (
     get_virsh_containers,
 )
 
+COMMAND_TO_FUNC = {
+    'docker': get_docker_containers,
+    'lxc': get_lxc_containers,
+    'vzlist': get_openvz_containers,
+    'virsh': get_virsh_containers,
+}
+
+
+def make_container_data(data):
+    blank_container = {
+        'environment': [],
+        'names': [],
+        'ips': [],
+    }
+
+    blank_container.update(data)
+    return blank_container
+
 
 class Containers(Plugin):
     spec = ('container', {
@@ -27,21 +45,26 @@ class Containers(Plugin):
 
     @staticmethod
     def prepare(settings):
-        pass
+        commands = COMMAND_TO_FUNC.keys()
 
-    def get_state(self, settings):
+        if not any(
+            find_executable(command)
+            for command in commands
+        ):
+            raise OSError('No container commands found: {0}'.format(commands))
+
+    @staticmethod
+    def get_state(settings):
         containers = {}
 
-        if find_executable('docker'):
-            containers.update(get_docker_containers())
+        for command, func in six.iteritems(COMMAND_TO_FUNC):
+            if find_executable(command):
+                containers.update(func())
 
-        if find_executable('lxc'):
-            containers.update(get_lxc_containers())
+        return dict(
+            (key, make_container_data(data))
+            for key, data in six.iteritems(containers)
+        )
 
-        if find_executable('vzlist'):
-            containers.update(get_openvz_containers())
 
-        if find_executable('virsh'):
-            containers.update(get_virsh_containers())
 
-        return containers
