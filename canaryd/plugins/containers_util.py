@@ -3,18 +3,6 @@ import json
 from canaryd.subprocess import CalledProcessError, get_command_output
 
 
-def _make_container(data):
-    blank_container = {
-        'environment': [],
-        'names': [],
-        'ips': [],
-    }
-
-    blank_container.update(data)
-
-    return blank_container
-
-
 def get_docker_containers():
     containers = {}
 
@@ -53,7 +41,7 @@ def get_docker_containers():
         container_id = container['Id'][:6]
         container_key = 'docker/{0}'.format(container_id)
 
-        containers[container_key] = _make_container(container_data)
+        containers[container_key] = container_data
 
     return containers
 
@@ -74,7 +62,7 @@ def get_lxc_containers():
         }
 
         container_key = 'lxc/{0}'.format(container['name'])
-        containers[container_key] = _make_container(container_data)
+        containers[container_key] = container_data
 
     return containers
 
@@ -97,7 +85,7 @@ def get_openvz_containers():
         }
 
         container_key = 'openvz/{0}'.format(container['ctid'])
-        containers[container_key] = _make_container(container_data)
+        containers[container_key] = container_data
 
     return containers
 
@@ -123,6 +111,6 @@ def get_virsh_containers():
         }
 
         container_key = 'virsh/{0}'.format(name)
-        containers[container_key] = _make_container(container_data)
+        containers[container_key] = container_data
 
     return containers
