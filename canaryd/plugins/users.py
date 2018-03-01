@@ -14,7 +14,7 @@ except ImportError:
 class Users(Plugin):
     spec = ('user', {
         'group': six.text_type,
-        'groups': set((six.text_type,)),
+        'groups': [six.text_type],
         'home': six.text_type,
         'shell': six.text_type,
     })
@@ -55,5 +55,9 @@ class Users(Plugin):
                     continue
 
                 users[username]['groups'].add(group.gr_name)
+
+        for user_data in six.itervalues(users):
+            if 'groups' in user_data:
+                user_data['groups'] = list(user_data['groups'])
 
         return users

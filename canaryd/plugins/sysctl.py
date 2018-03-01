@@ -9,7 +9,7 @@ IGNORE_PREFIXES = ('vm.', 'machdep.', 'debug.')
 
 class Sysctl(Plugin):
     spec = ('key', {
-        'values': set((six.text_type,)),
+        'values': [six.text_type],
     })
 
     command = (
