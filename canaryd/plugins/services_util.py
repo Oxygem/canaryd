@@ -17,30 +17,27 @@ IGNORE_INIT_SCRIPTS = []
 
 
 def get_pid_to_listens():
-    output = get_command_output(
-        'lsof -i -n -P -s TCP:LISTEN',
-    )
-
     pid_to_ports = {}
 
-    for line in output.splitlines():
+    output = get_command_output(
+        'netstat -plnt',
+    )
+
+    lines = output.splitlines()
+
+    for line in lines[2:]:
         bits = line.split()
+        proto, _, _, local_address, _, _, program = bits
 
-        if len(bits) < 5 or bits[-1] != '(LISTEN)':
-            continue
-
-        try:
-            pid = int(bits[1])
-        except (TypeError, ValueError):
-            continue
+        # Get the pid from PID/PROGRAM
+        pid = program.split('/')[0]
+        pid = int(pid)
 
         # Work out the host:port bit
-        ip_host = bits[-2]
-        host, port = ip_host.rsplit(':', 1)
+        host, port = local_address.rsplit(':', 1)
         port = int(port)
 
-        # Work out the IP type (4/6) by looking at the IP (contains : = ipv6)
-        ip_type = 'ipv6' if ':' in host else 'ipv4'
+        ip_type = 'ipv6' if proto == 'tcp6' else 'ipv4'
 
         pid_to_ports.setdefault(pid, set()).add((ip_type, host, port))
 
