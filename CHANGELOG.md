@@ -1,3 +1,21 @@
+# v0.4
+
++ Refactor how plugins handle changes to support event grouping on the server side
+    * Add methods:
+        - `get_action_for_change`
+        - `get_description_for_change`
+        - `get_change_key`
+        - `should_apply_change`
+        - `generate_issues_from_change`
+    * Removed/replacing:
+        - `generate_events`
+        - `is_change`
++ Use `netstat` over `lsof` to get PID -> port mappings (more reliable)
++ Improve/speed up `init.d` state collection
++ Better `init.d` script
++ Drop `set` as a valid plugin spec type (use list, like ES)
+
+
 # v0.3.1
 
 + Fix bug in `which` checking
