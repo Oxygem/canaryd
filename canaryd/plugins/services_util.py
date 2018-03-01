@@ -8,11 +8,12 @@ from canaryd.subprocess import CalledProcessError, get_command_output
 # lifecycle - and as such any events generated are not of use.
 LAUNCHCTL_IGNORE_NAMES = ('oneshot', 'mdworker', 'mbfloagent')
 
-INITD_REGEX = r'([a-zA-Z0-9\-]+)=([0-9]+)=([0-9]+)?'
 SYSTEMD_REGEX = r'^([a-z\-]+)\.service\s+[a-z\-]+\s+[a-z]+\s+([a-z]+)'
 UPSTART_REGEX = r'^([a-z\-]+) [a-z]+\/([a-z]+),?\s?(process)?\s?([0-9]+)?'
 SUPERVISOR_REGEX = r'([a-z\-]+)\s+([A-Z]+)\s+pid\s([0-9]+)'
 
+INITD_REGEX = r'([a-zA-Z0-9\-]+)=([0-9]+)=([0-9]+)?'
+INITD_USAGE_REGEX = re.compile(r'Usage:[^\n]+status')
 IGNORE_INIT_SCRIPTS = []
 
 
@@ -101,7 +102,13 @@ def get_initd_services(existing_services=None):
         script_path = path.join(init_dir, name)
 
         with open(script_path) as script:
-            if '### BEGIN INIT INFO' not in script.read():
+            script_data = script.read()
+
+            if (
+                # LSB header
+                '### BEGIN INIT INFO' not in script_data
+                or not INITD_USAGE_REGEX.search(script_data)
+            ):
                 IGNORE_INIT_SCRIPTS.append(name)
                 continue
 
@@ -126,16 +133,17 @@ def get_initd_services(existing_services=None):
                 grep '^\?.*\s{0}.*$' | \
                 head -n 1
                 '''.format(name),
+                shell=True,
             )
         except CalledProcessError:
-            pass
+            raise
 
         if pid_line:
             bits = pid_line.strip().split()
             try:
                 pid = int(bits[-2])
             except (TypeError, ValueError):
-                pass
+                raise
 
         # Check if enabled
         enabled = False
@@ -184,14 +192,13 @@ def get_systemd_services():
                 key, value = line.split('=', 1)
                 service_meta[key] = value
 
-            # Skip/ignore Type=oneshot services
-            if 'Type' in service_meta and service_meta['Type'] == 'oneshot':
-                continue
-
-            pid = int(service_meta.get(
+            pid = service_meta.get(
                 'ExecMainPID',
                 service_meta.get('MainPID', None),
-            ))
+            )
+
+            if pid:
+                pid = int(pid)
 
             enabled = service_meta.get('UnitFileState') == 'enabled'
 
