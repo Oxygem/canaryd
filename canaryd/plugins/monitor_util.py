@@ -16,6 +16,7 @@ def get_ps_cpu_stats():
 
     output = get_command_output(
         "ps -A -o %cpu | awk '{s+=$1} END {print s}'",
+        shell=True,
     )
 
     try:
@@ -38,6 +39,7 @@ def get_proc_cpu_stats():
 
     output = get_command_output(
         'cat /proc/stat && sleep 1 && cat /proc/stat',
+        shell=True,
     )
 
     # Parse /proc/stat
