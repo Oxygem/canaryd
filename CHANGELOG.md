@@ -1,3 +1,7 @@
+# 0.4.1
+
++ Fix monitor plugin CPU/IOWait collection
+
 # v0.4
 
 + Refactor how plugins handle changes to support event grouping on the server side
