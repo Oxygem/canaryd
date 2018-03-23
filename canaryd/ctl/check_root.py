@@ -1,6 +1,6 @@
 from os import geteuid
 
-from canaryd.packages import click
+from canaryd_packages import click
 
 from canaryd.exceptions import CanarydError, UserCancelError
 

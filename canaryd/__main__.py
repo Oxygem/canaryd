@@ -6,7 +6,7 @@ import logging
 
 from time import time
 
-from canaryd.packages import click  # noqa
+from canaryd_packages import click
 
 from canaryd.daemon import run_daemon
 from canaryd.log import logger, setup_logging, setup_logging_from_settings

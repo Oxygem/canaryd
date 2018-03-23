@@ -9,8 +9,8 @@ import traceback
 from datetime import datetime
 from logging.handlers import SysLogHandler
 
-from canaryd.packages import click
-from canaryd.packages import six
+from canaryd_packages import click
+from canaryd_packages import six
 
 STDOUT_LOG_LEVELS = (logging.DEBUG, logging.INFO)
 STDERR_LOG_LEVELS = (logging.WARNING, logging.ERROR, logging.CRITICAL)

@@ -4,9 +4,9 @@ from collections import defaultdict, deque
 from itertools import islice
 from time import sleep, time
 
-from canaryd.packages import six
+from canaryd_packages import six
 
-from canaryd.log import logger  # noqa
+from canaryd.log import logger
 from canaryd.plugin import Plugin
 from canaryd.subprocess import CalledProcessError
 

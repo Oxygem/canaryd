@@ -3,7 +3,7 @@ import socket
 from distutils.spawn import find_executable
 from os import path, sep as os_sep
 
-from canaryd.packages import six
+from canaryd_packages import six
 
 from canaryd.plugin import Plugin
 from canaryd.subprocess import CalledProcessError

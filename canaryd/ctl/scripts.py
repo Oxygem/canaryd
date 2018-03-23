@@ -1,4 +1,4 @@
-from canaryd.packages import click  # noqa
+from canaryd_packages import click
 
 from canaryd.exceptions import CanarydError
 from canaryd.script import (

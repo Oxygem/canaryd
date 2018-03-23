@@ -7,8 +7,8 @@ import platform
 from os import environ, geteuid, listdir, makedirs, path
 from shutil import copy
 
-from canaryd.packages import click, six  # noqa
-from canaryd.packages.six.moves.configparser import (  # noqa
+from canaryd_packages import click, six
+from canaryd_packages.six.moves.configparser import (
     DuplicateSectionError,
     Error as ConfigParserError,
     RawConfigParser,

@@ -18,19 +18,19 @@ PACKAGES = (
     'canaryd.plugins',
 
     # Packages
-    'canaryd.packages',
-    'canaryd.packages.click',
+    'canaryd_packages',
+    'canaryd_packages.click',
 
     # Requests package
-    'canaryd.packages.requests',
-    'canaryd.packages.requests.packages',
-    'canaryd.packages.requests.packages.chardet',
-    'canaryd.packages.requests.packages.urllib3',
-    'canaryd.packages.requests.packages.urllib3.contrib',
-    'canaryd.packages.requests.packages.urllib3.packages',
-    'canaryd.packages.requests.packages.urllib3.packages.backports',
-    'canaryd.packages.requests.packages.urllib3.packages.ssl_match_hostname',
-    'canaryd.packages.requests.packages.urllib3.util',
+    'canaryd_packages.requests',
+    'canaryd_packages.requests.packages',
+    'canaryd_packages.requests.packages.chardet',
+    'canaryd_packages.requests.packages.urllib3',
+    'canaryd_packages.requests.packages.urllib3.contrib',
+    'canaryd_packages.requests.packages.urllib3.packages',
+    'canaryd_packages.requests.packages.urllib3.packages.backports',
+    'canaryd_packages.requests.packages.urllib3.packages.ssl_match_hostname',
+    'canaryd_packages.requests.packages.urllib3.util',
 )
 
 TEST_REQUIRES = (

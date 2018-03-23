@@ -1,7 +1,8 @@
 from os import path
 from pkgutil import get_data
 
-from canaryd.packages import click
+from canaryd_packages import click
+
 from canaryd.subprocess import CalledProcessError, get_command_output
 
 

@@ -5,7 +5,8 @@ import sys
 from multiprocessing import cpu_count
 from os import path
 
-from canaryd.packages import six
+from canaryd_packages import six
+
 from canaryd.subprocess import get_command_output
 
 

@@ -11,11 +11,11 @@ from distutils.spawn import find_executable
 from glob import glob
 from os import path
 
-from canaryd.packages import six
-from canaryd.packages.importlib import import_module
+from canaryd_packages import six
+from canaryd_packages.importlib import import_module
 
+from canaryd.log import logger, print_exception
 from canaryd.subprocess import get_command_output
-from canaryd.log import logger, print_exception # noqa
 
 PLUGINS = []
 NAME_TO_PLUGIN = {}

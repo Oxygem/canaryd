@@ -1,4 +1,4 @@
-from canaryd.packages.click import ClickException
+from canaryd_packages.click import ClickException
 
 
 class CanarydError(ClickException):

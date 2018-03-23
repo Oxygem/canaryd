@@ -1,4 +1,4 @@
-from canaryd.packages import six  # noqa
+from canaryd_packages import six
 
 from canaryd.log import logger
 

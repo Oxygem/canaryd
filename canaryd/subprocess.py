@@ -2,13 +2,13 @@ import os
 import shlex
 import sys
 
-from canaryd.packages import six  # noqa
+from canaryd_packages import six
 
 from canaryd.log import logger
 
 
 if os.name == 'posix' and sys.version_info[0] < 3:
-    from canaryd.packages.subprocess32 import *  # noqa
+    from canaryd_packages.subprocess32 import *  # noqa
 else:
     from subprocess import *  # noqa
 

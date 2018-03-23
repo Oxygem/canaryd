@@ -1,4 +1,4 @@
-from canaryd.packages import six
+from canaryd_packages import six
 
 from canaryd.plugin import Plugin
 

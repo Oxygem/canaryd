@@ -1,6 +1,7 @@
 import re
 
-from canaryd.packages import six
+from canaryd_packages import six
+
 from canaryd.subprocess import get_command_output
 
 DEB_REGEX = r'^[a-z]+\s+([a-zA-Z0-9\+\-\.]+):?[a-zA-Z0-9]*\s+([a-zA-Z0-9:~\.\-\+]+).+$'

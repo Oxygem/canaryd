@@ -1,7 +1,7 @@
 from os import path
 
-from canaryd.packages import six
-from canaryd.packages.six.moves import shlex_quote
+from canaryd_packages import six
+from canaryd_packages.six.moves import shlex_quote
 
 from canaryd.plugin import Plugin
 from canaryd.script import get_scripts, get_scripts_directory

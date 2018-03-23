@@ -3,8 +3,9 @@ import socket
 from json import dumps as json_dumps, JSONEncoder
 from time import sleep
 
+from canaryd_packages import requests
+
 from canaryd.log import logger
-from canaryd.packages import requests
 from canaryd.settings import get_settings
 from canaryd.version import __version__
 

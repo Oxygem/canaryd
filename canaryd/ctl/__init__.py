@@ -9,7 +9,7 @@ import logging
 
 from os import path, system
 
-from canaryd.packages import click  # noqa
+from canaryd_packages import click, six
 
 from canaryd import remote
 
