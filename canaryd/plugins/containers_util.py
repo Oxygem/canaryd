@@ -9,6 +9,7 @@ def get_docker_containers():
     try:
         output = get_command_output(
             'docker inspect `docker ps -qa`',
+            shell=True,
         )
 
     # Either Docker is down or there are no containers
