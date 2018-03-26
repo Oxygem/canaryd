@@ -137,6 +137,15 @@ class Services(Plugin):
         return change.data and change.data.get('running')
 
     @staticmethod
+    def should_apply_change(change):
+        data_keys = list(six.iterkeys(change.data))
+
+        # If only up_ports changes, we don't want to generate an update - we'll
+        # generate any issues as needed below.
+        if len(data_keys) == 1 and data_keys[0] == 'up_ports':
+            return False
+
+    @staticmethod
     def get_action_for_change(change):
         if change.type != 'updated':
             return
@@ -151,13 +160,6 @@ class Services(Plugin):
 
         if 'pid' in change.data:
             return 'restarted'
-
-    @staticmethod
-    def should_apply_change(change):
-        # If only up_ports changes, we don't want to generate an update - we'll
-        # generate any issues as needed below.
-        if change.key == 'up_ports':
-            return False
 
     @staticmethod
     def generate_issues_from_change(change, settings):
