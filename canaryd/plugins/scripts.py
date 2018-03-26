@@ -76,10 +76,12 @@ class Scripts(Plugin):
         return results
 
     @staticmethod
-    def generate_issues_from_key_change(event_type, key, data_changes, settings):
+    def generate_issues_from_change(change, settings):
+        data_changes = change.data
+
         # If the script has been removed, resolve any leftover issues and exit.
         # (the delete event is still created).
-        if event_type == 'deleted':
+        if change.type == 'deleted':
             yield 'resolved', None, None
             return
 

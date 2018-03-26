@@ -160,7 +160,7 @@ class Monitor(Plugin):
         return data
 
     @staticmethod
-    def generate_issues_from_key_change(change, settings):
+    def generate_issues_from_change(change, settings):
         key = change.key
         event_type = change.type
         data_changes = change.data
@@ -193,7 +193,7 @@ class Monitor(Plugin):
                 900: '15 minutes',
             }
 
-            if time > 0:
+            if time and time > 0:
                 time_text = time_to_text[time]
 
                 if type_ == 'always':
