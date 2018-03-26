@@ -18,7 +18,7 @@ from canaryd.log import logger, setup_logging
 from canaryd.plugin import (
     get_and_prepare_working_plugins,
     get_plugin_by_name,
-    get_plugin_state,
+    get_plugin_states,
     get_plugins,
     prepare_plugin,
 )
@@ -130,7 +130,7 @@ will not function properly.
     if not key:
         click.echo('--> No key provided or set for this instance')
         click.echo('--> To sign up, input your email address, or blank to skip')
-        email_or_blank = raw_input('Email or blank: ')
+        email_or_blank = six.moves.input('Email or blank: ')
 
         if '@' not in email_or_blank:
             return False
@@ -163,7 +163,56 @@ will not function properly.
     return True
 
 
+def _print_plugin_states(states):
+    n_states = len(states)
+
+    for i, (plugin, status_data) in enumerate(states, 1):
+        click.echo('State for {0}:'.format(plugin))
+
+        status, data = status_data
+
+        if status:
+            print(json.dumps(
+                data,
+                cls=CanaryJSONEncoder,
+                indent=4,
+            ))
+        else:
+            raise CanarydError(click.style(
+                'Unexpected exception while getting {0} state: {1}({2})'.format(
+                    plugin.name,
+                    data.__class__.__name__,
+                    data,
+                ),
+                'red',
+                bold=True,
+            ))
+
+        if i < n_states:
+            click.echo()
+
+
+def _get_all_states(ctx, param, value):
+    if not value:
+        return
+
+    settings = get_settings()
+    plugins = get_and_prepare_working_plugins(settings)
+
+    states = get_plugin_states(plugins, settings)
+    _print_plugin_states(states)
+
+    ctx.exit()
+
+
 @main.command()
+@click.option(
+    '--all',
+    is_flag=True,
+    is_eager=True,
+    expose_value=False,
+    callback=_get_all_states,
+)
 @click.argument('plugin')
 def state(plugin):
     '''
@@ -191,26 +240,8 @@ def state(plugin):
             'yellow',
         ))
 
-    click.echo('State for {0}:'.format(plugin))
-
-    status, data = get_plugin_state(target_plugin, settings)
-
-    if status:
-        print(json.dumps(
-            data,
-            cls=CanaryJSONEncoder,
-            indent=4,
-        ))
-    else:
-        raise CanarydError(click.style(
-            'Unexpected exception while getting {0} state: {1}({2})'.format(
-                target_plugin.name,
-                data.__class__.__name__,
-                data,
-            ),
-            'red',
-            bold=True,
-        ))
+    states = get_plugin_states([target_plugin], settings)
+    _print_plugin_states(states)
 
 
 @main.command()
