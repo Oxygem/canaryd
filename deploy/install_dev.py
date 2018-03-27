@@ -1,11 +1,11 @@
-from pyinfra import inventory, state
+from pyinfra import host
 from pyinfra.modules import files, pkg, server
 
 SUDO = True
 
 
 # OpenBSD doesn't come with Python!
-with state.limit(inventory.get_host('@vagrant/openbsd58', [])):
+if host.name == '@vagrant/openbsd58':
     pkg.packages(
         {'Install Python 2.7'},
         'python-2.7',
