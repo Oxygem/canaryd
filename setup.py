@@ -76,7 +76,7 @@ setup_kwargs = {
             'init_scripts/*',
             'scripts/*',
         ],
-        'canaryd.packages.requests': [
+        'canaryd_packages.requests': [
             '*.pem',
         ],
     },

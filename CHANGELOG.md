@@ -1,3 +1,7 @@
+# v0.4.3
+
++ Fix location of `cacert.pem` now packages are under `canaryd_packages/`
+
 # v0.4.2
 
 + Fix issue generation for the `services` and `monitor` plugins
