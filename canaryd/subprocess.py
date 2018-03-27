@@ -16,16 +16,23 @@ else:
 def get_command_output(command, *args, **kwargs):
     logger.debug('Executing command: {0}'.format(command))
 
-    if not kwargs.get('shell', False):
-        if isinstance(command, six.text_type):
-            command = command.encode()
+    if isinstance(command, six.binary_type):
+        command = command.decode()
 
-        if not isinstance(command, (list, tuple)):
+    if (
+        not kwargs.get('shell', False)
+        and not isinstance(command, (list, tuple))
+    ):
             command = shlex.split(command)
 
-    return check_output(  # noqa
+    output = check_output(  # noqa
         command,
         close_fds=True,
         stderr=STDOUT,  # noqa
         *args, **kwargs
     )
+
+    if isinstance(output, six.binary_type):
+        output = output.decode()
+
+    return output
