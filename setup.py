@@ -38,7 +38,7 @@ TEST_REQUIRES = (
     'jsontest==1.3',
     'coverage==4.5.1',
     'mock==1.3.0',
-    'dictdiffer==0.7.0',
+    'dictdiffer==0.6.1',
 )
 
 DEV_REQUIRES = TEST_REQUIRES + (
