@@ -1,3 +1,11 @@
+# v0.4.2
+
++ Fix issue generation for the `services` and `monitor` plugins
++ Fix Docker container inspection
++ Add `--all` option to `canaryctl state`
++ Add unit tests for plugins
++ Add `.travis.yml`/Travis tests
+
 # 0.4.1
 
 + Fix monitor plugin CPU/IOWait collection
