@@ -1,19 +1,8 @@
+from distutils.spawn import find_executable
 from os import path
 from pkgutil import get_data
 
 from canaryd_packages import click
-
-from canaryd.subprocess import CalledProcessError, get_command_output
-
-
-def which(command):
-    try:
-        return get_command_output(
-            'which {0}'.format(command),
-        ).strip()
-
-    except (CalledProcessError, OSError):
-        pass
 
 
 def write_script(script_path, script):
@@ -21,7 +10,7 @@ def write_script(script_path, script):
     script = script.decode('utf-8')
 
     # Swap in the location of canaryd
-    canaryd_location = which('canaryd')
+    canaryd_location = find_executable('canaryd')
     script = script.replace('CANARYD_LOCATION', canaryd_location)
 
     # Write the init system script
@@ -36,21 +25,21 @@ def install_service():
     enable_command = None
 
     # OSX/Darwin
-    if which('launchctl'):
+    if find_executable('launchctl'):
         script = get_data('canaryd', path.join('init_scripts', 'com.oxygem.canaryd.plist'))
         script_path = path.join('/', 'Library', 'LaunchDaemons', 'com.oxygem.canaryd.plist')
         start_command = 'launchctl load {0}'.format(script_path)
         enable_command = 'launchctl enable system/com.oxygem.canaryd'
 
     # Systemd
-    elif which('systemctl'):
+    elif find_executable('systemctl'):
         script = get_data('canaryd', path.join('init_scripts', 'canaryd.service'))
         script_path = path.join('/', 'etc', 'systemd', 'system', 'canaryd.service')
         start_command = 'systemctl start canaryd.service'
         enable_command = 'systemctl enable canaryd.service'
 
     # Upstart
-    elif which('initctl'):
+    elif find_executable('initctl'):
         script = get_data('canaryd', path.join('init_scripts', 'canaryd.conf'))
         script_path = path.join('/', 'etc', 'init', 'canaryd.conf')
         start_command = 'initctl start canaryd'
@@ -61,10 +50,10 @@ def install_service():
         script_path = path.join('/', 'etc', 'init.d', 'canaryd')
         start_command = 'chmod +x /etc/init.d/canaryd && /etc/init.d/canaryd start'
 
-        if which('update-rc.d'):
+        if find_executable('update-rc.d'):
             enable_command = 'update-rc.d canaryd defaults'
 
-        elif which('chkconfig'):
+        elif find_executable('chkconfig'):
             enable_command = 'chkconfig canaryd on'
 
     write_script(script_path, script)
