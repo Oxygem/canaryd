@@ -12,7 +12,6 @@ from os import path, system
 from canaryd_packages import click, six
 
 from canaryd import remote
-
 from canaryd.exceptions import CanarydError
 from canaryd.log import logger, setup_logging
 from canaryd.plugin import (
@@ -23,7 +22,6 @@ from canaryd.plugin import (
     prepare_plugin,
 )
 from canaryd.remote import ApiError, CanaryJSONEncoder, create_event
-
 from canaryd.settings import (
     ensure_config_directory,
     get_config_directory,
