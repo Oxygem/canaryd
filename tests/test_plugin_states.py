@@ -12,18 +12,9 @@ from canaryd.plugin import get_plugin_by_name
 
 
 class TestPluginRealStates(TestCase):
-    def run_plugin(self, plugin_name):
-        plugin = get_plugin_by_name(plugin_name)
-        plugin.get_state({})
-
     def test_meta_plugin(self):
-        self.run_plugin('meta')
-
-    def test_services_plugin(self):
-        self.run_plugin('services')
-
-    def test_containers_plugin(self):
-        self.run_plugin('containers')
+        plugin = get_plugin_by_name('meta')
+        plugin.get_state({})
 
 
 @six.add_metaclass(JsonTest)
