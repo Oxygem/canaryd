@@ -58,6 +58,6 @@ class Users(Plugin):
 
         for user_data in six.itervalues(users):
             if 'groups' in user_data:
-                user_data['groups'] = list(user_data['groups'])
+                user_data['groups'] = sorted(list(user_data['groups']))
 
         return users
