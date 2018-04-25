@@ -39,6 +39,10 @@ def get_uptime():
                 match = re.search('([0-9]+)\s+day', duration)
                 days = int(match.group(1))
 
+            if 'hr' in duration:
+                match = re.search('([0-9]+)\s+hr', duration)
+                hours = int(match.group(1))
+
             if ':' in duration:
                 match = re.search('([0-9]+):([0-9]+)', duration)
                 hours = int(match.group(1))
@@ -107,11 +111,7 @@ class Meta(Plugin):
 
             up = ensure_datetime(new_up)
 
-            if (previous_up < up):
-                return True
-            else:
-                return False
-
+            return previous_up < up
         return True
 
     @staticmethod
