@@ -1,3 +1,10 @@
+# v0.4.4
+
++ Add `X hr` support parsing uptime in the meta plugin
++ Sort user groups consistently
++ Fix timeout handling so we correctly cleanup any commands that timed out
++ Fix timed rotating log handling
+
 # v0.4.3
 
 + Fix location of `cacert.pem` now packages are under `canaryd_packages/`
