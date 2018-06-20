@@ -28,7 +28,7 @@ def get_pid_to_listens(timeout):
     lines = output.splitlines()
 
     for line in lines[2:]:
-        bits = line.split()
+        bits = line.split(None, 6)
         proto, _, _, local_address, _, _, program = bits
 
         # Get the pid from PID/PROGRAM
