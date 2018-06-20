@@ -9,6 +9,7 @@ from mock import patch
 from canaryd_packages import six
 
 from canaryd.plugin import get_plugin_by_name
+from canaryd.settings import CanarydSettings
 
 
 class TestPluginRealStates(TestCase):
@@ -20,6 +21,7 @@ class TestPluginRealStates(TestCase):
 @six.add_metaclass(JsonTest)
 class TestPluginStates(TestCase):
     jsontest_files = path.join('tests/plugins')
+    test_settings = CanarydSettings()
 
     @contextmanager
     def patch_commands(self, commands):
@@ -47,7 +49,7 @@ class TestPluginStates(TestCase):
         plugin = get_plugin_by_name(test_data['plugin'])
 
         with self.patch_commands(test_data['commands']):
-            state = plugin.get_state({})
+            state = plugin.get_state(self.test_settings)
 
         try:
             self.assertEqual(state, test_data['state'])
