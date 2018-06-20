@@ -33,6 +33,6 @@ def get_command_output(command, *args, **kwargs):
 
     if isinstance(output, six.binary_type):
         encoding = chardet.detect(output)['encoding']
-        output = output.decode(encoding=encoding)
+        output = output.decode(encoding)
 
     return output
