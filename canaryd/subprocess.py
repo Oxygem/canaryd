@@ -3,6 +3,8 @@ import shlex
 import sys
 
 from canaryd_packages import six
+# Not ideal but using the vendored in (to requests) chardet package
+from canaryd_packages.requests.packages import chardet
 
 from canaryd.log import logger
 
@@ -30,6 +32,7 @@ def get_command_output(command, *args, **kwargs):
     )
 
     if isinstance(output, six.binary_type):
-        output = output.decode()
+        encoding = chardet.detect(output)['encoding']
+        output = output.decode(encoding=encoding)
 
     return output
