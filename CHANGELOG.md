@@ -1,3 +1,9 @@
+# v0.4.5
+
++ Use `chardet` package to improve decoding of command output
++ Fix supervisor service PID not being an integer
++ Fix splitting of `lsof` to find listen ports for a PID
+
 # v0.4.4
 
 + Add `X hr` support parsing uptime in the meta plugin
