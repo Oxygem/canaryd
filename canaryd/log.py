@@ -115,7 +115,7 @@ def setup_logging_from_settings(settings):
         elif isinstance(rotation, six.string_types):
             handler = logging.handlers.TimedRotatingFileHandler(
                 settings.log_file,
-                maxBytes=rotation,
+                when=rotation,
                 backupCount=count,
             )
 
