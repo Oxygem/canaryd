@@ -90,7 +90,6 @@ class Plugin(object):
         return int(round(settings.collect_interval_s / 2))
 
     def get_state(self, settings):
-
         data = get_command_output(
             self.command,
             timeout=self.get_timeout(settings),
