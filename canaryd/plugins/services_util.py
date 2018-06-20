@@ -277,7 +277,7 @@ def get_supervisor_services(timeout):
 
             services[name] = {
                 'running': status == 'RUNNING',
-                'pid': pid,
+                'pid': int(pid),
                 'init_system': 'supervisor',
             }
 
