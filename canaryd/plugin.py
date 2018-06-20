@@ -62,9 +62,6 @@ class Plugin(object):
     class PrepareError(Exception):
         pass
 
-    class TimeoutError(Exception):
-        pass
-
     def __repr__(self):
         return 'Plugin: {0}'.format(self.name)
 
@@ -88,9 +85,15 @@ class Plugin(object):
     def generate_issues_from_change(change, settings):
         pass
 
+    def get_timeout(self, settings):
+        # Set an alarm: a plugin can only run for MAX half the interval time
+        return int(round(settings.collect_interval_s / 2))
+
     def get_state(self, settings):
+
         data = get_command_output(
             self.command,
+            timeout=self.get_timeout(settings),
         )
 
         return self.parse(data)
@@ -277,15 +280,7 @@ def get_plugin_state(plugin, settings):
     Gets state output from a single plugin.
     '''
 
-    def _handle_timeout(signum, frame):
-        raise plugin.TimeoutError()
-
     logger.debug('Running plugin: {0}'.format(plugin))
-
-    # Set an alarm: a plugin can only run for MAX half the interval time
-    max_time = int(round(settings.collect_interval_s / 2))
-    signal.signal(signal.SIGALRM, _handle_timeout)
-    signal.alarm(max_time)
 
     status = False
     state = None
@@ -293,10 +288,6 @@ def get_plugin_state(plugin, settings):
     try:
         state = plugin.get_state(settings)
         status = True
-
-    except plugin.TimeoutError as e:
-        logger.warning('Timeout running plugin: {0}'.format(plugin))
-        state = e
 
     except Exception as e:
         logger.warning('Error running plugin: {0}: {1}'.format(plugin, e))

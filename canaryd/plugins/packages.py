@@ -33,12 +33,12 @@ class Packages(Plugin):
         ):
             raise OSError('No container commands found: {0}'.format(commands))
 
-    @staticmethod
-    def get_state(settings):
+    def get_state(self, settings):
         packages = {}
+        timeout = self.get_timeout(settings)
 
         for command, func in six.iteritems(COMMAND_TO_FUNC):
             if find_executable(command):
-                packages.update(func())
+                packages.update(func(timeout=timeout))
 
         return packages

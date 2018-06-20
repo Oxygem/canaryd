@@ -53,13 +53,13 @@ class Containers(Plugin):
         ):
             raise OSError('No container commands found: {0}'.format(commands))
 
-    @staticmethod
-    def get_state(settings):
+    def get_state(self, settings):
         containers = {}
+        timeout = self.get_timeout(settings)
 
         for command, func in six.iteritems(COMMAND_TO_FUNC):
             if find_executable(command):
-                containers.update(func())
+                containers.update(func(timeout=timeout))
 
         return dict(
             (key, make_container_data(data))

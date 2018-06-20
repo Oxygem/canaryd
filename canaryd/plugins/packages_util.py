@@ -9,8 +9,11 @@ RPM_REGEX = r'^([a-zA-Z0-9_\-\+]+)\-([0-9a-z\.\-]+)\.[a-z0-9_\.]+$'
 PKG_REGEX = r'^([a-zA-Z0-9_\-\+]+)\-([0-9a-z\.]+)'
 
 
-def parse_packages(package_type, command, regex, lower=True):
-    output = get_command_output(command)
+def get_parse_packages(timeout, package_type, command, regex, lower=True):
+    output = get_command_output(
+        command,
+        timeout=timeout,
+    )
 
     packages = {}
 
@@ -35,13 +38,13 @@ def parse_packages(package_type, command, regex, lower=True):
     )
 
 
-def get_deb_packages():
-    return parse_packages('deb', 'dpkg -l', DEB_REGEX)
+def get_deb_packages(timeout):
+    return get_parse_packages(timeout, 'deb', 'dpkg -l', DEB_REGEX)
 
 
-def get_rpm_packages():
-    return parse_packages('rpm', 'rpm -qa', RPM_REGEX)
+def get_rpm_packages(timeout):
+    return get_parse_packages(timeout, 'rpm', 'rpm -qa', RPM_REGEX)
 
 
-def get_pkg_packages():
-    return parse_packages('pkg', 'pkg_info', PKG_REGEX)
+def get_pkg_packages(timeout):
+    return get_parse_packages(timeout, 'pkg', 'pkg_info', PKG_REGEX)

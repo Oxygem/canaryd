@@ -17,11 +17,12 @@ INITD_USAGE_REGEX = re.compile(r'Usage:[^\n]+status')
 IGNORE_INIT_SCRIPTS = []
 
 
-def get_pid_to_listens():
+def get_pid_to_listens(timeout):
     pid_to_ports = {}
 
     output = get_command_output(
         'netstat -plnt',
+        timeout=timeout,
     )
 
     lines = output.splitlines()
@@ -45,13 +46,14 @@ def get_pid_to_listens():
     return pid_to_ports
 
 
-def get_launchd_services():
+def get_launchd_services(timeout):
     '''
     Execute & parse ``launchctl list``.
     '''
 
     output = get_command_output(
         'launchctl list',
+        timeout=timeout,
     )
 
     services = {}
@@ -88,7 +90,7 @@ def get_launchd_services():
     return services
 
 
-def get_initd_services(existing_services=None):
+def get_initd_services(existing_services, timeout):
     existing_services = existing_services or []
 
     init_dir = path.join(os_sep, 'etc', 'init.d')
@@ -116,7 +118,10 @@ def get_initd_services(existing_services=None):
         status = False
 
         try:
-            get_command_output((script_path, 'status'))
+            get_command_output(
+                (script_path, 'status'),
+                timeout=timeout,
+            )
             status = True
 
         except (OSError, CalledProcessError):
@@ -134,6 +139,7 @@ def get_initd_services(existing_services=None):
                 head -n 1
                 '''.format(name),
                 shell=True,
+                timeout=timeout,
             )
         except CalledProcessError:
             raise
@@ -151,6 +157,7 @@ def get_initd_services(existing_services=None):
         try:
             found_links = get_command_output(
                 'find /etc/rc*.d/S*{0} -type l'.format(name),
+                timeout=timeout,
             )
 
             if found_links.strip():
@@ -169,9 +176,10 @@ def get_initd_services(existing_services=None):
     return services
 
 
-def get_systemd_services():
+def get_systemd_services(timeout):
     output = get_command_output(
         'systemctl -alt service list-units',
+        timeout=timeout,
     )
 
     services = {}
@@ -212,9 +220,10 @@ def get_systemd_services():
     return services
 
 
-def get_upstart_services():
+def get_upstart_services(timeout):
     output = get_command_output(
         'initctl list',
+        timeout=timeout,
     )
 
     services = {}
@@ -250,9 +259,10 @@ def get_upstart_services():
     return services
 
 
-def get_supervisor_services():
+def get_supervisor_services(timeout):
     output = get_command_output(
         'supervisorctl status',
+        timeout=timeout,
     )
 
     services = {}

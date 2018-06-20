@@ -85,24 +85,24 @@ class Services(Plugin):
         ):
             raise OSError('No container commands found: {0}'.format(commands))
 
-    @staticmethod
-    def get_state(settings):
+    def get_state(self, settings):
         services = {}
+        timeout = self.get_timeout(settings)
 
         for command, func in six.iteritems(COMMAND_TO_FUNC):
             if find_executable(command):
-                services.update(func())
+                services.update(func(timeout=timeout))
 
         if path.exists(path.join(os_sep, 'etc', 'init.d')):
             services.update(
                 # Pass existing services to avoid overhead of running all the
                 # init.d status scripts.
-                get_initd_services(existing_services=services),
+                get_initd_services(existing_services=services, timeout=timeout),
             )
 
         # Get mapping of PID -> listening ports
         try:
-            pid_to_listens = get_pid_to_listens()
+            pid_to_listens = get_pid_to_listens(timeout=timeout)
 
         except (CalledProcessError, OSError):
             pass
