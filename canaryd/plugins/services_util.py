@@ -8,7 +8,10 @@ from canaryd.subprocess import CalledProcessError, get_command_output
 # lifecycle - and as such any events generated are not of use.
 LAUNCHCTL_IGNORE_NAMES = ('oneshot', 'mdworker', 'mbfloagent')
 
+# Systemd service types to ignore
+SYSTEMD_IGNORE_TYPES = ('oneshot',)
 SYSTEMD_REGEX = r'^([a-z\-]+)\.service\s+[a-z\-]+\s+[a-z]+\s+([a-z]+)'
+
 UPSTART_REGEX = r'^([a-z\-]+) [a-z]+\/([a-z]+),?\s?(process)?\s?([0-9]+)?'
 SUPERVISOR_REGEX = r'([a-z\-]+)\s+([A-Z]+)\s+pid\s([0-9]+)'
 
@@ -199,6 +202,9 @@ def get_systemd_services(timeout):
             for line in service_output.splitlines():
                 key, value = line.split('=', 1)
                 service_meta[key] = value
+
+            if service_meta.get('Type') in SYSTEMD_IGNORE_TYPES:
+                continue
 
             pid = service_meta.get(
                 'ExecMainPID',
