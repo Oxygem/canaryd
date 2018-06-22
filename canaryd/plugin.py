@@ -5,7 +5,6 @@
 from __future__ import division
 
 import re
-import signal
 
 from distutils.spawn import find_executable
 from glob import glob
@@ -292,10 +291,6 @@ def get_plugin_state(plugin, settings):
         logger.warning('Error running plugin: {0}: {1}'.format(plugin, e))
         print_exception()
         state = e
-
-    # Always reset the alarm
-    finally:
-        signal.alarm(0)
 
     # Validate the state
     if status:
