@@ -1,5 +1,6 @@
 import re
 
+from collections import defaultdict
 from os import listdir, path, sep as os_sep
 
 from canaryd.subprocess import CalledProcessError, get_command_output
@@ -19,34 +20,45 @@ INITD_REGEX = r'([a-zA-Z0-9\-]+)=([0-9]+)=([0-9]+)?'
 INITD_USAGE_REGEX = re.compile(r'Usage:[^\n]+status')
 IGNORE_INIT_SCRIPTS = []
 
+# We *require* procfs to check PID -> port mappings
+HAS_PROCFS = path.exists('/proc')
+PID_TO_PORTS = defaultdict(set)
+
 
 def get_pid_to_listens(timeout):
-    pid_to_ports = {}
+    if not HAS_PROCFS:
+        return PID_TO_PORTS
 
+    # Loop through the results and cleanup any PIDs that don't exist
+    for pid in list(PID_TO_PORTS.keys()):
+        if not path.exists('/proc/{0}'.format(pid)):
+            PID_TO_PORTS.pop(pid)
+
+    # Now get/update our PID -> port mapping
     output = get_command_output(
-        'netstat -plnt',
+        'lsof -i -n -P -s TCP:LISTEN',
         timeout=timeout,
     )
 
-    lines = output.splitlines()
+    for line in output.splitlines():
+        bits = line.split(None, 9)
 
-    for line in lines[2:]:
-        bits = line.split(None, 6)
-        proto, _, _, local_address, _, _, program = bits
+        if bits[-1] != '(LISTEN)':
+            continue
 
-        # Get the pid from PID/PROGRAM
-        pid = program.split('/')[0]
+        _, pid, _, _, ip_type, _, _, _, ip_host, _ = bits
+
+        ip_type = ip_type.lower()
         pid = int(pid)
 
         # Work out the host:port bit
-        host, port = local_address.rsplit(':', 1)
+        host, port = ip_host.rsplit(':', 1)
         port = int(port)
 
-        ip_type = 'ipv6' if proto == 'tcp6' else 'ipv4'
+        host_port_tuple = (ip_type, host, port)
+        PID_TO_PORTS[pid].add(host_port_tuple)
 
-        pid_to_ports.setdefault(pid, set()).add((ip_type, host, port))
-
-    return pid_to_ports
+    return PID_TO_PORTS
 
 
 def get_launchd_services(timeout):
