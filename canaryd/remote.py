@@ -81,23 +81,25 @@ def get_session():
     return SESSION
 
 
-def make_states_dict(states):
-    states_dict = {}
+def make_sync_or_changes_dict(states):
+    plugin_to_state = {}
 
     for plugin, (status, state) in states:
-        if status:
-            states_dict[plugin.name] = state
+        # Plugin ran OK - just attach any state
+        if status is True:
+            plugin_to_state[plugin.name] = state
 
-    return states_dict
+        # Plugin ran OK but needs to SYNC with the server, sending a full state
+        # or the plugin failed to run, send exception data
+        elif status in ('SYNC', 'ERROR'):
+            plugin_to_state[plugin.name] = (status, state)
 
+        else:
+            raise TypeError('Unknown status for {0} plugin: {1}/{2}'.format(
+                plugin.name, status, state,
+            ))
 
-def make_changes_dict(states):
-    states_dict = {}
-    for plugin, (status, changes) in states:
-        if status:
-            states_dict[plugin.name] = changes
-
-    return states_dict
+    return plugin_to_state
 
 
 def make_api_request(
@@ -205,7 +207,7 @@ def sync_states(states, settings):
 
     return _upload_states_return_settings(
         'server/{0}/sync'.format(settings.server_id),
-        make_states_dict(states),
+        make_sync_or_changes_dict(states),
         settings,
         json={
             'hostname': socket.gethostname(),
@@ -214,14 +216,14 @@ def sync_states(states, settings):
     )
 
 
-def upload_state_changes(states, settings):
+def upload_state_changes(state_changes, settings):
     '''
     Uploads partial state to api.servicecanary.com.
     '''
 
     return _upload_states_return_settings(
         'server/{0}/state'.format(settings.server_id),
-        make_changes_dict(states),
+        make_sync_or_changes_dict(state_changes),
         settings,
     )
 

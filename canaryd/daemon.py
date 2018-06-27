@@ -32,21 +32,39 @@ def _daemon_loop(previous_states, settings):
     for plugin, status_data in states:
         status, data = status_data
 
+        # Plugin ran OK and we have state!
         if status:
-            state_diff = get_state_diff(
-                plugin, data,
-                previous_states.get(plugin, {}),
-            )
+            previous_state = previous_states.get(plugin, {})
 
-            state_changes.append((plugin, (status, state_diff)))
+            # If the previous state was good - ie not an Exception instance - this
+            # prevents first-failing then working plugin from generating addition
+            # events on first successful run.
+            if isinstance(previous_state, dict):
+                state_diff = get_state_diff(plugin, data, previous_state)
+                state_changes.append((plugin, (status, state_diff)))
 
+            # Because we don't know the previous working state, send the whole
+            # state obj to the server to diff, like the initial sync.
+            else:
+                state_changes.append((plugin, ('SYNC', data)))
+
+            # Set the previous state
             previous_states[plugin] = data
+
+        # Plugin raised an exception, fail!
         else:
             logger.critical((
                 'Unexpected exception while getting {0} state: '
                 '{1}({2})'
             ).format(plugin.name, data.__class__.__name__, data))
-            continue
+
+            # Send the failed exception to the server, generating a warning
+            exception_data = {
+                'class': data.__class__.__name__,
+                'message': '{0}'.format(data),
+                'traceback': getattr(data, '_traceback'),
+            }
+            state_changes.append((plugin, ('ERROR', exception_data)))
 
     logger.info('Uploading state changes...')
 

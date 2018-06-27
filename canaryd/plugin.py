@@ -5,6 +5,7 @@
 from __future__ import division
 
 import re
+import traceback
 
 from distutils.spawn import find_executable
 from glob import glob
@@ -290,6 +291,8 @@ def get_plugin_state(plugin, settings):
     except Exception as e:
         logger.warning('Error running plugin: {0}: {1}'.format(plugin, e))
         print_exception()
+        # Attach the tracback to the exception before returning as state
+        e._traceback = traceback.format_exc()
         state = e
 
     # Validate the state

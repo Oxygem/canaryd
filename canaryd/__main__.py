@@ -91,7 +91,6 @@ def main(verbose, debug):
     previous_states = dict(
         (plugin, status_data[1])
         for plugin, status_data in states
-        if status_data[0]
     )
 
     run_daemon(previous_states, settings, start_time=start_time)
