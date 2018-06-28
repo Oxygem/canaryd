@@ -41,6 +41,10 @@ def get_pid_to_listens(timeout):
     )
 
     for line in output.splitlines():
+        # Ignore "no pwd entry..." lines
+        if line.startswith('lsof:'):
+            continue
+
         bits = line.split(None, 9)
 
         if bits[-1] != '(LISTEN)':
