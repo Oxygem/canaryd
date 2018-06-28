@@ -1,3 +1,9 @@
+# v0.5.1
+
++ Ignore plugin exceptions on initial first run (potentially during system init)
++ Fix for error lines in lsof output (tracking service ports)
+
+
 # v0.5
 
 + Extend the state daemon to handle/track plugin failures
