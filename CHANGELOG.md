@@ -1,3 +1,13 @@
+# v0.5
+
++ Extend the state daemon to handle/track plugin failures
+    - Uses the latest `canary_server` updates
+    - Handle plugins transitioning from broken -> working gracefully
++ Fix for systemd: ignore oneshot type services
++ Fix for service ports temporarily dissappearing
++ Fix when decoding command output in Python 2.6
+
+
 # v0.4.5
 
 + Use `chardet` package to improve decoding of command output
