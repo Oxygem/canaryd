@@ -48,9 +48,6 @@ def _daemon_loop(previous_states, settings):
             else:
                 state_changes.append((plugin, ('SYNC', data)))
 
-            # Set the previous state
-            previous_states[plugin] = data
-
         # Plugin raised an exception, fail!
         else:
             logger.critical((
@@ -65,6 +62,10 @@ def _daemon_loop(previous_states, settings):
                 'traceback': getattr(data, '_traceback'),
             }
             state_changes.append((plugin, ('ERROR', exception_data)))
+
+        # Always set the previous state - this means if we errored the next time
+        # we succeed we'll do a SYNC with the server.
+        previous_states[plugin] = data
 
     logger.info('Uploading state changes...')
 
