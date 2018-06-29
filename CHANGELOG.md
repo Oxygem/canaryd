@@ -1,3 +1,8 @@
+# v0.5.3
+
++ Improve capture of `init.d` process PIDs
++ More fixes for parsing `lsof`!
+
 # v0.5.2
 
 + Always set previous state, even if we failed
