@@ -18,6 +18,7 @@ UPSTART_REGEX = re.compile(r'^([a-z\-]+) [a-z]+\/([a-z]+),?\s?(process)?\s?([0-9
 SUPERVISOR_REGEX = re.compile(r'([a-z\-]+)\s+([A-Z]+)\s+pid\s([0-9]+)')
 
 INITD_USAGE_REGEX = re.compile(r'Usage:[^\n]+status')
+INITD_STATUS_REGEX = re.compile(r'\(pid\s+([0-9]+)\)')
 IGNORE_INIT_SCRIPTS = []
 
 # We *require* procfs to check PID -> port mappings
@@ -133,40 +134,21 @@ def get_initd_services(existing_services, timeout):
 
         # Get the status
         status = False
+        pid = None
 
         try:
-            get_command_output(
+            status_line = get_command_output(
                 (script_path, 'status'),
                 timeout=timeout,
             )
             status = True
 
+            matches = INITD_STATUS_REGEX.search(status_line)
+            if matches:
+                pid = int(matches.group(1))
+
         except (OSError, CalledProcessError):
             pass
-
-        # Get the PID
-        pid = None
-        pid_line = None
-
-        try:
-            pid_line = get_command_output(
-                '''
-                ps --ppid 1 -o 'tty,pid,comm' | \
-                grep '^\?.*\s{0}.*$' | \
-                head -n 1
-                '''.format(name),
-                shell=True,
-                timeout=timeout,
-            )
-        except CalledProcessError:
-            raise
-
-        if pid_line:
-            bits = pid_line.strip().split()
-            try:
-                pid = int(bits[-2])
-            except (TypeError, ValueError):
-                raise
 
         # Check if enabled
         enabled = False
