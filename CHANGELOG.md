@@ -1,3 +1,9 @@
+# v0.5.2
+
++ Always set previous state, even if we failed
++ Skip invalid lsof lines
++ Fix cleaning up deleted items in hardware plugin
+
 # v0.5.1
 
 + Ignore plugin exceptions on initial first run (potentially during system init)
