@@ -47,10 +47,10 @@ def get_pid_to_listens(timeout):
 
         bits = line.split(None, 9)
 
-        if bits[-1] != '(LISTEN)':
+        try:
+            _, pid, _, _, ip_type, _, _, _, ip_host, _ = bits
+        except ValueError:
             continue
-
-        _, pid, _, _, ip_type, _, _, _, ip_host, _ = bits
 
         ip_type = ip_type.lower()
         pid = int(pid)
