@@ -3,6 +3,7 @@ import re
 from collections import defaultdict
 from os import listdir, path, sep as os_sep
 
+from canaryd.log import logger
 from canaryd.subprocess import CalledProcessError, get_command_output
 
 # We ignore these as they regularly get deleted/added as part of normal OSX
@@ -41,26 +42,24 @@ def get_pid_to_listens(timeout):
     )
 
     for line in output.splitlines():
-        # Ignore "no pwd entry..." lines
-        if line.startswith('lsof:'):
+        # Skip bad/error lines
+        if 'no pwd entry' in line:
             continue
-
-        bits = line.split(None, 9)
 
         try:
-            _, pid, _, _, ip_type, _, _, _, ip_host, _ = bits
+            _, pid, _, _, ip_type, _, _, _, ip_host, _ = line.split(None, 9)
+
+            ip_type = ip_type.lower()
+            pid = int(pid)
+
+            # Work out the host:port bit
+            host, port = ip_host.rsplit(':', 1)
+            port = int(port)
+
+            host_port_tuple = (ip_type, host, port)
+            PID_TO_PORTS[pid].add(host_port_tuple)
         except ValueError:
-            continue
-
-        ip_type = ip_type.lower()
-        pid = int(pid)
-
-        # Work out the host:port bit
-        host, port = ip_host.rsplit(':', 1)
-        port = int(port)
-
-        host_port_tuple = (ip_type, host, port)
-        PID_TO_PORTS[pid].add(host_port_tuple)
+            logger.warning('Dodgy lsof line ignored: "{0}"'.format(line))
 
     return PID_TO_PORTS
 
