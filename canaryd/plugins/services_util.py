@@ -12,12 +12,11 @@ LAUNCHCTL_IGNORE_NAMES = ('oneshot', 'mdworker', 'mbfloagent')
 
 # Systemd service types to ignore
 SYSTEMD_IGNORE_TYPES = ('oneshot',)
-SYSTEMD_REGEX = r'^([a-z\-]+)\.service\s+[a-z\-]+\s+[a-z]+\s+([a-z]+)'
+SYSTEMD_REGEX = re.compile(r'^([a-z\-]+)\.service\s+[a-z\-]+\s+[a-z]+\s+([a-z]+)')
 
-UPSTART_REGEX = r'^([a-z\-]+) [a-z]+\/([a-z]+),?\s?(process)?\s?([0-9]+)?'
-SUPERVISOR_REGEX = r'([a-z\-]+)\s+([A-Z]+)\s+pid\s([0-9]+)'
+UPSTART_REGEX = re.compile(r'^([a-z\-]+) [a-z]+\/([a-z]+),?\s?(process)?\s?([0-9]+)?')
+SUPERVISOR_REGEX = re.compile(r'([a-z\-]+)\s+([A-Z]+)\s+pid\s([0-9]+)')
 
-INITD_REGEX = r'([a-zA-Z0-9\-]+)=([0-9]+)=([0-9]+)?'
 INITD_USAGE_REGEX = re.compile(r'Usage:[^\n]+status')
 IGNORE_INIT_SCRIPTS = []
 
@@ -203,40 +202,41 @@ def get_systemd_services(timeout):
     services = {}
 
     for line in output.splitlines():
-        line = line.strip()
-        matches = re.match(SYSTEMD_REGEX, line)
-        if matches:
-            name = matches.group(1)
+        matches = SYSTEMD_REGEX.match(line.strip())
+        if not matches:
+            continue
 
-            # Get service info to extract pid/enabled status
-            service_output = get_command_output(
-                'systemctl show {0}.service'.format(name),
-            )
+        name = matches.group(1)
 
-            service_meta = {}
-            for line in service_output.splitlines():
-                key, value = line.split('=', 1)
-                service_meta[key] = value
+        # Get service info to extract pid/enabled status
+        service_output = get_command_output(
+            'systemctl show {0}.service'.format(name),
+        )
 
-            if service_meta.get('Type') in SYSTEMD_IGNORE_TYPES:
-                continue
+        service_meta = {}
+        for line in service_output.splitlines():
+            key, value = line.split('=', 1)
+            service_meta[key] = value
 
-            pid = service_meta.get(
-                'ExecMainPID',
-                service_meta.get('MainPID', None),
-            )
+        if service_meta.get('Type') in SYSTEMD_IGNORE_TYPES:
+            continue
 
-            if pid:
-                pid = int(pid)
+        pid = service_meta.get(
+            'ExecMainPID',
+            service_meta.get('MainPID', None),
+        )
 
-            enabled = service_meta.get('UnitFileState') == 'enabled'
+        if pid:
+            pid = int(pid)
 
-            services[name] = {
-                'running': matches.group(2) == 'running',
-                'pid': pid,
-                'enabled': enabled,
-                'init_system': 'systemd',
-            }
+        enabled = service_meta.get('UnitFileState') == 'enabled'
+
+        services[name] = {
+            'running': matches.group(2) == 'running',
+            'pid': pid,
+            'enabled': enabled,
+            'init_system': 'systemd',
+        }
 
     return services
 
@@ -250,32 +250,34 @@ def get_upstart_services(timeout):
     services = {}
 
     for line in output.splitlines():
-        matches = re.match(UPSTART_REGEX, line)
-        if matches:
-            name = matches.group(1)
-            pid = matches.group(4)
+        matches = UPSTART_REGEX.match(line)
+        if not matches:
+            continue
 
-            if pid:
-                pid = int(pid)
+        name = matches.group(1)
+        pid = matches.group(4)
 
-            enabled = True
+        if pid:
+            pid = int(pid)
 
-            # Check if enabled by looking in any override file
-            override_filename = path.join(
-                os_sep, 'etc', 'init',
-                '{0}.override'.format(name),
-            )
-            if path.exists(override_filename):
-                with open(override_filename) as script:
-                    if 'manual' in script.read():
-                        enabled = False
+        enabled = True
 
-            services[name] = {
-                'running': matches.group(2) == 'running',
-                'pid': pid,
-                'enabled': enabled,
-                'init_system': 'upstart',
-            }
+        # Check if enabled by looking in any override file
+        override_filename = path.join(
+            os_sep, 'etc', 'init',
+            '{0}.override'.format(name),
+        )
+        if path.exists(override_filename):
+            with open(override_filename) as script:
+                if 'manual' in script.read():
+                    enabled = False
+
+        services[name] = {
+            'running': matches.group(2) == 'running',
+            'pid': pid,
+            'enabled': enabled,
+            'init_system': 'upstart',
+        }
 
     return services
 
@@ -289,17 +291,18 @@ def get_supervisor_services(timeout):
     services = {}
 
     for line in output.splitlines():
-        matches = re.match(SUPERVISOR_REGEX, line)
+        matches = SUPERVISOR_REGEX.match(line)
+        if not matches:
+            continue
 
-        if matches:
-            name = matches.group(1)
-            status = matches.group(2)
-            pid = matches.group(3)
+        name = matches.group(1)
+        status = matches.group(2)
+        pid = matches.group(3)
 
-            services[name] = {
-                'running': status == 'RUNNING',
-                'pid': int(pid),
-                'init_system': 'supervisor',
-            }
+        services[name] = {
+            'running': status == 'RUNNING',
+            'pid': int(pid),
+            'init_system': 'supervisor',
+        }
 
     return services
