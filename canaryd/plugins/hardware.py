@@ -105,7 +105,7 @@ class Hardware(Plugin):
                 self.current_state[key] = item
 
         # Remove any items dropped from current state in latest_state
-        for key, item in six.iteritems(self.current_state):
+        for key, item in list(six.iteritems(self.current_state)):
             if key not in latest_state:
                 del self.current_state[key]
 
