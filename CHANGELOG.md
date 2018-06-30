@@ -1,3 +1,7 @@
+# v0.5.4
+
++ Ignore `/etc/init.d/kcare`
+
 # v0.5.3
 
 + Improve capture of `init.d` process PIDs
