@@ -19,7 +19,7 @@ SUPERVISOR_REGEX = re.compile(r'([a-z\-]+)\s+([A-Z]+)\s+pid\s([0-9]+)')
 
 INITD_USAGE_REGEX = re.compile(r'Usage:[^\n]+status')
 INITD_STATUS_REGEX = re.compile(r'\(pid\s+([0-9]+)\)')
-IGNORE_INIT_SCRIPTS = []
+IGNORE_INIT_SCRIPTS = ['kcare']
 
 # We *require* procfs to check PID -> port mappings
 HAS_PROCFS = path.exists('/proc')
