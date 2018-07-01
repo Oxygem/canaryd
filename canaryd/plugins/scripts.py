@@ -89,21 +89,15 @@ class Scripts(Plugin):
             _, to_code = data_changes['exit_code']
 
             message = None
-            data = data_changes
 
             if 'output' in data_changes:
-                data = dict(
-                    (k, v)
-                    for k, v in six.iteritems(data_changes)
-                    if k != 'output'
-                )
                 message = data_changes['output'][1]
 
             if to_code >= 2:
-                yield 'critical', message, data
+                yield 'critical', message, data_changes
 
             elif to_code == 1:
-                yield 'warning', message, data
+                yield 'warning', message, data_changes
 
             elif to_code == 0:
                 # Include all the changes - including output
