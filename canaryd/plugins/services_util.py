@@ -41,7 +41,7 @@ def get_pid_to_listens(timeout):
 
     # Now get/update our PID -> port mapping
     output = get_command_output(
-        'lsof -i -n -P -s TCP:LISTEN',
+        'lsof -i -n -P -b -l -L -s TCP:LISTEN',
         timeout=timeout,
     )
 
