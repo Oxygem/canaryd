@@ -238,9 +238,12 @@ def get_disk_stats():
             continue
 
         value = int(bits[2])
+
+        available = int(bits[3])
         max_ = int(bits[1])
 
-        percentage = round(value / max_ * 100, 2)
+        percentage_free = round(available / max_ * 100, 2)
+        percentage = 100 - percentage_free
 
         # Loop backwards through the line bits until we find the bit starting
         # with "/". This means we capture the entire mount path, even if it
