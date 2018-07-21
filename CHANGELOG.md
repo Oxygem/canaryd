@@ -1,3 +1,7 @@
+# v0.5.6
+
++ Fix bug with tracking invalid init.d scripts
+
 # v0.5.5
 
 + Calculate disk space used by doing (max - available) rather than using `df` used
