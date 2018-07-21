@@ -30,16 +30,7 @@ HAS_PROCFS = path.exists('/proc')
 PID_TO_PORTS = defaultdict(set)
 
 
-def get_pid_to_listens(timeout):
-    if not HAS_PROCFS:
-        return PID_TO_PORTS
-
-    # Loop through the results and cleanup any PIDs that don't exist
-    for pid in list(PID_TO_PORTS.keys()):
-        if not path.exists('/proc/{0}'.format(pid)):
-            PID_TO_PORTS.pop(pid)
-
-    # Now get/update our PID -> port mapping
+def _get_lsof_pid_to_listens(timeout):
     output = get_command_output(
         'lsof -i -n -P -b -l -L -s TCP:LISTEN',
         timeout=timeout,
@@ -64,6 +55,54 @@ def get_pid_to_listens(timeout):
             PID_TO_PORTS[pid].add(host_port_tuple)
         except ValueError:
             logger.warning('Dodgy lsof line ignored: "{0}"'.format(line))
+
+
+def _get_netstat_pid_to_listens(timeout):
+    output = get_command_output(
+        'netstat -plnt',
+    )
+
+    lines = output.splitlines()
+
+    for line in lines[2:]:
+        try:
+            bits = line.split()
+            proto, _, _, local_address, _, _, program = bits
+
+            # Get the pid from PID/PROGRAM
+            pid = program.split('/')[0]
+            pid = int(pid)
+
+            # Work out the host:port bit
+            host, port = local_address.rsplit(':', 1)
+            port = int(port)
+
+            ip_type = 'ipv6' if proto == 'tcp6' else 'ipv4'
+
+            host_port_tuple = (ip_type, host, port)
+            PID_TO_PORTS[pid].add(host_port_tuple)
+        except ValueError:
+            logger.warning('Dodgy netstat line ignored: "{0}"'.format(line))
+
+
+def get_pid_to_listens(timeout):
+    if not HAS_PROCFS:
+        return PID_TO_PORTS
+
+    # Loop through the results and cleanup any PIDs that don't exist
+    for pid in list(PID_TO_PORTS.keys()):
+        if not path.exists('/proc/{0}'.format(pid)):
+            PID_TO_PORTS.pop(pid)
+
+    try:
+        _get_lsof_pid_to_listens(timeout=timeout)
+    except (CalledProcessError, OSError):
+        logger.warning('Missing lsof, defaulting to netstat')
+
+        try:
+            _get_netstat_pid_to_listens(timeout=timeout)
+        except (CalledProcessError, OSError):
+            pass
 
     return PID_TO_PORTS
 

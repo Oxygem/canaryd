@@ -101,29 +101,24 @@ class Services(Plugin):
             )
 
         # Get mapping of PID -> listening ports
-        try:
-            pid_to_listens = get_pid_to_listens(timeout=timeout)
+        pid_to_listens = get_pid_to_listens(timeout=timeout)
 
-        except (CalledProcessError, OSError):
-            pass
+        # Augment services with their ports
+        for name, data in six.iteritems(services):
+            if 'pid' not in data or data['pid'] not in pid_to_listens:
+                data['ports'] = set()
+                data['up_ports'] = set()
+                continue
 
-        else:
-            # Augment services with their ports
-            for name, data in six.iteritems(services):
-                if 'pid' not in data or data['pid'] not in pid_to_listens:
-                    data['ports'] = set()
-                    data['up_ports'] = set()
-                    continue
+            data['ports'] = set(
+                port
+                for _, _, port in pid_to_listens[data['pid']]
+            )
 
-                data['ports'] = set(
-                    port
-                    for _, _, port in pid_to_listens[data['pid']]
-                )
-
-                data['up_ports'] = set(
-                    port for ip_type, host, port in pid_to_listens[data['pid']]
-                    if check_port(ip_type, host, port)
-                )
+            data['up_ports'] = set(
+                port for ip_type, host, port in pid_to_listens[data['pid']]
+                if check_port(ip_type, host, port)
+            )
 
         return dict(
             (key, make_service_data(data))
