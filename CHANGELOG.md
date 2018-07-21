@@ -1,3 +1,9 @@
+# v0.5.5
+
++ Calculate disk space used by doing (max - available) rather than using `df` used
++ Optimise `lsof` (add `-b -l -L`)
++ Ignore more init scripts by default (networking, halt, etc)
+
 # v0.5.4
 
 + Ignore `/etc/init.d/kcare`
