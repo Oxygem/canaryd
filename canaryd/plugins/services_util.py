@@ -60,6 +60,7 @@ def _get_lsof_pid_to_listens(timeout):
 def _get_netstat_pid_to_listens(timeout):
     output = get_command_output(
         'netstat -plnt',
+        timeout=timeout,
     )
 
     lines = output.splitlines()
