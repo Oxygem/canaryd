@@ -30,8 +30,6 @@ class Monitor(Plugin):
     + CPU/IO wait usage %
     + Memory/swap usage %
     + Per disk usage %
-
-    The actual tracking happens in a separate thread.
     '''
 
     spec = ('key', {

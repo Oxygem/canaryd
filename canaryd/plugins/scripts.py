@@ -29,9 +29,6 @@ class Scripts(Plugin):
         canaryctl script enable FILENAME
         canaryctl script disable FILENAME
 
-        # Create a new script
-        canaryctl script create FILENAME
-
         # List all scripts (available and enabled)
         canaryctl scripts
     '''
