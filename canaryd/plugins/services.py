@@ -6,7 +6,6 @@ from os import path, sep as os_sep
 from canaryd_packages import six
 
 from canaryd.plugin import Plugin
-from canaryd.subprocess import CalledProcessError
 
 from .services_util import (
     get_initd_services,
