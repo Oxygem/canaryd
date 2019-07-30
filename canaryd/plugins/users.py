@@ -12,6 +12,10 @@ except ImportError:
 
 
 class Users(Plugin):
+    '''
+    Tracks system users and groups, as well as login events.
+    '''
+
     spec = ('user', {
         'group': six.text_type,
         'groups': [six.text_type],

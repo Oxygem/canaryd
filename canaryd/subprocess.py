@@ -10,9 +10,9 @@ from canaryd.log import logger
 
 
 if os.name == 'posix' and sys.version_info[0] < 3:
-    from canaryd_packages.subprocess32 import *  # noqa
+    from canaryd_packages.subprocess32 import *  # noqa: F403
 else:
-    from subprocess import *  # noqa
+    from subprocess import *  # noqa: F403
 
 
 def get_command_output(command, *args, **kwargs):
@@ -24,10 +24,10 @@ def get_command_output(command, *args, **kwargs):
     ):
         command = shlex.split(command)
 
-    output = check_output(  # noqa
+    output = check_output(  # noqa: F405
         command,
         close_fds=True,
-        stderr=STDOUT,  # noqa
+        stderr=STDOUT,  # noqa: F405
         *args, **kwargs
     )
 

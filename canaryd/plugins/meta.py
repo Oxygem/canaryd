@@ -36,20 +36,20 @@ def get_uptime():
             mins = 0
 
             if 'day' in duration:
-                match = re.search('([0-9]+)\s+day', duration)
+                match = re.search(r'([0-9]+)\s+day', duration)
                 days = int(match.group(1))
 
             if 'hr' in duration:
-                match = re.search('([0-9]+)\s+hr', duration)
+                match = re.search(r'([0-9]+)\s+hr', duration)
                 hours = int(match.group(1))
 
             if ':' in duration:
-                match = re.search('([0-9]+):([0-9]+)', duration)
+                match = re.search(r'([0-9]+):([0-9]+)', duration)
                 hours = int(match.group(1))
                 mins = int(match.group(2))
 
             if 'min' in duration:
-                match = re.search('([0-9]+)\s+min', duration)
+                match = re.search(r'([0-9]+)\s+min', duration)
                 mins = int(match.group(1))
 
             up_since = datetime.utcnow() - timedelta(
