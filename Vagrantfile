@@ -19,8 +19,8 @@ Vagrant.configure('2') do |config|
     end
 
     # systemd
-    config.vm.define :ubuntu16 do |ubuntu|
-        ubuntu.vm.box = 'bento/ubuntu-16.04'
+    config.vm.define :ubuntu18 do |ubuntu|
+        ubuntu.vm.box = 'bento/ubuntu-18.04'
     end
 
     # init.d
