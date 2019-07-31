@@ -235,7 +235,7 @@ def prepare_plugin(plugin, settings):
 
     except Plugin.PrepareError as e:
         logger.info('Plugin prepare failed: {0}: {1}'.format(
-            plugin.name, e.message,
+            plugin.name, e.args,
         ))
         print_exception(debug_only=True)
         return False, e
