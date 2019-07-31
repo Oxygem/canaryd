@@ -23,6 +23,8 @@ class Packages(Plugin):
         'package_type': six.text_type,
     })
 
+    is_slow = True
+
     @staticmethod
     def prepare(settings):
         commands = COMMAND_TO_FUNC.keys()

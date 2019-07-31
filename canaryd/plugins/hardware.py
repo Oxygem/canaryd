@@ -66,6 +66,8 @@ class Hardware(Plugin):
     command = 'lshw -json'
     current_state = None
 
+    is_slow = True
+
     def __init__(self):
         self.previous_states = deque((), 2)
 
