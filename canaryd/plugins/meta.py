@@ -105,6 +105,9 @@ class Meta(Plugin):
         if change.key == 'up_since':
             old_up, new_up = change.data['value']
 
+            if old_up is None:
+                return True
+
             previous_up = ensure_datetime(old_up)
             # Account for slight jitter
             previous_up += timedelta(minutes=1)
