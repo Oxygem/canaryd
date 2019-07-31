@@ -59,6 +59,8 @@ class Plugin(object):
     # Log warnings for missing keys when validating state items?
     warn_for_missing_keys = True
 
+    is_slow = False
+
     class PrepareError(Exception):
         pass
 
