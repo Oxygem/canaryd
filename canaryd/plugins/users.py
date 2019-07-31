@@ -1,6 +1,8 @@
 from canaryd_packages import six
 
+from canaryd.log import logger
 from canaryd.plugin import Plugin
+from canaryd.subprocess import CalledProcessError, get_command_output
 
 # Attempt to import pwd/grp - the users plugin is *nix only
 try:
@@ -9,6 +11,27 @@ try:
 except ImportError:
     pwd = None
     grp = None
+
+
+def get_last_login_times(timeout):
+    output = get_command_output(
+        'lastlog',
+        timeout=timeout,
+    )
+
+    user_logins = {}
+
+    for line in output.splitlines()[1:]:
+        user, _, ip, time = line.split(None, 3)
+        if time.endswith('*'):
+            continue
+
+        user_logins[user] = {
+            'login_time': time,
+            'login_ip': ip,
+        }
+
+    return user_logins
 
 
 class Users(Plugin):
@@ -21,6 +44,8 @@ class Users(Plugin):
         'groups': [six.text_type],
         'home': six.text_type,
         'shell': six.text_type,
+        'login_time': six.text_type,
+        'login_ip': six.text_type,
     })
 
     def prepare(self, settings):
@@ -28,6 +53,14 @@ class Users(Plugin):
             raise self.PrepareError('Missing either pwd or group modules.')
 
     def get_state(self, settings):
+        timeout = self.get_timeout(settings)
+
+        try:
+            user_logins = get_last_login_times(timeout)
+        except (CalledProcessError, OSError) as e:
+            logger.warning('Could not get last login times: {0}'.format(e))
+            user_logins = {}
+
         users = {}
 
         # Get all groups and map by ID -> group
@@ -42,11 +75,18 @@ class Users(Plugin):
         users_data = pwd.getpwall()
 
         for user in users_data:
-            users[user.pw_name] = {
+            data = {
                 'groups': set(),
                 'home': user.pw_dir,
                 'shell': user.pw_shell,
             }
+
+            username = user.pw_name
+
+            if username in user_logins:
+                data.update(user_logins[username])
+
+            users[username] = data
 
             group = groups_by_id.get(user.pw_gid)
             if group:
