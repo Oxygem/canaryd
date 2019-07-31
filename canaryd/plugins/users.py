@@ -105,3 +105,11 @@ class Users(Plugin):
                 user_data['groups'] = sorted(list(user_data['groups']))
 
         return users
+
+    @staticmethod
+    def get_action_for_change(change):
+        if change.type != 'updated':
+            return
+
+        if 'login_time' in change.data:
+            return 'logged in'
