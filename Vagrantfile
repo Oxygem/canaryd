@@ -29,13 +29,8 @@ Vagrant.configure('2') do |config|
     end
 
     # systemd
-    config.vm.define :debian8 do |debian|
-        debian.vm.box = 'bento/debian-8'
-    end
-
-    # systemd
-    config.vm.define :debian9 do |debian|
-        debian.vm.box = 'bento/debian-9'
+    config.vm.define :debian10 do |debian|
+        debian.vm.box = 'bento/debian-10'
     end
 
     # upstart / python2.6
