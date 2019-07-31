@@ -256,11 +256,14 @@ def prepare_plugin(plugin, settings):
     return True
 
 
-def get_and_prepare_working_plugins(settings):
+def get_and_prepare_working_plugins(settings, include_slow=True):
     all_plugins = get_plugins()
     working_plugins = []
 
     for plugin in all_plugins:
+        if not include_slow and plugin.is_slow:
+            continue
+
         status = prepare_plugin(plugin, settings)
 
         if status is True:

@@ -20,11 +20,14 @@ def _sleep_until_interval(start, interval):
         sleep(interval - time_taken)
 
 
-def _daemon_loop(previous_states, settings):
-    logger.info('Getting plugin states...')
+def _daemon_loop(iteration, previous_states, settings):
+    slow_plugin_iter_interval = settings.slow_collect_interval_s / settings.collect_interval_s
+    do_slow_plugins = iteration % slow_plugin_iter_interval == 0
+
+    logger.info('Getting plugin (include_slow={0}) states...'.format(do_slow_plugins))
 
     # Load the plugin list
-    plugins = get_and_prepare_working_plugins(settings)
+    plugins = get_and_prepare_working_plugins(settings, include_slow=do_slow_plugins)
 
     states = get_plugin_states(plugins, settings)
     state_changes = []
@@ -91,10 +94,13 @@ def run_daemon(previous_states, settings, start_time=None):
             start_time, settings.collect_interval_s,
         )
 
+    iterations = 1  # start 1 for the initial sync
+
     while True:
         start = time()
 
-        _daemon_loop(previous_states, settings)
+        _daemon_loop(iterations, previous_states, settings)
+        iterations += 1
 
         _sleep_until_interval(
             start, settings.collect_interval_s,

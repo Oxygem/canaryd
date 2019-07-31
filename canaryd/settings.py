@@ -54,6 +54,8 @@ class CanarydSettings(object):
     debug = False
 
     collect_interval_s = 30
+    # Only collect slow plugin data this often
+    slow_collect_interval_s = 900
 
     # API access key
     api_key = API_KEY
