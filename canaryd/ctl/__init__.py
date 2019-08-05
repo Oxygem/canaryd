@@ -8,6 +8,7 @@ import json
 import logging
 
 from os import path, system
+from time import sleep
 
 from canaryd_packages import click, six
 
@@ -211,8 +212,14 @@ def _get_all_states(ctx, param, value):
     expose_value=False,
     callback=_get_all_states,
 )
+@click.option(
+    '--delay',
+    type=int,
+    default=0,
+    help='Seconds to wait after preparing plugins before collecting state.',
+)
 @click.argument('plugin')
-def state(plugin):
+def state(plugin, delay):
     '''
     Get state for a single plugin.
     '''
@@ -237,6 +244,8 @@ def state(plugin):
             'Plugin unavailable: {0} ({1})'.format(target_plugin.name, e),
             'yellow',
         ))
+
+    sleep(delay)
 
     states = get_plugin_states([target_plugin], settings)
     _print_plugin_states(states)
