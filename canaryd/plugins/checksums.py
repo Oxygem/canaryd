@@ -54,7 +54,7 @@ class Checksums(Plugin):
 
                 try:
                     file_hash = get_file_hash(filename)
-                except OSError:
+                except (OSError, IOError):
                     pass
                 else:
                     file_hashes[filename] = {
