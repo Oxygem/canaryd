@@ -95,6 +95,9 @@ def setup_logging(verbose, debug):
 
 
 def setup_logging_from_settings(settings):
+    if settings.debug == 'true':
+        logger.setLevel(logging.DEBUG)
+
     if settings.log_file:
         rotation = settings.log_file_rotation
         count = settings.log_file_rotation_count

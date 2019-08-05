@@ -48,10 +48,6 @@ def main(verbose, debug):
     # Setup any log file/syslog
     setup_logging_from_settings(settings)
 
-    # Settings can set debug on if needed
-    if settings.debug == 'true':
-        logger.setLevel(logging.DEBUG)
-
     if not settings.api_key or not settings.server_id:
         logger.critical('Missing api_key and/or server_id in config file')
         return
