@@ -60,8 +60,7 @@ class LogFormatter(logging.Formatter):
 
 
 def setup_logging(verbose, debug):
-    # Figure out the log level
-    log_level = logging.WARNING
+    log_level = logging.CRITICAL
 
     if verbose:
         log_level = logging.INFO
