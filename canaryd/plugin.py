@@ -201,17 +201,18 @@ def get_plugins():
     Get the list of installed plugins.
     '''
 
-    module_filenames = glob(path.join(path.dirname(__file__), 'plugins', '*.py'))
+    if not PLUGINS:
+        module_filenames = glob(path.join(path.dirname(__file__), 'plugins', '*.py'))
 
-    module_names = [
-        path.basename(name)[:-3]
-        for name in module_filenames
-        if not name.endswith('__init__.py')
-    ]
+        module_names = [
+            path.basename(name)[:-3]
+            for name in module_filenames
+            if not name.endswith('__init__.py')
+        ]
 
-    # Import all the modules to populate PLUGINS
-    for name in module_names:
-        import_module('canaryd.plugins.{0}'.format(name))
+        # Import all the modules to populate PLUGINS
+        for name in module_names:
+            import_module('canaryd.plugins.{0}'.format(name))
 
     return PLUGINS
 
