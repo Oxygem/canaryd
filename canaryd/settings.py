@@ -190,7 +190,7 @@ def write_settings_to_config(settings):
     for key, value in six.iteritems(settings.__dict__):
         config.set('canaryd', key, value)
 
-    with open(config_file, 'wb') as f:
+    with open(config_file, 'w') as f:
         config.write(f)
 
 
