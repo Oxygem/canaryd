@@ -7,12 +7,11 @@ from canaryd.plugin import Plugin
 
 BUFFER_SIZE = 65536
 PATHS_TO_TRACK = (
-    '/etc/passwd',
-    '/etc/group',
-    '/etc/shadow',
-    '/etc/sudoers',
+    '/etc/*',
     '/sbin/*',
     '/bin/*',
+    '/boot/*',
+    '/dev/*',
 )
 
 
