@@ -1,5 +1,6 @@
 from glob import glob
 from hashlib import sha1
+from os import path
 
 from canaryd_packages import six
 
@@ -48,6 +49,9 @@ class Checksums(Plugin):
 
         for path_to_track in PATHS_TO_TRACK:
             for filename in glob(path_to_track):
+                if not path.isfile(filename):
+                    continue
+
                 try:
                     file_hash = get_file_hash(filename)
                 except OSError:
