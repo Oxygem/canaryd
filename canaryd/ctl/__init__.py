@@ -166,9 +166,12 @@ def _print_plugin_states(states):
     n_states = len(states)
 
     for i, (plugin, status_data) in enumerate(states, 1):
-        click.echo('State for {0}:'.format(plugin))
-
         status, data = status_data
+
+        click.echo('State for {0} ({1} items):'.format(
+            click.style(plugin.name, bold=True),
+            len(data),
+        ))
 
         if status:
             print(json.dumps(
