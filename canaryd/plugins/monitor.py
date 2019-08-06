@@ -66,7 +66,7 @@ class Monitor(Plugin):
     # average timescales - so we always need value and 1/5/15 min averages.
     diff_updates = False
 
-    # Don't generate events from state updates (see generate_issues_from_key_change below)
+    # Don't generate events from state updates (see generate_issues_from_change below)
     generate_update_events = False
 
     # Don't log warnings when keys are missing (eg 15_min_percentage)
