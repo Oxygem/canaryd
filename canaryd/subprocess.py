@@ -15,14 +15,17 @@ else:
     from subprocess import *  # noqa: F403
 
 
+def ensure_command_tuple(command):
+    if not isinstance(command, (list, tuple)):
+        return shlex.split(command)
+    return command
+
+
 def get_command_output(command, *args, **kwargs):
     logger.debug('Executing command: {0}'.format(command))
 
-    if (
-        not kwargs.get('shell', False)
-        and not isinstance(command, (list, tuple))
-    ):
-        command = shlex.split(command)
+    if not kwargs.get('shell', False):
+        command = ensure_command_tuple(command)
 
     output = check_output(  # noqa: F405
         command,
