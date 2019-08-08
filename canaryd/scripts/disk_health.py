@@ -33,12 +33,14 @@ try:
     # Look for OSX disks first (OSX has /dev/sdt which breaks below)
     disks_data = get_command_output(
         'ls /dev/disk?',
+        shell=True,
     )
 
 except (CalledProcessError, OSError):
     # Look for Linux disks (/dev/sdX, /dev/hdX)
     disks_data = get_command_output(
         'ls /dev/[hs]d?',
+        shell=True,
     )
 
 
