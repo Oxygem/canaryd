@@ -2,6 +2,7 @@ from canaryd_packages import click
 
 from canaryd.exceptions import CanarydError
 from canaryd.script import (
+    copy_builtin_scripts,
     disable_script,
     enable_script,
     get_scripts,
@@ -10,7 +11,6 @@ from canaryd.script import (
     ScriptNotLinkError,
 )
 from canaryd.settings import (
-    copy_builtin_scripts,
     get_settings,
 )
 
@@ -51,12 +51,17 @@ def scripts(ctx):
 
 
 @scripts.command()
-def copy():
+@click.option('--no-enable', is_flag=True, default=False)
+def install(no_enable=False):
     '''
-    Copy the builtin scripts into the servers canaryd settings directory.
+    Install the builtin scripts and enable where possible.
     '''
 
-    copy_builtin_scripts()
+    copied, enabled = copy_builtin_scripts(enable_where_possible=not no_enable)
+    click.echo('--> Installed {0}, enabled {1}'.format(
+        ', '.join(click.style(s, bold=True) for s in copied),
+        ', '.join(click.style(s, bold=True) for s in enabled),
+    ))
 
 
 @scripts.command()

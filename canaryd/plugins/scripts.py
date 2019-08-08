@@ -26,8 +26,8 @@ class Scripts(Plugin):
     .. code:: sh
 
         # Enable/disable scripts in $canaryd-config/scripts/available
-        canaryctl script enable FILENAME
-        canaryctl script disable FILENAME
+        canaryctl scripts enable FILENAME
+        canaryctl scripts disable FILENAME
 
         # List all scripts (available and enabled)
         canaryctl scripts

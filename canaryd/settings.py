@@ -1,11 +1,6 @@
-# canaryd
-# File: canaryd/settings.py
-# Desc: settings for canaryd/canaryctl
-
 import platform
 
-from os import environ, geteuid, listdir, makedirs, path
-from shutil import copy
+from os import environ, geteuid, makedirs, path
 
 from canaryd_packages import click, six
 from canaryd_packages.six.moves.configparser import (
@@ -194,23 +189,6 @@ def write_settings_to_config(settings):
         config.write(f)
 
 
-def copy_builtin_scripts():
-    # Copy built in scripts to the scripts/available directory
-    available_scripts_directory = path.join(get_scripts_directory(), 'available')
-
-    logger.debug(
-        'Copying default scripts to: {0}'.format(available_scripts_directory),
-    )
-
-    builtin_scripts_directory = path.join(path.dirname(__file__), 'scripts')
-
-    for file in listdir(builtin_scripts_directory):
-        copy(
-            path.join(builtin_scripts_directory, file),
-            path.join(available_scripts_directory, file),
-        )
-
-
 def ensure_config_directory():
     # Make sure the config directory exists
     config_directory = get_config_directory()
@@ -218,15 +196,3 @@ def ensure_config_directory():
     if not path.exists(config_directory):
         logger.debug('Creating config directory: {0}'.format(config_directory))
         makedirs(config_directory)
-
-    # Make sure the scripts directory exists
-    scripts_directory = get_scripts_directory()
-
-    if not path.exists(scripts_directory):
-        logger.debug('Creating scripts directory: {0}'.format(scripts_directory))
-
-        # Make the scripts, scripts/enabled & scripts/available directories
-        makedirs(path.join(scripts_directory, 'enabled'))
-        makedirs(path.join(scripts_directory, 'available'))
-
-        copy_builtin_scripts()

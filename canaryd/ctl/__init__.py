@@ -23,6 +23,7 @@ from canaryd.plugin import (
     prepare_plugin,
 )
 from canaryd.remote import ApiError, CanaryJSONEncoder, create_event
+from canaryd.script import ensure_scripts_directory
 from canaryd.settings import (
     ensure_config_directory,
     get_config_directory,
@@ -59,6 +60,7 @@ def main(verbose, debug):
 
     # Ensure the scripts directory (in config) exists
     ensure_config_directory()
+    ensure_scripts_directory()
 
 
 @main.command()
