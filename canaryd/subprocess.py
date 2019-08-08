@@ -21,19 +21,7 @@ def ensure_command_tuple(command):
     return command
 
 
-def get_command_output(command, *args, **kwargs):
-    logger.debug('Executing command: {0}'.format(command))
-
-    if not kwargs.get('shell', False):
-        command = ensure_command_tuple(command)
-
-    output = check_output(  # noqa: F405
-        command,
-        close_fds=True,
-        stderr=STDOUT,  # noqa: F405
-        *args, **kwargs
-    )
-
+def decode_output(output):
     if isinstance(output, six.binary_type):
         encoding = chardet.detect(output)['encoding']
         if encoding:
@@ -41,4 +29,25 @@ def get_command_output(command, *args, **kwargs):
         else:
             output = output.decode()
 
+    return output
+
+
+def get_command_output(command, *args, **kwargs):
+    logger.debug('Executing command: {0}'.format(command))
+
+    if not kwargs.get('shell', False):
+        command = ensure_command_tuple(command)
+
+    try:
+        output = check_output(  # noqa: F405
+            command,
+            close_fds=True,
+            stderr=STDOUT,  # noqa: F405
+            *args, **kwargs
+        )
+    except CalledProcessError as e:  # noqa: F405
+        e.output = decode_output(e.output)
+        raise e
+
+    output = decode_output(output)
     return output
