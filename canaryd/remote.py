@@ -3,7 +3,7 @@ import socket
 from json import dumps as json_dumps, JSONEncoder
 from time import sleep
 
-from canaryd_packages import requests
+from canaryd_packages import requests, six
 
 from canaryd.log import logger
 from canaryd.settings import get_settings
@@ -23,6 +23,9 @@ class CanaryJSONEncoder(JSONEncoder):
 
         if hasattr(obj, 'isoformat'):
             return obj.isoformat()
+
+        if isinstance(obj, six.binary_type):
+            return obj.decode()
 
         return JSONEncoder.default(self, obj)
 
