@@ -60,6 +60,10 @@ for disk in disks:
     except CalledProcessError as e:
         smart_data = e.output
 
+        # If the device doesn't support SMART not much we can do about it!
+        if 'Operation not supported by device' in smart_data:
+            continue
+
         for i in SMART_RETURN_BITS:
             bit = e.returncode & i
             if bit and i in SMART_RETURN_BITS:
