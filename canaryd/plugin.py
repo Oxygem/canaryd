@@ -8,11 +8,8 @@ import re
 import traceback
 
 from distutils.spawn import find_executable
-from glob import glob
-from os import path
 
 from canaryd_packages import six
-from canaryd_packages.importlib import import_module
 
 from canaryd.log import logger, print_exception
 from canaryd.subprocess import get_command_output
@@ -200,19 +197,6 @@ def get_plugins():
     '''
     Get the list of installed plugins.
     '''
-
-    if not PLUGINS:
-        module_filenames = glob(path.join(path.dirname(__file__), 'plugins', '*.py'))
-
-        module_names = [
-            path.basename(name)[:-3]
-            for name in module_filenames
-            if not name.endswith('__init__.py')
-        ]
-
-        # Import all the modules to populate PLUGINS
-        for name in module_names:
-            import_module('canaryd.plugins.{0}'.format(name))
 
     return PLUGINS
 
