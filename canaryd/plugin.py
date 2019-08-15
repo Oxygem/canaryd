@@ -73,10 +73,6 @@ class Plugin(object):
         pass
 
     @staticmethod
-    def get_change_key(data_changes):
-        return ''
-
-    @staticmethod
     def should_apply_change(change):
         return True
 

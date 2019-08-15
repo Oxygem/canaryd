@@ -125,12 +125,6 @@ class Services(Plugin):
         )
 
     @staticmethod
-    def get_change_key(change):
-        # Ensure the running state is included in our change key, such that
-        # if grouping we only group services that have started/stopped.
-        return change.data and change.data.get('running')
-
-    @staticmethod
     def should_apply_change(change):
         data_keys = list(six.iterkeys(change.data))
 

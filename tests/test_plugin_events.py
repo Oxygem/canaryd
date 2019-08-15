@@ -12,15 +12,6 @@ class TestServicesEvents(TestCase):
     def setUp(self):
         self.plugin = get_plugin_by_name('services')
 
-    def test_change_key(self):
-        change = Change(
-            self.plugin, 'updated', 'key',
-            data={'running': True},
-        )
-
-        change_data = self.plugin.get_change_key(change)
-        self.assertEqual(change_data, True)
-
     def test_should_apply_change_up_ports_only(self):
         change = Change(
             self.plugin, 'updated', 'key',
