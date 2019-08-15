@@ -29,10 +29,10 @@ def get_file_hash(filename):
     return sha.hexdigest()
 
 
-class Checksums(Plugin):
+class Integrity(Plugin):
     '''
-    Calculates checksums of executables and important files, and tracks any
-    changes that occur to them.
+    Tracks the integrity of system files by checking their owner, permissions
+    and checksum hashes.
     '''
 
     spec = ('filename', {
