@@ -1,10 +1,19 @@
 from glob import glob
 from hashlib import sha1
-from os import path
+from os import path, stat
 
 from canaryd_packages import six
 
 from canaryd.plugin import Plugin
+
+# Attempt to import pwd/grp - only supported on *nix
+try:
+    import pwd
+    import grp
+except ImportError:
+    pwd = None
+    grp = None
+
 
 BUFFER_SIZE = 65536
 PATHS_TO_TRACK = (
@@ -37,8 +46,12 @@ class Integrity(Plugin):
     and checksum hashes.
     '''
 
-    spec = ('filename', {
+    spec = ('file', {
         'sha1_hash': six.text_type,
+        'size': int,
+        'user': six.text_type,
+        'group': six.text_type,
+        'permissions': six.text_type,
     })
 
     is_slow = True
@@ -54,13 +67,24 @@ class Integrity(Plugin):
                 if not path.isfile(filename):
                     continue
 
+                stat_data = stat(filename)
+
+                file_data = {
+                    'size': stat_data.st_size,
+                    'permissions': format(stat_data.st_mode, 'o'),
+                }
+
+                if pwd:
+                    file_data['user'] = pwd.getpwuid(stat_data.st_uid).pw_name
+
+                if grp:
+                    file_data['group'] = grp.getgrgid(stat_data.st_gid).gr_name
+
                 try:
-                    file_hash = get_file_hash(filename)
+                    file_data['sha1_hash'] = get_file_hash(filename)
                 except (OSError, IOError):
                     pass
-                else:
-                    file_hashes[filename] = {
-                        'sha1_hash': file_hash,
-                    }
+
+                file_hashes[filename] = file_data
 
         return file_hashes
