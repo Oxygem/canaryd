@@ -3,6 +3,7 @@
 # Desc: entry point for canaryd
 
 import logging
+import signal
 
 from time import time
 
@@ -14,9 +15,17 @@ from canaryd.plugin import (
     get_and_prepare_working_plugins,
     get_plugin_states,
 )
-from canaryd.remote import backoff, ping, sync_states
+from canaryd.remote import backoff, ping, shutdown, sync_states
 from canaryd.settings import ensure_config_directory, get_settings
 from canaryd.version import __version__
+
+
+class GracefulExitRequested(Exception):
+    pass
+
+
+def handle_graceful_quit(signum, frame):
+    raise GracefulExitRequested('yawn')
 
 
 @click.command(context_settings={'help_option_names': ['-h', '--help']})
@@ -89,7 +98,14 @@ def main(verbose, debug):
         for plugin, status_data in states
     )
 
-    run_daemon(previous_states, settings, start_time=start_time)
+    # Now that we've settings - setup graceful (clean shutdown) exit handling
+    signal.signal(signal.SIGTERM, handle_graceful_quit)
+    signal.signal(signal.SIGINT, handle_graceful_quit)
+
+    try:
+        run_daemon(previous_states, settings, start_time=start_time)
+    except GracefulExitRequested:
+        shutdown(settings)  # we're exiting, so only one shot at this
 
 
 try:

@@ -187,6 +187,14 @@ def ping(settings):
     )
 
 
+def shutdown(settings):
+    return make_api_request(
+        get_session().post,
+        'server/{0}/shutdown'.format(settings.server_id),
+        settings=settings,
+    )
+
+
 def _upload_states_return_settings(url, states, settings, json=None):
     json = json or states
 
