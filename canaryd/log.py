@@ -59,8 +59,8 @@ class LogFormatter(logging.Formatter):
             return super(LogFormatter, self).format(record)
 
 
-def setup_logging(verbose, debug):
-    log_level = logging.CRITICAL
+def setup_logging(verbose, debug, default_level=logging.CRITICAL):
+    log_level = default_level
 
     if verbose:
         log_level = logging.INFO

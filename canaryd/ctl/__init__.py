@@ -51,7 +51,7 @@ def main(verbose, debug):
     canaryd control.
     '''
 
-    log_level = setup_logging(verbose, debug)
+    log_level = setup_logging(verbose, debug, default_level=logging.WARNING)
 
     logger.info('Starting canaryctl v{0}'.format(__version__))
     logger.info('Log level set to: {0}'.format(
