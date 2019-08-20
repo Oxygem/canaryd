@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=root
 ExecStart=CANARYD_LOCATION
-Restart=on-abort
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
