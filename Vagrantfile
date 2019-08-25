@@ -44,4 +44,13 @@ Vagrant.configure('2') do |config|
         openbsd.vm.network 'private_network', ip: '192.168.31.13'
         openbsd.vm.synced_folder './', '/opt/canaryd', type: 'nfs'
     end
+
+    # rc.d
+    config.vm.define :freebsd12 do |freebsd|
+        freebsd.vm.box = 'freebsd/FreeBSD-12.0-STABLE'
+        freebsd.ssh.insert_key = false
+        freebsd.ssh.shell = '/bin/csh'
+        freebsd.vm.network 'private_network', type: 'dhcp'
+        freebsd.vm.synced_folder './', '/opt/canaryd', type: 'nfs'
+    end
 end
