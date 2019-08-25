@@ -10,7 +10,12 @@ from canaryd.log import logger
 from canaryd.plugin import Plugin
 from canaryd.subprocess import CalledProcessError
 
-from .monitor_util import get_cpu_stats, get_disk_stats, get_memory_stats
+from .monitor_util import (
+    get_cpu_stats,
+    get_disk_stats,
+    get_memory_stats,
+    get_network_stats,
+)
 
 
 def sleep_until_interval(start, interval):
@@ -93,6 +98,7 @@ class Monitor(Plugin):
             ('cpu', get_cpu_stats),
             ('memory', get_memory_stats),
             ('disk', get_disk_stats),
+            ('network', get_network_stats),
         ):
             try:
                 stats = collector()
