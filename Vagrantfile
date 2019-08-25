@@ -13,11 +13,6 @@ Vagrant.configure('2') do |config|
     # Begin canaryd test VM's:
     #
 
-    # upstart
-    config.vm.define :ubuntu14 do |ubuntu|
-        ubuntu.vm.box = 'bento/ubuntu-14.04'
-    end
-
     # systemd
     config.vm.define :ubuntu18 do |ubuntu|
         ubuntu.vm.box = 'bento/ubuntu-18.04'
