@@ -65,12 +65,14 @@ class Scripts(Plugin):
                 results[script] = {
                     'output': output.strip(),
                     'exit_code': 0,
+                    'enabled': True,
                 }
 
             except (CalledProcessError, OSError) as e:
                 results[script] = {
                     'output': e.output.strip(),
                     'exit_code': e.returncode,
+                    'enabled': True,
                 }
 
         return results
