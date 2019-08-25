@@ -170,9 +170,9 @@ def _print_plugin_states(states):
     for i, (plugin, status_data) in enumerate(states, 1):
         status, data = status_data
 
-        click.echo('State for {0} ({1} items):'.format(
+        click.echo('State for {0}{1}:'.format(
             click.style(plugin.name, bold=True),
-            len(data),
+            '({0} items)'.format(len(data)) if status else '',
         ))
 
         if status:
