@@ -5,7 +5,7 @@ SUDO = True
 
 
 # OpenBSD doesn't come with Python!
-if host.name == '@vagrant/openbsd58':
+if host.name == '@vagrant/openbsd6':
     pkg.packages(
         {'Install Python 2.7'},
         'python-2.7',
