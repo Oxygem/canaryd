@@ -40,6 +40,8 @@ Vagrant.configure('2') do |config|
 
     # rc.d
     config.vm.define :openbsd6 do |openbsd|
-        openbsd.vm.box = 'ryanmaclean/openbsd-6.0'
+        openbsd.vm.box = 'openbsd/openbsd-6.4'
+        openbsd.vm.network 'private_network', ip: '192.168.31.13'
+        openbsd.vm.synced_folder './', '/opt/canaryd', type: 'nfs'
     end
 end
