@@ -47,44 +47,109 @@ class PluginMeta(type):
 
 @six.add_metaclass(PluginMeta)
 class Plugin(object):
+    '''
+    The base plugin implementation.
+    '''
+
+    #: Whether to diff state changes or always pass the entire state
     diff_updates = True
 
+    #: Whether to generate update events for this plugin
     generate_update_events = True
+    #: Whether to generate added events for this plugin
     generate_added_events = True
+    #: Whether to generate deleted events for this plugin
     generate_deleted_events = True
 
-    # Log warnings for missing keys when validating state items?
+    #: Log warnings for missing keys when validating state items?
     warn_for_missing_keys = True
 
+    #: Whether this plugin is considered "slow" and run less often
     is_slow = False
 
     class PrepareError(Exception):
-        pass
+        '''
+        Raised when a plugin cannot be prepared for execution.
+        '''
 
     def __repr__(self):
         return 'Plugin: {0}'.format(self.name)
 
     @staticmethod
     def get_action_for_change(change):
-        pass
+        '''
+        Get the event action for a given change. Executed on the server side on
+        receiving state.
+
+        Args:
+            change (Change): a change object
+
+        Returns:
+            action (str): the event action
+        '''
 
     @staticmethod
     def get_description_for_change(change):
-        pass
+        '''
+        Get the event description for a given change. Executed on the server
+        side on receiving state.
+
+        Args:
+            change (Change): a change object
+
+        Returns:
+            description (str): the event description
+        '''
 
     @staticmethod
     def should_apply_change(change):
+        '''
+        Deterime whether a given change should be applied. Executed on the
+        server side on receiving state.
+
+        Args:
+            change (Change): a change object
+
+        Returns:
+            status (bool): whether the change should be applied
+        '''
+
         return True
 
     @staticmethod
     def generate_issues_from_change(change, settings):
-        pass
+        '''
+        Plugin can generate issue type events from a given change. Executed on
+        the server side on receiving state.
+
+        Args:
+            change (Change): a change object
+            settings (dict): canaryd daemon settings
+
+        Yields:
+            events (tuple): ``(event_type, event_message, event_data)``
+        '''
 
     def get_timeout(self, settings):
         # Set an alarm: a plugin can only run for MAX half the interval time
         return int(round(settings.collect_interval_s / 2))
 
+    def log(self, message):
+        message = '[{0}]: {1}'.format(self.name, message)
+        logger.debug(message)
+
     def get_state(self, settings):
+        '''
+        Get the current state for this plugin. Returns structured objects that
+        match the spec defined on the plugin.
+
+        Args:
+            settings (dict): canaryd daemon settings
+
+        Returns:
+            state (dict): dictionary of current state items, matching plugin spec
+        '''
+
         data = get_command_output(
             self.command,
             timeout=self.get_timeout(settings),
@@ -92,16 +157,27 @@ class Plugin(object):
 
         return self.parse(data)
 
+    def parse(self, data):
+        raise NotImplementedError
+
     def prepare(self, settings):
+        '''
+        Determine if this plugin can be executed.
+
+        Args:
+            settings (dict): canaryd daemon settings
+
+        Raises:
+            Plugin.PrepareError
+            OSError
+            Exception
+        '''
+
         command_bits = self.command.split()
         command = command_bits[0]
 
         if not find_executable(command):
             raise OSError('Could not find executable: {0}'.format(command))
-
-    def log(self, message):
-        message = '[{0}]: {1}'.format(self.name, message)
-        logger.debug(message)
 
     def check_spec_key(self, key, value):
         spec = self.spec[1]
