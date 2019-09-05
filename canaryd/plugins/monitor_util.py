@@ -353,10 +353,10 @@ def get_netstat_network_stats():
 
     lines = output.splitlines()
     headers = lines[0]
-    header_to_position = {
-        header: i
+    header_to_position = dict(
+        (header, i)
         for i, header in enumerate(headers.split())
-    }
+    )
 
     # Collect the metrics from each loop
     first_device_stats = {}
