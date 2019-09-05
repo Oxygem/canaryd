@@ -51,6 +51,12 @@ def _daemon_loop(iteration, previous_states, settings):
             else:
                 state_changes.append((plugin, ('SYNC', data)))
 
+            # Plugin state collected OK so now check for any specific events to
+            # send in addition.
+            plugin_events = plugin.get_events(settings)
+            if plugin_events:
+                state_changes.append((plugin, ('EVENTS', plugin_events)))
+
         # Plugin raised an exception, fail!
         else:
             logger.critical((

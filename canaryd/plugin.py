@@ -138,6 +138,20 @@ class Plugin(object):
         message = '[{0}]: {1}'.format(self.name, message)
         logger.debug(message)
 
+    def get_events(self, settings):
+        '''
+        Plugin can generate raw events here, ie for things that don't fit into
+        the spec/state model. This should be a generator yielding event tuples:
+
+        Args:
+            settings (dict): canaryd daemon settings
+
+        Returns:
+            events (list): ``[(event_type, event_message, event_data), ...]``
+        '''
+
+        return []
+
     def get_state(self, settings):
         '''
         Get the current state for this plugin. Returns structured objects that
