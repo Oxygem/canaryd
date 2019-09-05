@@ -77,11 +77,22 @@ def main(verbose, debug):
     start_time = time()
     states = get_plugin_states(plugins, settings)
 
+    # Filter out the non-working plugins and wrap as a (command, data) tuple
+    # we don't track errors on the initial sync because often canaryd starts
+    # early on a server meaning some things aren't up. The next state collection
+    # will collect and sync these.
+    working_states = []
+    for plugin, status_data in states:
+        status, data = status_data
+        if status is not True:
+            continue
+        working_states.append((plugin, ('SYNC', data)))
+
     # Sync this state and get settings
     logger.info('Syncing initial state...')
 
     remote_settings = backoff(
-        sync_states, states, settings,
+        sync_states, working_states, settings,
         error_message='Could not sync state',
         max_wait=settings.collect_interval_s,
     )
@@ -95,7 +106,7 @@ def main(verbose, debug):
     # Make previous states dict
     previous_states = dict(
         (plugin, status_data[1])
-        for plugin, status_data in states
+        for plugin, status_data in working_states
     )
 
     # Now that we've settings - setup graceful (clean shutdown) exit handling
