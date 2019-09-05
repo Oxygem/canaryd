@@ -36,7 +36,7 @@ def _daemon_loop(iteration, previous_states, settings):
         status, data = status_data
 
         # Plugin ran OK and we have state!
-        if status:
+        if status is True:
             previous_state = previous_states.get(plugin, {})
 
             # If the previous state was good - ie not an Exception instance - this
