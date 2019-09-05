@@ -8,6 +8,10 @@ IGNORE_PREFIXES = ('vm.', 'machdep.', 'debug.')
 
 
 class Sysctl(Plugin):
+    '''
+    Tracks sysctl entries/settings.
+    '''
+
     spec = ('key', {
         'values': [six.text_type],
     })

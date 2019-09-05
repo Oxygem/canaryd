@@ -18,6 +18,10 @@ COMMAND_TO_FUNC = {
 
 
 class Packages(Plugin):
+    '''
+    Tracks packages installed on the system. Compatible with ``dpkg``, ``rpm`` and BSD's ``pkg_info``.
+    '''
+
     spec = ('package', {
         'versions': [six.text_type],
         'package_type': six.text_type,

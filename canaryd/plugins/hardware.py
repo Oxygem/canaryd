@@ -61,6 +61,10 @@ def get_hardware_spec():
 
 
 class Hardware(Plugin):
+    '''
+    Tracks system hardware using ``lshw`` (if available).
+    '''
+
     spec = ('key', get_hardware_spec())
 
     command = 'lshw -json'

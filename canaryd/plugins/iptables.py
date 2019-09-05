@@ -25,6 +25,10 @@ IPTABLES_ARGS = {
 
 
 class Iptables(Plugin):
+    '''
+    Tracks ``iptables`` chains, policies and rule changes.
+    '''
+
     spec = ('chain', {
         'policy': six.text_type,
         'rules': [dict],

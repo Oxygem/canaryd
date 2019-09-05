@@ -75,6 +75,10 @@ def get_uname_data(flag):
 
 
 class Meta(Plugin):
+    '''
+    Tracks basic server information (kernel, OS).
+    '''
+
     spec = ('key', {
         'value': None,
     })

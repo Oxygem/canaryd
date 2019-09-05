@@ -31,6 +31,11 @@ def make_container_data(data):
 
 
 class Containers(Plugin):
+    '''
+    Tracks containers and VMs running on the system. Currently supports ``docker``,
+    ``lxc``, ``openvz`` and ``kvm``.
+    '''
+
     spec = ('container', {
         'runtime': six.text_type,
         'running': bool,
