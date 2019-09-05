@@ -6,7 +6,7 @@ from time import sleep
 from canaryd_packages import requests, six
 
 from canaryd.log import logger
-from canaryd.settings import get_settings
+from canaryd.settings import get_settings, VALID_STATUSES
 from canaryd.version import __version__
 
 SESSION = None
@@ -91,19 +91,15 @@ def make_sync_or_changes_dict(states, ignore_false_status=False):
         if ignore_false_status and status is False:
             continue
 
-        # Plugin ran OK - just attach any state
-        if status is True:
+        if status is True:  # plugin ran OK, just attach state data
             plugin_to_state[plugin.name] = state
 
-        # Plugin ran OK but needs to SYNC with the server, sending a full state
-        # or the plugin failed to run, send exception data
-        elif status in ('SYNC', 'ERROR'):
-            plugin_to_state[plugin.name] = (status, state)
-
-        else:
+        if status not in VALID_STATUSES:
             raise TypeError('Unknown status for {0} plugin: {1}/{2}'.format(
                 plugin.name, status, state,
             ))
+
+        plugin_to_state[plugin.name] = (status, state)
 
     return plugin_to_state
 

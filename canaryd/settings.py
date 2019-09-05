@@ -13,6 +13,8 @@ from canaryd_packages.six.moves.configparser import (
 from canaryd.exceptions import ConfigError
 from canaryd.log import logger
 
+VALID_STATUSES = ('DIFF', 'SYNC', 'ERROR', 'EVENTS')
+
 API_BASE = environ.get(
     'API_BASE',
     'https://api.servicecanary.com',
