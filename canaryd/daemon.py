@@ -44,7 +44,7 @@ def _daemon_loop(iteration, previous_states, settings):
             # events on first successful run.
             if isinstance(previous_state, dict):
                 state_diff = get_state_diff(plugin, data, previous_state)
-                state_changes.append((plugin, (status, state_diff)))
+                state_changes.append((plugin, ('DIFF', state_diff)))
 
             # Because we don't know the previous working state, send the whole
             # state obj to the server to diff, like the initial sync.
