@@ -1,5 +1,6 @@
 import platform
 
+from collections import defaultdict
 from os import environ, geteuid, makedirs, path
 
 from canaryd_packages import click, six
@@ -61,6 +62,8 @@ class CanarydSettings(object):
     def __init__(self, **kwargs):
         self.update(kwargs)
 
+        self.plugin_settings = defaultdict(dict)
+
         # If no log file specified, we're root and /var/log exists, use that
         if (
             self.log_file is None
@@ -76,16 +79,30 @@ class CanarydSettings(object):
         except AttributeError:
             pass
 
+    def to_dict(self):
+        return dict(
+            (key, value)
+            for key, value in self.__dict__.items()
+            if key != 'plugin_settings'
+        )
+
     def update(self, data):
         changed_keys = []
 
         for key, value in six.iteritems(data):
+            if key == 'plugin_settings':
+                raise ValueError('Cannot update plugin_settings directly!')
+
             if getattr(self, key, None) != value:
                 setattr(self, key, value)
                 changed_keys.append(key)
 
         logger.debug('Settings updated: {0} <= {1}'.format(changed_keys, data))
         return changed_keys
+
+    def update_plugin_settings(self, plugin_name, data):
+        self.plugin_settings[plugin_name].update(data)
+        logger.debug('Plugin settings updated: {0} <= {1}'.format(plugin_name, data))
 
 
 def get_config_directory():
@@ -122,19 +139,27 @@ def _get_settings(config_file=None):
 
     parser = RawConfigParser()
 
-    if path.exists(config_file):
-        try:
-            parser.read(config_file)
-            canaryd_config_items = parser.items('canaryd')
+    if not path.exists(config_file):
+        return settings
 
-            settings.update(dict(canaryd_config_items))
-            settings.update(dict(canaryd_config_items))
+    try:
+        parser.read(config_file)
+    except ConfigParserError as e:
+        logger.critical('Error in config file ({0}): {1}'.format(
+            config_file, e.message,
+        ))
+        raise ConfigError('Config file error')
 
-        except ConfigParserError as e:
-            logger.critical('Error in config file ({0}): {1}'.format(
-                config_file, e.message,
-            ))
-            raise ConfigError('Config file error')
+    canaryd_config_items = parser.items('canaryd')
+    settings.update(dict(canaryd_config_items))
+
+    for section in parser.sections():
+        if not section.startswith('plugin:'):
+            continue
+
+        plugin_name = section[7:]
+        plugin_config_items = parser.items(section)
+        settings.update_plugin_settings(plugin_name, plugin_config_items)
 
     return settings
 
@@ -182,7 +207,7 @@ def write_settings_to_config(settings):
     except DuplicateSectionError:
         pass
 
-    for key, value in six.iteritems(settings.__dict__):
+    for key, value in six.iteritems(settings.to_dict()):
         config.set('canaryd', key, value)
 
     with open(config_file, 'w') as f:
