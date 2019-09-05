@@ -84,16 +84,10 @@ def get_session():
     return SESSION
 
 
-def make_sync_or_changes_dict(states, ignore_false_status=False):
+def make_sync_or_changes_dict(states):
     plugin_to_state = {}
 
     for plugin, (status, state) in states:
-        if ignore_false_status and status is False:
-            continue
-
-        if status is True:  # plugin ran OK, just attach state data
-            plugin_to_state[plugin.name] = state
-
         if status not in VALID_STATUSES:
             raise TypeError('Unknown status for {0} plugin: {1}/{2}'.format(
                 plugin.name, status, state,
@@ -215,16 +209,9 @@ def sync_states(states, settings):
     from the server (settings).
     '''
 
-    states = make_sync_or_changes_dict(
-        states,
-        # We ignore any exceptions in the first loop - canaryd often starts
-        # early after boot, so we don't want to raise alarms while things init.
-        ignore_false_status=True,
-    )
-
     return _upload_states_return_settings(
         'server/{0}/sync'.format(settings.server_id),
-        states,
+        make_sync_or_changes_dict(states),
         settings,
         json={
             'hostname': socket.gethostname(),
