@@ -49,16 +49,6 @@ def check_port(ip_type, host, port):
         sock.close()
 
 
-def make_service_data(data):
-    blank_service = {
-        'ports': [],
-        'up_ports': [],
-    }
-
-    blank_service.update(data)
-    return blank_service
-
-
 class Services(Plugin):
     '''
     The services plugin provides a combined view of "system" services - ie the
@@ -105,8 +95,6 @@ class Services(Plugin):
         # Augment services with their ports
         for name, data in six.iteritems(services):
             if 'pid' not in data or data['pid'] not in pid_to_listens:
-                data['ports'] = set()
-                data['up_ports'] = set()
                 continue
 
             data['ports'] = set(
@@ -120,7 +108,7 @@ class Services(Plugin):
             )
 
         return dict(
-            (key, make_service_data(data))
+            (key, data)
             for key, data in six.iteritems(services)
         )
 
