@@ -1,3 +1,19 @@
+# v0.6-dev0 WIP
+
++ Add **integrity** plugin to track important file owners/permissions/checksums
++ Add notion of "slow" plugins with a reduced collection interval
+    * applied to packages, hardware and integrity plugins
++ Track/add `login_time` attribute to users plugin
++ Track/add `enabled` attribute to scripts plugin
++ Track network interface transmit/receive bytes in monitor plugin
++ Use `netstat` to find service ports if `lsof` isn't available
++ Python `3.7` testing/compatability
++ Rename `canaryctl scripts copy` -> `canaryctl scripts install`
++ Automatically enable compatible scripts on install/init
++ Gracefully exit the `canaryd` daemon when service stopped, stops offline issues/alerts
++ Modify how canaryd communicates with the Service Canary API
+
+
 # v0.5.6
 
 + Fix bug with tracking invalid init.d scripts
