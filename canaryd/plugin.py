@@ -343,7 +343,7 @@ def get_and_prepare_working_plugins(settings, include_slow=True):
             working_plugins.append(plugin)
 
     logger.info('Loaded plugins: {0}'.format(', '.join([
-        plugin.__class__.__name__
+        plugin.name
         for plugin in working_plugins
     ])))
 
