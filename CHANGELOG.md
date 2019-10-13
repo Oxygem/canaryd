@@ -1,4 +1,4 @@
-# v0.6-dev0 WIP
+# v0.6
 
 + Add **integrity** plugin to track important file owners/permissions/checksums
 + Add notion of "slow" plugins with a reduced collection interval
