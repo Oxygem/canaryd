@@ -1,3 +1,7 @@
+# v0.6.2
+
++ Correct typo from `v0.6.1`!
+
 # v0.6.1
 
 + Set a max size (1GB) for file integrity checks
