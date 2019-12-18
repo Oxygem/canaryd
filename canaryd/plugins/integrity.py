@@ -70,7 +70,7 @@ class Integrity(Plugin):
 
                 stat_data = stat(filename)
 
-                if stat.data.st_size > MAX_SIZE:
+                if stat_data.st_size > MAX_SIZE:
                     continue
 
                 file_data = {
