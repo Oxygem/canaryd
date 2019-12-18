@@ -1,3 +1,7 @@
+# v0.6.1
+
++ Set a max size (1GB) for file integrity checks
+
 # v0.6
 
 + Add **integrity** plugin to track important file owners/permissions/checksums
