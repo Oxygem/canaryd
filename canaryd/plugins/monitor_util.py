@@ -276,10 +276,16 @@ def _get_device_speed(device):
     speed = 0
     speed_file = path.join(os_sep, 'sys', 'class', 'net', device, 'speed')
 
-    if path.exists(speed_file):
+    if not path.exists(speed_file):
+        return
+
+    try:
         with open(speed_file, 'r') as f:
             data = f.read()
-        speed = int(data)
+    except IOError:
+        return
+
+    speed = int(data)
 
     # Turn mbits -> bytes
     speed = speed * 125000
