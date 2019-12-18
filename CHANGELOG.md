@@ -1,3 +1,7 @@
+# v0.6.3
+
++ Fix monitor plugin failing where interface speed cannot be read from `/sys`
+
 # v0.6.2
 
 + Correct typo from `v0.6.1`!
