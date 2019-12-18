@@ -16,6 +16,7 @@ except ImportError:
 
 
 BUFFER_SIZE = 65536
+MAX_SIZE = 1024 ** 3  # 1GB
 PATHS_TO_TRACK = (
     '/etc/*',
     '/boot/*',
@@ -68,6 +69,9 @@ class Integrity(Plugin):
                     continue
 
                 stat_data = stat(filename)
+
+                if stat.data.st_size > MAX_SIZE:
+                    continue
 
                 file_data = {
                     'size': stat_data.st_size,
