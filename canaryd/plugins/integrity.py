@@ -30,6 +30,9 @@ PATHS_TO_TRACK = (
     '/opt/bin/*',
     '/opt/sbin/*',
 )
+PATHS_TO_IGNORE = (
+    '/etc/adjtime',
+)
 
 
 def get_file_hash(filename):
@@ -69,7 +72,10 @@ class Integrity(Plugin):
 
         for path_to_track in PATHS_TO_TRACK:
             for filename in glob(path_to_track):
-                if not path.isfile(filename):
+                if (
+                    filename in PATHS_TO_IGNORE
+                    or not path.isfile(filename)
+                ):
                     continue
 
                 stat_data = stat(filename)
