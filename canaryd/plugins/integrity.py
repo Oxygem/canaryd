@@ -25,8 +25,8 @@ PATHS_TO_TRACK = (
     '/lib/*',
     '/usr/lib/*',
     '/usr/local/lib/*',
-    '/lib64',
-    '/usr/lib64',
+    '/lib64/*',
+    '/usr/lib64/*',
 
     '/bin/*',
     '/sbin/*',

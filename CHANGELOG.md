@@ -1,3 +1,7 @@
+# v0.6.6
+
++ Fix `/lib64` and `/usr/lib64` integrity checks
+
 # v0.6.5
 
 + Corrected release for `v0.6.4`
