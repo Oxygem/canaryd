@@ -1,3 +1,7 @@
+# v0.6.5
+
++ Corrected release for `v0.6.4`
+
 # v0.6.4
 
 + Expand integrity checks
