@@ -21,6 +21,13 @@ PATHS_TO_TRACK = (
     '/etc/*',
     '/boot/*',
     '/dev/*',
+
+    '/lib/*',
+    '/usr/lib/*',
+    '/usr/local/lib/*',
+    '/lib64',
+    '/usr/lib64',
+
     '/bin/*',
     '/sbin/*',
     '/usr/bin/*',
