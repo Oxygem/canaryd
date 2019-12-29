@@ -25,6 +25,10 @@ PATHS_TO_TRACK = (
     '/sbin/*',
     '/usr/bin/*',
     '/usr/sbin/*',
+    '/usr/local/bin/*',
+    '/usr/local/sbin/*',
+    '/opt/bin/*',
+    '/opt/sbin/*',
 )
 
 
