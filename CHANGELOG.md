@@ -1,3 +1,8 @@
+# v0.6.4
+
++ Expand integrity checks
++ Ignore `/etc/adjtime` for file integrity checks
+
 # v0.6.3
 
 + Fix monitor plugin failing where interface speed cannot be read from `/sys`
