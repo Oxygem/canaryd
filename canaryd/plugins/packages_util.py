@@ -43,7 +43,14 @@ def get_deb_packages(timeout):
 
 
 def get_rpm_packages(timeout):
-    return get_parse_packages(timeout, 'rpm', 'rpm -qa', RPM_REGEX)
+    return get_parse_packages(
+        timeout,
+        'rpm',
+        # Run as nobody to avoid corrupting the rpm database - a known issue with rpm
+        # See: https://github.com/rpm-software-management/rpm/issues/232
+        'su nobody -s /bin/sh -c "rpm -qa"',
+        RPM_REGEX,
+    )
 
 
 def get_pkg_packages(timeout):
