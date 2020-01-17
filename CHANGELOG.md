@@ -1,3 +1,7 @@
+# v0.6.7
+
++ Execute `rpm -qa` as nobody to avoid corrupting the rpm database
+
 # v0.6.6
 
 + Fix `/lib64` and `/usr/lib64` integrity checks
