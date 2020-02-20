@@ -1,5 +1,5 @@
 from distutils.spawn import find_executable
-from os import listdir, makedirs, path, remove, symlink
+from os import access, listdir, makedirs, path, remove, symlink, X_OK
 from shutil import copy
 
 from canaryd.log import logger
@@ -66,6 +66,8 @@ def _get_scripts(dirname):
             continue
 
         full_path = path.join(dirname, name)
+        if not access(full_path, X_OK):
+            continue
 
         scripts.append(name)
         settings = _extract_script_settings(full_path)
