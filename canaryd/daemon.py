@@ -1,6 +1,4 @@
-# canaryd
-# File: canaryd/daemon.py
-# Desc: the canaryd daemon
+from __future__ import division
 
 from time import sleep, time
 
@@ -21,7 +19,9 @@ def _sleep_until_interval(start, interval):
 
 
 def _daemon_loop(iteration, previous_states, settings):
-    slow_plugin_iter_interval = settings.slow_collect_interval_s / settings.collect_interval_s
+    slow_plugin_iter_interval = round(
+        settings.slow_collect_interval_s / settings.collect_interval_s,
+    )
     do_slow_plugins = iteration % slow_plugin_iter_interval == 0
 
     logger.info('Getting plugin (include_slow={0}) states...'.format(do_slow_plugins))
