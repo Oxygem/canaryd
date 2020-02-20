@@ -3,6 +3,7 @@ from os import path
 from canaryd_packages import six
 from canaryd_packages.six.moves import shlex_quote
 
+from canaryd.log import logger
 from canaryd.plugin import Plugin
 from canaryd.script import get_scripts, get_scripts_directory
 from canaryd.subprocess import CalledProcessError, get_command_output
@@ -42,18 +43,30 @@ class Scripts(Plugin):
     # Don't generate events from state updates (see generate_issues_from_change below)
     generate_update_events = False
 
+    iterations = 0
+
     def prepare(self, settings):
         pass
 
     def get_state(self, settings):
         results = {}
 
-        for script, enabled in get_scripts(settings):
+        for script, enabled, script_settings in get_scripts(settings):
             if not enabled:
                 results[script] = {
                     'enabled': False,
                 }
                 continue
+
+            if script_settings and 'INTERVAL' in script_settings:
+                slow_script_iter_interval = round(
+                    script_settings['INTERVAL'] / settings.collect_interval_s,
+                )
+                if self.iterations % slow_script_iter_interval != 0:
+                    logger.debug((
+                        'Skipping script due to interval setting: {0}'
+                    ).format(script))
+                    continue
 
             script_path = path.join(get_scripts_directory(), 'enabled', script)
 
@@ -75,6 +88,7 @@ class Scripts(Plugin):
                     'enabled': True,
                 }
 
+        self.iterations += 1
         return results
 
     @staticmethod
