@@ -4,6 +4,9 @@ import sys
 
 from canaryd.subprocess import CalledProcessError, get_command_output
 
+# Run once an hour, smartctl can be intensive
+# CANARYD_INTERVAL = 3600
+
 SMART_RETURN_BITS = {
     0: False,  # command line parse error
     1: 'device open failed',
