@@ -43,10 +43,11 @@ def scripts(ctx):
 
     click.echo('--> Scripts:')
 
-    for script in scripts:
-        click.echo('    {0}, enabled: {1}'.format(
-            click.style(script[0], bold=True),
-            script[1],
+    for name, enabled, settings in scripts:
+        click.echo('    {0}, enabled: {1}, settings: {2}'.format(
+            click.style(name, bold=True),
+            enabled,
+            settings,
         ))
 
 

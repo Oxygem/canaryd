@@ -9,6 +9,10 @@ INVALID_EXTENSIONS = (
     '.pyc',
 )
 
+SCRIPT_SETTING_KEYS = {
+    'INTERVAL': int,
+}
+
 
 class ScriptException(Exception):
     pass
@@ -32,18 +36,62 @@ class ScriptNotLinkError(ScriptException):
     '''
 
 
+def _extract_script_settings(full_path):
+    settings = {}
+
+    with open(full_path) as f:
+        for line in f.readlines():
+            for key, parser in SCRIPT_SETTING_KEYS.items():
+                match_key = '# CANARYD_{0}'.format(key)
+                if not line.startswith(match_key) or '=' not in line:
+                    continue
+
+                _, value = line.split('=', 1)
+                value = value.strip()
+                value = parser(value)
+
+                if value:
+                    settings[key] = value
+
+    return settings
+
+
+def _get_scripts(dirname):
+    scripts = []
+    all_settings = {}
+
+    script_names = listdir(dirname)
+    for name in script_names:
+        if any(name.endswith(e) for e in INVALID_EXTENSIONS):
+            continue
+
+        full_path = path.join(dirname, name)
+
+        scripts.append(name)
+        settings = _extract_script_settings(full_path)
+        if settings:
+            all_settings[name] = settings
+
+    return scripts, all_settings
+
+
 def get_scripts(settings):
-    available_scripts = listdir(path.join(get_scripts_directory(), 'available'))
-    enabled_scripts = listdir(path.join(get_scripts_directory(), 'enabled'))
+    script_settings = {}
+
+    available_scripts, available_script_settings = _get_scripts(
+        path.join(get_scripts_directory(), 'available'),
+    )
+    script_settings.update(available_script_settings)
+
+    enabled_scripts, enabled_script_settings = _get_scripts(
+        path.join(get_scripts_directory(), 'enabled'),
+    )
+    script_settings.update(enabled_script_settings)
 
     all_scripts = set(available_scripts + enabled_scripts)
-    all_scripts = filter(
-        lambda script: not script.endswith(INVALID_EXTENSIONS),
-        all_scripts,
-    )
 
     return (
-        (script, script in enabled_scripts)
+        (script, script in enabled_scripts, script_settings.get(script))
         for script in all_scripts
     )
 
