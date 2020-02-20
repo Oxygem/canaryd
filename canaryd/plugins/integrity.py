@@ -50,7 +50,6 @@ def get_file_hash(filename):
             data = f.read(BUFFER_SIZE)
             if not data:
                 break
-
             sha.update(data)
     return sha.hexdigest()
 
@@ -74,10 +73,17 @@ class Integrity(Plugin):
     def prepare(self, settings):
         return True
 
-    def get_state(self, settings):
-        file_hashes = {}
+    def get_files_to_check(self, settings):
+        plugin_settings = settings.get_plugin_settings('integrity')
 
-        for path_to_track in PATHS_TO_TRACK:
+        paths_to_check = set(PATHS_TO_TRACK)
+        user_paths_to_check = plugin_settings.get('check_paths')
+        if user_paths_to_check:
+            paths_to_check.update(user_paths_to_check.split())
+
+        checked_files = set()
+
+        for path_to_track in paths_to_check:
             for filename in glob(path_to_track):
                 if (
                     filename in PATHS_TO_IGNORE
@@ -85,27 +91,34 @@ class Integrity(Plugin):
                 ):
                     continue
 
-                stat_data = stat(filename)
+                if filename not in checked_files:
+                    checked_files.add(filename)
+                    yield filename
 
-                if stat_data.st_size > MAX_SIZE:
-                    continue
+    def get_state(self, settings):
+        file_hashes = {}
+        for filename in self.get_files_to_check(settings):
+            stat_data = stat(filename)
 
-                file_data = {
-                    'size': stat_data.st_size,
-                    'permissions': format(stat_data.st_mode, 'o'),
-                }
+            if stat_data.st_size > MAX_SIZE:
+                continue
 
-                if pwd:
-                    file_data['user'] = pwd.getpwuid(stat_data.st_uid).pw_name
+            file_data = {
+                'size': stat_data.st_size,
+                'permissions': format(stat_data.st_mode, 'o'),
+            }
 
-                if grp:
-                    file_data['group'] = grp.getgrgid(stat_data.st_gid).gr_name
+            if pwd:
+                file_data['user'] = pwd.getpwuid(stat_data.st_uid).pw_name
 
-                try:
-                    file_data['sha1_hash'] = get_file_hash(filename)
-                except (OSError, IOError):
-                    pass
+            if grp:
+                file_data['group'] = grp.getgrgid(stat_data.st_gid).gr_name
 
-                file_hashes[filename] = file_data
+            try:
+                file_data['sha1_hash'] = get_file_hash(filename)
+            except (OSError, IOError):
+                pass
+
+            file_hashes[filename] = file_data
 
         return file_hashes
