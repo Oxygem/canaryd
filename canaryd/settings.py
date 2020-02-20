@@ -106,6 +106,9 @@ class CanarydSettings(object):
         self.plugin_settings[plugin_name].update(data)
         logger.debug('Plugin settings updated: {0} <= {1}'.format(plugin_name, data))
 
+    def get_plugin_settings(self, plugin_name):
+        return self.plugin_settings.get(plugin_name, {})
+
 
 def get_config_directory():
     # If we're non-root, just use the users config dir (~/.config, etc)
