@@ -1,3 +1,9 @@
+# v0.6.8
+
++ Make it possible to set settings comments to scripts (currently interval only)
++ Set the builtin `disk_health.py` script to have a 1hr interval
++ Add `check_paths` plugin setting for integrity plugin
+
 # v0.6.7
 
 + Execute `rpm -qa` as nobody to avoid corrupting the rpm database
