@@ -1,3 +1,9 @@
+# v0.6.9
+
++ Fix handling of Docker containers that have no command
++ Fix hardware plugin for devices with multiple logical names
++ Improve `disk_health.py` script (nvme support, nice error if no disks found)
+
 # v0.6.8
 
 + Make it possible to set settings comments to scripts (currently interval only)
