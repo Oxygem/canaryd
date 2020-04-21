@@ -20,10 +20,14 @@ def get_docker_containers(timeout):
     data = json.loads(output)
 
     for container in data:
+        command = container['Config']['Cmd']
+        if isinstance(command, list):
+            command = ' '.join(command)
+
         container_data = {
             'runtime': 'docker',
             'running': container['State']['Running'],
-            'command': ' '.join(container['Config']['Cmd']),
+            'command': command,
             'environment': container['Config']['Env'],
             'image': container['Config']['Image'],
             'id': container['Id'],
