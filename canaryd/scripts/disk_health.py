@@ -40,11 +40,15 @@ try:
     )
 
 except (CalledProcessError, OSError):
-    # Look for Linux disks (/dev/sdX, /dev/hdX)
-    disks_data = get_command_output(
-        'ls /dev/[hs]d?',
-        shell=True,
-    )
+    try:
+        # Look for Linux disks (/dev/sdX, /dev/hdX, /dev/nvmeX)
+        disks_data = get_command_output(
+            'ls /dev/[hs]d? || ls /dev/nvme?',
+            shell=True,
+        )
+    except (CalledProcessError, OSError):
+        print('No disks to check found!')
+        sys.exit(1)
 
 
 # Turn into a list of disks
