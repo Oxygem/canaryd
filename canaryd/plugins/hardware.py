@@ -37,8 +37,12 @@ def get_lshw_items(children):
 
             new_item['meta'] = item
 
-            # Prefer logicalname over id
             key = item.pop('logicalname', item.pop('id'))
+
+            # Where we have multiple names, use first and attach the others in meta
+            if isinstance(key, list):
+                new_item['meta']['other_keys'] = key[1:]
+                key = key[0]
 
             items.append((key, new_item))
 
